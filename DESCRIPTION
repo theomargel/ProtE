@@ -9,3 +9,18 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+    readxl,
+    dplyr,
+    openxlsx,
+    tidyverse,
+    stringdist,
+    tidyr,
+    broom,
+    reshape2,
+    RVAideMemoire,
+    gMWT,
+    ggpubr,
+    ggplot2
+URL: https://github.com/theomargel/PACKAGE
+BugReports: https://github.com/theomargel/PACKAGE/issues
