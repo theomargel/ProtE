@@ -12,7 +12,7 @@ user_inputs(group1, group2)
 \item{group2}{path to the folder where the samples from group 2 are}
 }
 \value{
-the group name for group1
+excel file
 }
 \description{
 Creates an a excel file
