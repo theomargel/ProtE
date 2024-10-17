@@ -6,15 +6,19 @@
 #' @param group2 path to the folder where the samples from group 2 are
 #'
 #'
-#' @return the group name for group1
+#' @return excel file
 #'
 #' @examples user_inputs(group1, group2)
 #' @export
 user_inputs <- function(group1, group2)
   {
+group1<- gsub( "\\\\", "/", group1)
+group2<-  gsub( "\\\\", "/", group2)
+
 g1.name <- basename(group1)
-return(g1.name)
 g2.name <- basename(group2)
+
+
 #group number is now 2
 groups_number <- 2
 #create the dataspace for all the data
