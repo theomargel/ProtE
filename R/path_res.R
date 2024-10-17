@@ -1,6 +1,19 @@
+#' Get data from 2 different sample groups from protein discoverer and create a dataspace wwith all the protein IDs found.
+#'
+#' Creates an a excel file
+#'
+#' @param group1  path to the folder where the samples from group 2 are
+#' @param group2 path to the folder where the samples from group 2 are
+#'
+#'
+#' @return the group name for group1
+#'
+#' @examples user_inputs(group1, group2)
+#' @export
 user_inputs <- function(group1, group2)
   {
 g1.name <- basename(group1)
+return(g1.name)
 g2.name <- basename(group2)
 #group number is now 2
 groups_number <- 2
@@ -18,7 +31,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
   file_names_g2<-list.files(path=group2,pattern="*.xlsx")
   setwd(group2)
   for (i in 1:length(file_names_g2)) {
-    file_case <- read_excel(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
+    file_case <- readxl::read_excel(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
     dataspace <- rbind(dataspace,file_case[,1:2])
   }
 }
@@ -26,7 +39,8 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
   if (!dir.exists(path_res)) {
     stop("The specified folder does not exist.")
   }
-    openxlsx::write.xlsx(meano_data, file = "meano_data.xlsx")
+    setwd(path_res)
+    openxlsx::write.xlsx(dataspace, file = "dataspace.xlsx")
     message("the excel was created")
 }
 
