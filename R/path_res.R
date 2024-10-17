@@ -1,19 +1,6 @@
-#' get excel File and Return Mean of First Column
-#'
-#' This function reads the first column of an Excel file, calculates the mean,
-#' and writes the result to a new Excel file.
-#'
-#' @param input_file Path to the input Excel file.
-#'
-#' @return A message confirming the mean value has been saved.
-#' @examples exel_meano "C:/Users/User/"
-#'
-#' @export
-
-
-user_inputs <- function(group1, group2) {
-g1.name <-
-g2.name <-
+user_inputs <- function(path_for_group1, path_for_group2) {
+g1.name <- basename(path_for_group1)
+g2.name <- basename(path_for_group2)
 
 
 
