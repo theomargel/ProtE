@@ -14,7 +14,7 @@ user_inputs <- function(group1, group2)
   {
 group1<- gsub( "\\\\", "/", group1)
 group2<-  gsub( "\\\\", "/", group2)
-#rogwqffpej
+
 g1.name <- basename(group1)
 g2.name <- basename(group2)
 
@@ -86,5 +86,14 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
     })
     openxlsx::write.xlsx(dataspace, file = "normalized_list.xlsx")
     message("the excel of the normalized list was created")
+
+    case_number <-NULL
+    case_number <- numeric(groups_number)
+
+    for (i in 1:groups_number) {
+      case_number[i] <- length(get(paste0("file_names_g",i)))
+    }
+
+  return(case_number[1:2])
 }
 
