@@ -95,6 +95,24 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
     }
 
 
+
+    threshold_value <- readline ("Set a percentage threshold for missing values.
+                         Proteins with missing values greater than this threshold, will be deleted.
+                           (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
+      if (threshold_value < 0 && threshold_value > 100 && threshold_value != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
+
+      threshold<-numeric(groups_number)
+
+      if(threshold_value == "D"){
+        for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
+      } else {
+        threshold_value <- 100- as.numeric(threshold_value)
+        # Iterate over each group and calculate the new threshold
+        for (i in 1:groups_number) {
+          threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+      }
+
+
     method_number <- readline ("How to treat Proteome Discoverer's bugs (blank values)?
   0 = as zeros
   1 = as group averages
@@ -152,6 +170,7 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
 
 
+    if (groups_number==2){
 
 
       #Count the numberof 0 for group1
@@ -173,23 +192,9 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
         } else{
           dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
         }
-      }
+        }
 
-      threshold_value <- readline ("Set a percentage threshold for missing values.
-                         Proteins with missing values greater than this threshold, will be deleted.
-                           (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
-      if (threshold_value < 0 && threshold_value > 100 && threshold_value != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
 
-      threshold<-numeric(groups_number)
-
-      if(threshold_value == "D"){
-        for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
-      } else {
-        threshold_value <- 100- as.numeric(threshold_value)
-        # Iterate over each group and calculate the new threshold
-        for (i in 1:groups_number) {
-          threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
-      }
 
 
        setwd<-path_res
@@ -201,7 +206,8 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
-
+      dataspace$Number_0_group1 <- NULL
+      dataspace$Number_0_group2 <- NULL}
 
 
 ### - Mann-Whitney and Kruskal-Wallis starts here! - ###
@@ -295,9 +301,190 @@ colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
 write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
 message("normalized stats ok!")
 
+if (groups_number == 2){
+
+
+  Group<-list()
+  times<-vector()
+  for (i in (1:length(case_number))){
+    times<-case_number[i]
+    Group[[i]] <- rep(paste0("G",i), times)
+    times<-NULL
+  }
+
+  Group<-unlist(Group)
+  Group<-gsub("G1", g1.name, Group)
+  Group<-gsub("G2", g2.name, Group)
 
 }
 
 
 
+Group2<-unique(Group)
 
+log.dataspace <- log(dataspace[,-c(1:2)]+1)
+
+# PCA of the entire data
+
+pca<-prcomp(t(log.dataspace), scale=FALSE, center=FALSE)
+
+pca.data <- data.frame(Sample=rownames(pca$x),
+                       X=pca$x[,1],
+                       Y=pca$x[,2],
+                       Group = Group)
+
+
+pca.var<-pca$sdev^2
+pca.var.per<-round(pca.var/sum(pca.var)*100,1)
+
+pca.data$Group<-factor(pca.data$Group, levels=Group2)
+
+pca.ent<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
+  geom_point(aes(color=Group), size = 2, alpha = 1)+
+  #scale_colour_manual(values=cbbPalette)+
+  xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
+  ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
+  #ylim(-60,60)+
+  ggtitle("Complete set of proteins")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))+
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  theme(legend.text = element_text(size = 12))+
+  theme(legend.title = element_text(size = 12))+
+  theme(legend.position="right")
+
+pca.ent
+
+ggplot2::ggsave("PCA_plot_alldata.tiff", plot = pca.ent, device = "tiff", path = path_res,
+       scale = 1, width = 5, height = 4, units = "in",
+       dpi = 300, limitsize = TRUE)
+
+# PCA of the significant data. If number of groups = 2, the script uses the
+# unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
+
+which.sig<-vector()
+if (groups_number != 2){
+  which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
+} else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
+
+which(Ddataspace$MW_G2vsG1< 0.05)
+log.dataspace.sig <- log.dataspace[which.sig,]
+
+
+pca<-prcomp(t(log.dataspace.sig), scale=FALSE, center=FALSE)
+
+pca.data <- data.frame(Sample=rownames(pca$x),
+                       X=pca$x[,1],
+                       Y=pca$x[,2],
+                       Group = Group)
+
+
+pca.var<-pca$sdev^2
+pca.var.per<-round(pca.var/sum(pca.var)*100,1)
+
+pca.data$Group<-factor(pca.data$Group, levels=Group2)
+
+pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
+  geom_point(aes(color=Group), size = 2, alpha = 1)+
+  #scale_colour_manual(values=cbbPalette)+
+  xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
+  ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
+  #ylim(-60,60)+
+  ggtitle("Statistically significant proteins")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust=0.5))+
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  theme(legend.text = element_text(size = 12))+
+  theme(legend.title = element_text(size = 12))+
+  theme(legend.position="right")
+
+pca.sig
+
+
+ggplot2::ggsave("PCA_plot_significant.tiff", plot = pca.sig, device = "tiff", path = path_res,
+       scale = 1, width = 5, height = 4, units = "in",
+       dpi = 300, limitsize = TRUE)
+
+
+a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
+             common.legend = TRUE, legend = "bottom")
+
+
+
+ggplot2::ggsave("PCA_plots_combined.tiff", plot = a, device = "tiff", path = path_res,
+       scale = 1, width = 8, height = 4.5, units = "in",
+       dpi = 300, limitsize = TRUE)
+
+# Quality check - boxplots of data distribution
+
+melt.log.dataspace <- reshape2::melt(log.dataspace)
+
+repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
+storevec <- NULL
+storeres <- list()
+
+for (i in seq_along(Group2)){
+  storevev <- rep(Group2[i], repvec[i])
+  storeres[[i]] <- storevev
+}
+
+
+melt.log.dataspace$Group <- unlist(storeres)
+melt.log.dataspace$Group <- factor(melt.log.dataspace$Group, levels = Group2)
+
+
+qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=fct_inorder(variable), y=value, color=Group))+
+  geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+  #scale_colour_manual(values=colors)+
+  xlab("Sample")+
+  ylab("Log parts per million")+
+  theme_classic()+
+  theme(text = element_text(size = 19),
+        axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+        axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))+
+  guides(color = guide_legend(override.aes = list(size = 1)))+
+  #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
+  geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
+
+
+qc.boxplots
+
+ggplot2::ggsave("QC_dataDistribution_withZeros.tiff", plot = qc.boxplots, device = "tiff", path = path_res,
+       scale = 1, width = 12, height = 5, units = "in",
+       dpi = 300, limitsize = TRUE, bg = "white")
+
+
+melt.log.dataspace.na <- melt.log.dataspace
+
+melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
+
+melt.log.dataspace.na$Group <- factor(melt.log.dataspace.na$Group, levels = Group2)
+
+is.factor(melt.log.dataspace.na$variable)
+
+qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=fct_inorder(variable), y=value, color=Group))+
+  geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+  #scale_colour_manual(values=colors)+
+  xlab("Sample")+
+  ylab("Log parts per million")+
+  theme_classic()+
+  theme(text = element_text(size = 19),
+        axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+        axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))+
+  guides(color = guide_legend(override.aes = list(size = 1)))+
+  #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
+  geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
+
+
+qc.boxplots.na
+
+ggplot2::ggsave("QC_dataDistribution_NoZeros.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
+       scale = 1, width = 12, height = 5, units = "in",
+       dpi = 300, limitsize = TRUE, bg = "white")
+
+
+
+
+}
