@@ -7,7 +7,7 @@
 user_inputs(group1, group2)
 }
 \arguments{
-\item{group1}{path to the folder where the samples from group 2 are}
+\item{group1}{path to the folder where the samples from group 1 are}
 
 \item{group2}{path to the folder where the samples from group 2 are}
 }
