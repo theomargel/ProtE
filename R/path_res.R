@@ -202,6 +202,102 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
 
+
+
+### - Mann-Whitney and Kruskal-Wallis starts here! - ###
+
+### 1 ### Specify file for statistical analysis
+data2 <- dataspace
+
+if (groups_number==2){
+  data2$Average_G1 <- rowMeans(data2[,coln])
+  data2$Average_G2 <- rowMeans(data2[,coln2])
+  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
+  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
+  ### Calculate unadjusted p-value
+  for (i in c(1:length(data2[,1]))){
+    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE)
+    data2[i,"MW_G2vsG1"]<-test_list[[3]]
+  }
+  #### adjust the p-values
+  data2$BH_p_G2vsG1 <- stats::p.adjust(data2$MW_G2vsG1, method = "BH")
+  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
+  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
+  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
+  #data$subtraction <- (data$average_case)-(data$average_control)
+
+
+  Ddataspace<-data2
+  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
+  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
+  Ddataspace<-Ddataspace %>%
+    dplyr::select(Accession, Description, Symbol, everything())
+  Fdataspace<-Ddataspace
 }
+
+if (groups_number != 2){
+
+
+  # Create grouping variable for the Kruskal test
+
+
+  Group<-list()
+  times<-vector()
+  for (i in (1:length(case_number))){
+    times<-case_number[i]
+    Group[[i]] <- rep(paste0("G",i), times)
+    times<-NULL
+  }
+  Group<-unlist(Group)
+
+
+
+  dataspace3<-t(dataspace[,-c(1:2)])
+  dataspace3<-as.data.frame(dataspace3)
+
+  colnames(dataspace3)<-dataspace[,1]
+
+  #dataspace3 <- dataspace3 %>% mutate_if(is.factor, as.numeric)
+
+  dataspace4<-cbind(Group,dataspace3)
+  dataspace4$Group<-as.factor(dataspace4$Group)
+
+
+  #Do the Kruskal-Wallis test
+  df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
+  df4 <- df3 %>% dplyr::group_by(key)
+  df4$value<-as.numeric(df4$value)
+  df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x= .$value, g = .$Group)))
+  Kruskal_Wallis.pvalue <- df5$p.value
+  data3<-cbind(Ddataspace,Kruskal_Wallis.pvalue)
+  data3$Kruskal_Wallis.pvalue_BH.adjusted<- p.adjust(data3$Kruskal_Wallis.pvalue, method = "BH")
+
+
+  #Create gene symbols and write the data
+
+  Fdataspace<-data3
+  Fdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Fdataspace$Description)
+  Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
+  Fdataspace<-Fdataspace %>%
+    dplyr::select(Accession, Description, Symbol, everything())
+
+}
+
+if (groups_number == 2){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
+
+write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
+message("normalized stats ok!")
+
+
+}
+
+
 
 
