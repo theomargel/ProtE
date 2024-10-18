@@ -2,7 +2,7 @@
 #'
 #' Creates an a excel file
 #'
-#' @param group1  path to the folder where the samples from group 2 are
+#' @param group1  path to the folder where the samples from group 1 are
 #' @param group2 path to the folder where the samples from group 2 are
 #'
 #'
