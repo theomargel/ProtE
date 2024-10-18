@@ -21,7 +21,8 @@ Depends:
     RVAideMemoire,
     gMWT,
     ggpubr,
-    ggplot2
+    ggplot2, 
+    stats
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2
