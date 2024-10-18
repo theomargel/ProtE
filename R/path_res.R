@@ -82,45 +82,24 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
-      ifelse(is.na(x), 0, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
+      ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
     })
-    openxlsx::write.xlsx(dataspace, file = "normalized_list.xlsx")
-    message("the excel of the normalized list was created")
 
     dat.dataspace<-dataspace
 
     #assign values to case number
-    case_number <-NULL
     case_number <- numeric(groups_number)
 
     for (i in 1:groups_number) {
       case_number[i] <- length(get(paste0("file_names_g",i)))
     }
 
-    threshold <- readline ("Set a percentage threshold for missing values.
-                         Proteins with missing values greater than this threshold, will be deleted.
-                           (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
-    if (threshold < 0 && threshold > 100 && threshold != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
-
-
-    threshold <- NULL
-    if(threshold == "D"){
-      for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
-    } else {
-      threshold <- 100- as.numeric(threshold)
-      new_thresholds <- numeric(groups_number)
-      # Iterate over each group and calculate the new threshold
-      for (i in 1:groups_number) {
-        new_thresholds[i] <- ceiling(case_number[i] - (case_number[i]) * as.numeric(threshold / 100) + 0.00000000001)
-        threshold <- new_thresholds
-         }
-
 
     method_number <- readline ("How to treat Proteome Discoverer's bugs (blank values)?
   0 = as zeros
   1 = as group averages
   ")
-    if (method_number != 1 && method_number != 2) {stop("Error, you should add 0 or 1")}
+    if (method_number != 0 && method_number != 1) {stop("Error, you should add 0 or 1")}
 
     # Create identifier variables for the thhreshold and statistics
 
@@ -168,23 +147,12 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
-    message("the normalized with bugs taking average means was created")
-
-    threshold <- readline ("Set a percentage threshold for missing values.
-                         Proteins with missing values greater than this threshold, will be deleted.
-                           (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
-    if (threshold < 0 && threshold > 100 && threshold != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
 
 
-    threshold <- NULL
-    if(threshold == "D"){
-      for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
-    } else {
-      threshold <- 100- as.numeric(threshold)
-      for (i in 1:groups_number){threshold[i] <-  ceiling((case_number[i]-(case_number[i])*as.numeric(threshold/100)+0.00000000001))}
-    }
-    }
-    if (groups_number==2){
+
+
+
+
 
       #Count the numberof 0 for group1
       dataspace[is.na(dataspace)] <- 0
@@ -206,7 +174,25 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
           dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
         }
       }
-      setwd<-path_res
+
+      threshold_value <- readline ("Set a percentage threshold for missing values.
+                         Proteins with missing values greater than this threshold, will be deleted.
+                           (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
+      if (threshold_value < 0 && threshold_value > 100 && threshold_value != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
+
+      threshold<-numeric(groups_number)
+
+      if(threshold_value == "D"){
+        for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
+      } else {
+        threshold_value <- 100- as.numeric(threshold_value)
+        # Iterate over each group and calculate the new threshold
+        for (i in 1:groups_number) {
+          threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+      }
+
+
+       setwd<-path_res
       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       #Delete row with x or more zeros
@@ -215,6 +201,7 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
-       }
+
 }
+
 
