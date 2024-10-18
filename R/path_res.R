@@ -87,6 +87,7 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
     openxlsx::write.xlsx(dataspace, file = "normalized_list.xlsx")
     message("the excel of the normalized list was created")
 
+    #assign values to case number
     case_number <-NULL
     case_number <- numeric(groups_number)
 
@@ -94,6 +95,21 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
       case_number[i] <- length(get(paste0("file_names_g",i)))
     }
 
-  return(case_number[1:2])
+    method_number <- readline ("How to treat Proteome Discoverer's bugs (blank values)?
+  0 = as zeros
+  1 = as group averages
+  ")
+    if (method_number != 1 && method_number != 2) {stop("Error, you should add 0 or 1")}
+
+    # Create identifier variables for the thhreshold and statistics
+
+    if (groups_number==2){
+      control_last <-(3+case_number[1]-1)
+      coln <- c(3:control_last)
+      case_last <- (control_last+case_number[2])
+      coln2 <- c((control_last+1):case_last)
+    }
+
+
 }
 
