@@ -10,7 +10,7 @@
 #'
 #' @examples user_inputs(group1, group2)
 #' @export
-user_inputs <- function(group1, group2)
+user_inputs <- function(group1, group2, imputation = TRUE)
   {
 group1<- gsub( "\\\\", "/", group1)
 group2<-  gsub( "\\\\", "/", group2)
@@ -209,6 +209,12 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL}
 
+##imputation KNN
+if (imputation == TRUE) {
+dataspace[dataspace==0] <- NA
+dataspace <- VIM::kNN(dataspace, imp_var = FALSE)
+openxlsx::write.xlsx(dataspace,file = "Dataset_IMPUTED.xlsx")}
+else {dataspace <- dataspace }
 
 ### - Mann-Whitney and Kruskal-Wallis starts here! - ###
 

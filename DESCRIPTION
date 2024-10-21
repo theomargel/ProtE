@@ -18,11 +18,10 @@ Depends:
     tidyr,
     broom,
     reshape2,
-    RVAideMemoire,
-    gMWT,
     ggpubr,
     ggplot2, 
-    stats
+    stats,
+    VIM
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2
