@@ -6,12 +6,13 @@
 #' @param group2 path to the folder where the samples from group 2 are
 #' @param imputation if imputation will happen
 #' @param global_threshold whether trheshold for missing values will apply to all groups together or to each group seperately
+#'@param MWtest mann whitney test: Matched for a paired one, Indepedent for an unpaired
 #'
 #' @return excel file
 #'
 #' @examples user_inputs(group1, group2)
 #' @export
-user_inputs <- function(group1, group2, imputation = TRUE, global_threshold = TRUE)
+user_inputs <- function(group1, group2, imputation = TRUE, global_threshold = TRUE, MWtest)
   {
 group1<- gsub( "\\\\", "/", group1)
 group2<-  gsub( "\\\\", "/", group2)
@@ -238,10 +239,15 @@ if (groups_number==2){
   data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
   data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
   ### Calculate unadjusted p-value
-  for (i in c(1:length(data2[,1]))){
+  if (MWtest == "Matched"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE)
     data2[i,"MW_G2vsG1"]<-test_list[[3]]
-  }
+  }}
+  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
+    data2[i,"MW_G2vsG1"]<-test_list[[3]]
+  }}
+
   #### adjust the p-values
   data2$BH_p_G2vsG1 <- stats::p.adjust(data2$MW_G2vsG1, method = "BH")
   #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
