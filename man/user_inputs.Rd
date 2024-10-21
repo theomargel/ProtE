@@ -4,7 +4,7 @@
 \alias{user_inputs}
 \title{Get data from 2 different sample groups from protein discoverer and create a dataspace wwith all the protein IDs found.}
 \usage{
-user_inputs(group1, group2)
+user_inputs(group1, group2, imputation = TRUE)
 }
 \arguments{
 \item{group1}{path to the folder where the samples from group 1 are}
