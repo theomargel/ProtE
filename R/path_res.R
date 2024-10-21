@@ -12,19 +12,27 @@
 #'
 #' @examples user_inputs(group1, group2)
 #' @export
-user_inputs <- function(group1, group2, imputation = TRUE, global_threshold = TRUE, MWtest)
+user_inputs <- function(..., imputation = TRUE, global_threshold = TRUE, MWtest)
   {
-group1<- gsub( "\\\\", "/", group1)
-group2<-  gsub( "\\\\", "/", group2)
+group_paths <- list(...)
+groups_number <- length(group_paths)
+if (groups_number>9){stop("You can add up to 9 groups")}
 
-g1.name <- basename(group1)
-g2.name <- basename(group2)
-
+group_paths<- gsub( "\\\\", "/", group_paths)
+for (i in 1:groups_number) {
+  assign(paste0("group",i),group_paths[[i]])
+}
+group_names <- basename(group_paths)
+for (i in 1:groups_number) {
+assign(paste0("g",i,".name"),group_names[[i]])}
 
 #group number is now 2
-groups_number <- 2
+
 #create the dataspace for all the data
 dataspace <- data.frame()
+
+
+
 #assign the excel files to a list
 file_names_g1<-list.files(path=group1,pattern="*.xlsx")
 
@@ -40,7 +48,79 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_case <- readxl::read_excel(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
     dataspace <- rbind(dataspace,file_case[,1:2])
   }
+  # group 3 protein IDs
+  if (groups_number==3 | groups_number == 4 | groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
+    file_names_g3<-list.files(path=group3,pattern="*.xlsx")
+    setwd(group3)
+    for (i in 1:length(file_names_g3)) {
+      file_case <- readxl::read_excel(paste(group3,file_names_g3[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+  # group 4 protein IDs
+  if (groups_number==4 | groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
+    file_names_g4<-list.files(path=group4,pattern="*.xlsx")
+    setwd(group4)
+    for (i in 1:length(file_names_g4)) {
+      file_case <- readxl::read_excel(paste(group4,file_names_g4[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+
+
+  # group 5 protein IDs
+  if (groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
+    file_names_g5<-list.files(path=group5,pattern="*.xlsx")
+    setwd(group5)
+    for (i in 1:length(file_names_g5)) {
+      file_case <- readxl::read_excel(paste(group5,file_names_g5[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+  # group 6 protein IDs
+  if (groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
+    file_names_g6<-list.files(path=group6,pattern="*.xlsx")
+    setwd(group6)
+    for (i in 1:length(file_names_g6)) {
+      file_case <- readxl::read_excel(paste(group6,file_names_g6[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+  # group 7 protein IDs
+  if (groups_number==7 | groups_number==8 | groups_number==9){
+    file_names_g7<-list.files(path=group7,pattern="*.xlsx")
+    setwd(group7)
+    for (i in 1:length(file_names_g7)) {
+      file_case <- readxl::read_excel(paste(group7,file_names_g7[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+  # group 8 protein IDs
+  if (groups_number==8 | groups_number==9){
+    file_names_g8<-list.files(path=group8,pattern="*.xlsx")
+    setwd(group8)
+    for (i in 1:length(file_names_g8)) {
+      file_case <- readxl::read_excel(paste(group8,file_names_g8[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
+
+  # group 9 protein IDs
+  if (groups_number==9){
+    file_names_g9<-list.files(path=group9,pattern="*.xlsx")
+    setwd(group9)
+    for (i in 1:length(file_names_g9)) {
+      file_case <- readxl::read_excel(paste(group9,file_names_g9[i],sep = "/"), sheet = 1)
+      dataspace <- rbind(dataspace,file_case[,1:2])
+    }
+  }
 }
+
 dataspace <- dataspace[!is.na(dataspace$Accession),]
 dupl <- duplicated(dataspace[,1])
 dataspace_no_dupl <- dataspace[!dupl,]
