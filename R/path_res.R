@@ -4,13 +4,14 @@
 #'
 #' @param group1  path to the folder where the samples from group 1 are
 #' @param group2 path to the folder where the samples from group 2 are
-#'
+#' @param imputation if imputation will happen
+#' @param global_threshold whether trheshold for missing values will apply to all groups together or to each group seperately
 #'
 #' @return excel file
 #'
 #' @examples user_inputs(group1, group2)
 #' @export
-user_inputs <- function(group1, group2, imputation = TRUE)
+user_inputs <- function(group1, group2, imputation = TRUE, global_threshold = TRUE)
   {
 group1<- gsub( "\\\\", "/", group1)
 group2<-  gsub( "\\\\", "/", group2)
@@ -94,13 +95,23 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
       case_number[i] <- length(get(paste0("file_names_g",i)))
     }
 
-
-
-    threshold_value <- readline ("Set a percentage threshold for missing values.
+ threshold_value <- readline ("Set a percentage threshold for missing values.
                          Proteins with missing values greater than this threshold, will be deleted.
                            (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
       if (threshold_value < 0 && threshold_value > 100 && threshold_value != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
 
+if (global_threshold == TRUE) {
+
+  if(threshold_value == "D"){
+threshold <- ceiling(sum(case_number)-(sum(case_number)*60/100)+0.00000000001)}
+ else {
+    threshold_value <- 100- as.numeric(threshold_value)
+    # Iterate over each group and calculate the new threshold
+
+      threshold <-  ceiling(sum(case_number)-(sum(case_number)*(as.numeric(threshold_value)/100))+0.00000000001)
+  }
+}
+ if (global_threshold == FALSE) {
       threshold<-numeric(groups_number)
 
       if(threshold_value == "D"){
@@ -111,7 +122,7 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
         for (i in 1:groups_number) {
           threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
       }
-
+}
 
     method_number <- readline ("How to treat Proteome Discoverer's bugs (blank values)?
   0 = as zeros
@@ -167,9 +178,6 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
 
 
-
-
-
     if (groups_number==2){
 
 
@@ -192,29 +200,32 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
         } else{
           dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
         }
-        }
-
-
-
+      }
+      dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2
 
        setwd<-path_res
       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
+      if (global_threshold == TRUE) {
+        dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
+        openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
 
+      if (global_threshold == FALSE) {
       #Delete row with x or more zeros
       dataspace <- dataspace[dataspace$Number_0_group1<threshold[1] | dataspace$Number_0_group2<threshold[2],]
 
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
-      openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
+      openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
       dataspace$Number_0_group1 <- NULL
-      dataspace$Number_0_group2 <- NULL}
+      dataspace$Number_0_group2 <- NULL
+      dataspace$Number_0_all_groups <- NULL }
 
 ##imputation KNN
 if (imputation == TRUE) {
 dataspace[dataspace==0] <- NA
-dataspace <- VIM::kNN(dataspace, imp_var = FALSE)
+dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= ceiling(length(colnames(dataspace)))/2)
 openxlsx::write.xlsx(dataspace,file = "Dataset_IMPUTED.xlsx")}
-else {dataspace <- dataspace }
+if (imputation == FALSE){dataspace <- dataspace}
 
 ### - Mann-Whitney and Kruskal-Wallis starts here! - ###
 
