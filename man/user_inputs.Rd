@@ -25,9 +25,9 @@ It takes Proteomics Data from samples in different groups, in the format they ar
 #' # Example of running the function with paths for two groups
 if (interactive()){
 user_inputs(
-  temp_dir_after,
-  temp_dir_before,
-  MWtest = "Matched",
+  "C:/Users/User/Documents/T0_samples",
+  "C:/Users/User/Documents/T0_samples",
+  MWtest = "Paired",
   imputation = TRUE,
   global_threshold = TRUE
 )}
