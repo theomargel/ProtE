@@ -5,7 +5,7 @@
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
-#' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Indepedent" for a Mann-Whitney U test.
+#' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom readxl read_excel
@@ -1510,7 +1510,7 @@ message("The excel with the imputed missing values was created as Dataset_Impute
 if (imputation == FALSE){dataspace <- dataspace}
 
 ### - Mann-Whitney and Kruskal-Wallis starts here! - ###
-if (MWtest != "Paired" && MWtest != "Indepedent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
+if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
 ### 1 ### Specify file for statistical analysis
 data2 <- dataspace
 
