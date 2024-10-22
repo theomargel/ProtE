@@ -1,6 +1,6 @@
 #' Proteome Discoverer analysis
 #'
-#' It takes Proteomics Data from samples in different groups, in the format they are created by protein discoverer. It processes and analyze these Data in order to create PCA plots and Boxplots.
+#' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descitpions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 #'
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
