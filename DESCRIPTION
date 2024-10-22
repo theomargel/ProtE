@@ -18,7 +18,8 @@ Imports:
     reshape2,
     ggpubr,
     ggplot2, 
-    VIM
+    VIM, 
+    forcats
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2

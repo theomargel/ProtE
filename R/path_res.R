@@ -7,18 +7,20 @@
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #'
+#'
+#'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom readxl read_excel
 #' @importFrom openxlsx write.xlsx
-#' @importFrom dplyr select  group_by  do
+#' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather
 #' @importFrom broom tidy
-#' @importFrom magrittr %>%
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave
+#' @importFrom ggplot2 ggplot ggsave aes geom_point xlab ylab ggtitle theme_bw theme element_text guides guide_legend geom_boxplot theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
+#' @importFrom forcats fct_inorder
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
@@ -1542,7 +1544,7 @@ if (groups_number==2){
   Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
   Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
   Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
+    dplyr::select(Accession, Description, Symbol, dplyr::everything())
   Fdataspace<-Ddataspace
 }
 
@@ -3643,7 +3645,7 @@ pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
 pca.data$Group<-factor(pca.data$Group, levels=Group2)
 
-pca.ent<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
+pca.ent<-ggplot2::ggplot(data=pca.data, ggplot2::aes(x=X, y=Y, label=Sample))+
   geom_point(aes(color=Group), size = 2, alpha = 1)+
   #scale_colour_manual(values=cbbPalette)+
   xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
@@ -3737,7 +3739,7 @@ melt.log.dataspace$Group <- unlist(storeres)
 melt.log.dataspace$Group <- factor(melt.log.dataspace$Group, levels = Group2)
 
 
-qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=fct_inorder(variable), y=value, color=Group))+
+qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
   #scale_colour_manual(values=colors)+
   xlab("Sample")+
@@ -3767,7 +3769,7 @@ melt.log.dataspace.na$Group <- factor(melt.log.dataspace.na$Group, levels = Grou
 
 is.factor(melt.log.dataspace.na$variable)
 
-qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=fct_inorder(variable), y=value, color=Group))+
+qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
   #scale_colour_manual(values=colors)+
   xlab("Sample")+

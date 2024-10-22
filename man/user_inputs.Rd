@@ -13,13 +13,13 @@ user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
 
 \item{global_threshold}{TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately}
 
-\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Indepedent" for a Mann-Whitney U test.}
+\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 }
 \value{
 Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 }
 \description{
-It takes Proteomics Data from samples in different groups, in the format they are created by protein discoverer. It processes and analyze these Data in order to create PCA plots and Boxplots.
+It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descitpions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 }
 \examples{
 #' # Example of running the function with paths for two groups.
