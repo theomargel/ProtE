@@ -21,6 +21,7 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
 #' @importFrom forcats fct_inorder
+#'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
@@ -3789,7 +3790,7 @@ qc.boxplots.na
 ggplot2::ggsave("QC_dataDistribution_NoZeros.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
        scale = 1, width = 12, height = 5, units = "in",
        dpi = 300, limitsize = TRUE, bg = "white")
-
+message("The Boxplots for each sample have been created")
 
 
 
