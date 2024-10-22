@@ -18,7 +18,8 @@
 #' @importFrom ggplot2 ggplot ggsave
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
-#' @examples #' # Example of running the function with paths for two groups
+#' @examples #' # Example of running the function with paths for two groups.
+#' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
 #' user_inputs(
 #'   "C:/Users/User/Documents/T0_samples",
@@ -258,7 +259,8 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
 
     path_res <- readline(prompt = "Specify folder where you want to save the results.
-                         Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Documents    ")
+Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Documents"
+                         )
   if (!dir.exists(path_res)) {
     stop("The specified folder does not exist.")
   }
