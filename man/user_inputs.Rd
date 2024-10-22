@@ -2,27 +2,34 @@
 % Please edit documentation in R/path_res.R
 \name{user_inputs}
 \alias{user_inputs}
-\title{Get data from 2 different sample groups from protein discoverer and create a dataspace wwith all the protein IDs found.}
+\title{Proteome Discoverer analysis}
 \usage{
 user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
 }
 \arguments{
-\item{imputation}{if imputation will happen}
+\item{...}{The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.}
 
-\item{global_threshold}{whether trheshold for missing values will apply to all groups together or to each group seperately}
+\item{imputation}{TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.}
 
-\item{MWtest}{mann whitney test: Paired for a paired one, Indepedent for an unpaired}
+\item{global_threshold}{TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately}
 
-\item{group1}{path to the folder where the samples from group 1 are}
-
-\item{group2}{path to the folder where the samples from group 2 are}
+\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Indepedent" for a Mann-Whitney U test.}
 }
 \value{
-excel file
+Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 }
 \description{
-Creates an a excel file
+It takes Proteomics Data from samples in different groups, in the format they are created by protein discoverer. It processes and analyze these Data in order to create PCA plots and Boxplots.
 }
 \examples{
-user_inputs(group1, group2)
+#' # Example of running the function with paths for two groups
+if (interactive()){
+user_inputs(
+  temp_dir_after,
+  temp_dir_before,
+  MWtest = "Matched",
+  imputation = TRUE,
+  global_threshold = TRUE
+)}
+
 }

@@ -2,16 +2,37 @@
 #'
 #' It takes Proteomics Data from samples in different groups, in the format they are created by protein discoverer. It processes and analyze these Data in order to create PCA plots and Boxplots.
 #'
-#' @param group_paths  The specific path to the folder where the samples from each group are located. Attention: Add '\\' between the directories and not '/'.
+#' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Indepedent" for a Mann-Whitney U test.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
+#' @importFrom readxl read_excel
+#' @importFrom openxlsx write.xlsx
+#' @importFrom dplyr select  group_by  do
+#' @importFrom tidyr gather
+#' @importFrom broom tidy
+#' @importFrom reshape2 melt
+#' @importFrom ggpubr ggarrange
+#' @importFrom ggplot2 ggplot ggsave
+#' @importFrom VIM kNN
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
+#' @examples #' # Example of running the function with paths for two groups
+#' if (interactive()){
+#' user_inputs(
+#'   "C:/Users/User/Documents/T0_samples",
+#'   "C:/Users/User/Documents/T0_samples",
+#'   MWtest = "Paired",
+#'   imputation = TRUE,
+#'   global_threshold = TRUE
+#' )}
 #'
-#' @examples user_inputs("C:\\Users\\User\\Documents\\itern\\RforPD\\after","C:\\Users\\User\\Documents\\itern\\RforPD\\before", MWtest = "Matched", imputation = TRUE, global_threshold = TRUE)
 #' @export
-user_inputs <- function(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
+user_inputs <- function(...,
+                        imputation = TRUE,
+                        global_threshold = TRUE,
+                        MWtest = "Paired")
   {
 group_paths <- list(...)
 groups_number <- length(group_paths)
@@ -236,7 +257,8 @@ if (groups_number==9){
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
 
-    path_res <- readline(prompt = "Specify folder where you want to save the results. Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Documents    ")
+    path_res <- readline(prompt = "Specify folder where you want to save the results.
+                         Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Documents    ")
   if (!dir.exists(path_res)) {
     stop("The specified folder does not exist.")
   }
