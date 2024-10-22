@@ -262,14 +262,10 @@ if (groups_number==9){
 }
 
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
+path_g1 <- dirname(group1)
+path_res <- file.path(path_g1, "MS_analysis")
+dir.create(path_res, showWarnings = FALSE)
 
-
-    path_res <- readline(prompt = "Specify folder where you want to save the results.
-Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Documents"
-                         )
-  if (!dir.exists(path_res)) {
-    stop("The specified folder does not exist.")
-  }
     setwd(path_res)
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
     message("The excel of the list with all proteomics data was created as Masterlist.xlsx")
