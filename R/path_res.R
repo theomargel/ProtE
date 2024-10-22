@@ -3626,7 +3626,7 @@ log.dataspace <- log(dataspace[,-c(1:2)]+1)
 
 # PCA of the entire data
 
-pca<-prcomp(t(log.dataspace), scale=FALSE, center=FALSE)
+pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
 
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
@@ -3671,7 +3671,7 @@ which(Ddataspace$MW_G2vsG1< 0.05)
 log.dataspace.sig <- log.dataspace[which.sig,]
 
 
-pca<-prcomp(t(log.dataspace.sig), scale=FALSE, center=FALSE)
+pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
 
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
