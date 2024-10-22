@@ -6,8 +6,8 @@
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
-#'
-#'
+#' @param threshold_value The % of missing values per protein that will cause its omittion
+#' @param bugs Either 0 to treate Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom readxl read_excel
@@ -37,7 +37,9 @@
 user_inputs <- function(...,
                         imputation = TRUE,
                         global_threshold = TRUE,
-                        MWtest = "Paired")
+                        MWtest = "Independent",
+                        threshold_value = 50,
+                        bugs = 0)
   {
 group_paths <- list(...)
 groups_number <- length(group_paths)
@@ -286,36 +288,27 @@ Attention use double backlash '\\' between the paths: e.g.: C:\\Users\\User\\Doc
       case_number[i] <- length(get(paste0("file_names_g",i)))
     }
 
- threshold_value <- readline ("Set a percentage threshold for missing values. Proteins with missing values greater than this threshold, will be deleted. (Enter a number, e.g., 50. Write 'D' for default, which is 40%):")
-      if (threshold_value < 0 && threshold_value > 100 && threshold_value != "D") {stop("Error, you should add D for default or a number between 0 and 100")}
+if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
 if (global_threshold == TRUE) {
 
-  if(threshold_value == "D"){
-threshold <- ceiling(sum(case_number)-(sum(case_number)*60/100)+0.00000000001)}
- else {
+
     threshold_value <- 100- as.numeric(threshold_value)
     # Iterate over each group and calculate the new threshold
 
       threshold <-  ceiling(sum(case_number)-(sum(case_number)*(as.numeric(threshold_value)/100))+0.00000000001)
   }
-}
+
  if (global_threshold == FALSE) {
       threshold<-numeric(groups_number)
-
-      if(threshold_value == "D"){
-        for (i in 1:groups_number){threshold[i] <- ceiling((case_number[i]-(case_number[i])*60/100)+0.00000000001)}
-      } else {
         threshold_value <- 100- as.numeric(threshold_value)
         # Iterate over each group and calculate the new threshold
         for (i in 1:groups_number) {
           threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
-      }
 }
 
-    method_number <- readline ("How to treat Proteome Discoverer's bugs (blank values)? 0 = as zeros, 1 = as group averages
-  ")
-    if (method_number != 0 && method_number != 1) {stop("Error, you should add 0 or 1")}
+
+    if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
     # Create identifier variables for the thhreshold and statistics
 
@@ -444,7 +437,7 @@ threshold <- ceiling(sum(case_number)-(sum(case_number)*60/100)+0.00000000001)}
 
 
     # assign average of group to discoverer bugs!
-    if (method_number==1){
+    if (bugs== "average"){
       dat.dataspace[dat.dataspace==0] <- 1
       dat.dataspace[is.na(dat.dataspace)] <- 0
 

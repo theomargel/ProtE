@@ -4,7 +4,14 @@
 \alias{user_inputs}
 \title{Proteome Discoverer analysis}
 \usage{
-user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
+user_inputs(
+  ...,
+  imputation = TRUE,
+  global_threshold = TRUE,
+  MWtest = "Independent",
+  threshold_value = 50,
+  bugs = 0
+)
 }
 \arguments{
 \item{...}{The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.}
@@ -14,6 +21,10 @@ user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
 \item{global_threshold}{TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately}
 
 \item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
+
+\item{threshold_value}{The % of missing values per protein that will cause its omittion}
+
+\item{bugs}{Either 0 to treate Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.}
 }
 \value{
 Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
