@@ -13,6 +13,7 @@
 #' @importFrom dplyr select  group_by  do
 #' @importFrom tidyr gather
 #' @importFrom broom tidy
+#' @importFrom magrittr %>%
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave

@@ -22,7 +22,8 @@ Excel files with the proteomic values from all samples, processed with normaliza
 It takes Proteomics Data from samples in different groups, in the format they are created by protein discoverer. It processes and analyze these Data in order to create PCA plots and Boxplots.
 }
 \examples{
-#' # Example of running the function with paths for two groups
+#' # Example of running the function with paths for two groups.
+#Do not add if (interactive()){} condition in your code
 if (interactive()){
 user_inputs(
   "C:/Users/User/Documents/T0_samples",
