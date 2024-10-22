@@ -20,7 +20,6 @@ Depends:
     reshape2,
     ggpubr,
     ggplot2, 
-    stats,
     VIM
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues

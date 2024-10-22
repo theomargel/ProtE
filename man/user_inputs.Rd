@@ -4,14 +4,14 @@
 \alias{user_inputs}
 \title{Get data from 2 different sample groups from protein discoverer and create a dataspace wwith all the protein IDs found.}
 \usage{
-user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest)
+user_inputs(..., imputation = TRUE, global_threshold = TRUE, MWtest = "Paired")
 }
 \arguments{
 \item{imputation}{if imputation will happen}
 
 \item{global_threshold}{whether trheshold for missing values will apply to all groups together or to each group seperately}
 
-\item{MWtest}{mann whitney test: Matched for a paired one, Indepedent for an unpaired}
+\item{MWtest}{mann whitney test: Paired for a paired one, Indepedent for an unpaired}
 
 \item{group1}{path to the folder where the samples from group 1 are}
 
