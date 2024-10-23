@@ -1,13 +1,13 @@
 #' Proteome Discoverer analysis
 #'
-#' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descitpions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
+#' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descriptions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 #'
-#' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '\\' between the directories and not '/'.
+#' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Add '/' between the directories.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
-#' @param threshold_value The % of missing values per protein that will cause its omittion
-#' @param bugs Either 0 to treate Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
+#' @param threshold_value The percentage of missing values per protein that will cause its omittion.
+#' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom readxl read_excel
@@ -21,6 +21,7 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
 #' @importFrom forcats fct_inorder
+#' @importFrom utils globalVariables
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -34,6 +35,12 @@
 #' )}
 #'
 #' @export
+
+
+global_var<-utils::globalVariables(c("group1", "group2", "Accession", "Description", "Symbol", "X", "Y", "Sample", "variable"))
+
+
+
 user_inputs <- function(...,
                         imputation = TRUE,
                         global_threshold = TRUE,
