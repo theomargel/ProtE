@@ -21,7 +21,6 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
 #' @importFrom forcats fct_inorder
-#' @importFrom utils globalVariables
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -37,7 +36,6 @@
 #' @export
 
 
-global_var<-utils::globalVariables(c("group1", "group2", "Accession", "Description", "Symbol", "X", "Y", "Sample", "variable"))
 
 
 
@@ -48,6 +46,8 @@ user_inputs <- function(...,
                         threshold_value = 50,
                         bugs = 0)
   {
+  group1 = group2 = Accession =Description =Symbol =X =Y =Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
+
 group_paths <- list(...)
 groups_number <- length(group_paths)
 if (groups_number>9){stop("You can add up to 9 groups")}
@@ -3612,7 +3612,7 @@ if (groups_number == 4){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
@@ -3621,8 +3621,8 @@ if (groups_number == 5){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
-  namesc<-gsub("G5", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
+  namesc<-gsub("G5", g5.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
@@ -3631,9 +3631,9 @@ if (groups_number == 6){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
-  namesc<-gsub("G5", g3.name, namesc)
-  namesc<-gsub("G6", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
+  namesc<-gsub("G5", g5.name, namesc)
+  namesc<-gsub("G6", g6.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
@@ -3642,10 +3642,10 @@ if (groups_number == 7){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
-  namesc<-gsub("G5", g3.name, namesc)
-  namesc<-gsub("G6", g3.name, namesc)
-  namesc<-gsub("G7", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
+  namesc<-gsub("G5", g5.name, namesc)
+  namesc<-gsub("G6", g6.name, namesc)
+  namesc<-gsub("G7", g7.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
@@ -3655,11 +3655,11 @@ if (groups_number == 8){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
-  namesc<-gsub("G5", g3.name, namesc)
-  namesc<-gsub("G6", g3.name, namesc)
-  namesc<-gsub("G7", g3.name, namesc)
-  namesc<-gsub("G8", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
+  namesc<-gsub("G5", g5.name, namesc)
+  namesc<-gsub("G6", g6.name, namesc)
+  namesc<-gsub("G7", g7.name, namesc)
+  namesc<-gsub("G8", g8.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
@@ -3668,12 +3668,12 @@ if (groups_number == 9){
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g3.name, namesc)
-  namesc<-gsub("G5", g3.name, namesc)
-  namesc<-gsub("G6", g3.name, namesc)
-  namesc<-gsub("G7", g3.name, namesc)
-  namesc<-gsub("G8", g3.name, namesc)
-  namesc<-gsub("G9", g3.name, namesc)
+  namesc<-gsub("G4", g4.name, namesc)
+  namesc<-gsub("G5", g5.name, namesc)
+  namesc<-gsub("G6", g6.name, namesc)
+  namesc<-gsub("G7", g7.name, namesc)
+  namesc<-gsub("G8", g8.name, namesc)
+  namesc<-gsub("G9", g9.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
