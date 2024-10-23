@@ -3592,6 +3592,84 @@ if (groups_number == 2){
   colnames(Fdataspace)<-namesc
 }
 
+if (groups_number == 3){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+if (groups_number == 4){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+if (groups_number == 5){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G5", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+if (groups_number == 6){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G5", g3.name, namesc)
+  namesc<-gsub("G6", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+if (groups_number == 7){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G5", g3.name, namesc)
+  namesc<-gsub("G6", g3.name, namesc)
+  namesc<-gsub("G7", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+
+if (groups_number == 8){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G5", g3.name, namesc)
+  namesc<-gsub("G6", g3.name, namesc)
+  namesc<-gsub("G7", g3.name, namesc)
+  namesc<-gsub("G8", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
+if (groups_number == 9){
+  namesc<-colnames(Fdataspace)
+  namesc<-gsub("G1", g1.name, namesc)
+  namesc<-gsub("G2", g2.name, namesc)
+  namesc<-gsub("G3", g3.name, namesc)
+  namesc<-gsub("G4", g3.name, namesc)
+  namesc<-gsub("G5", g3.name, namesc)
+  namesc<-gsub("G6", g3.name, namesc)
+  namesc<-gsub("G7", g3.name, namesc)
+  namesc<-gsub("G8", g3.name, namesc)
+  namesc<-gsub("G9", g3.name, namesc)
+  colnames(Fdataspace)<-namesc
+}
+
 colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
 
 openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
