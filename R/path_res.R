@@ -13,7 +13,7 @@
 #' @importFrom readxl read_excel
 #' @importFrom openxlsx write.xlsx
 #' @importFrom dplyr select  group_by  do everything  %>%
-#' @importFrom tidyr gather
+#' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
@@ -1499,13 +1499,39 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
 
+pre_dataspace <- dataspace
 
 ##imputation KNN
 if (imputation == TRUE) {
 dataspace[dataspace==0] <- NA
 dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= ceiling(length(colnames(dataspace)))/2)
 openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-message("The excel with the imputed missing values was created as Dataset_Imputed.xlsx")}
+
+#create histogramm for imputed values
+pre_dataspace1<-pre_dataspace[,-1:-2]
+dataspace1<-dataspace[,-1:-2]
+imp.values<- dataspace1 - pre_dataspace1
+
+his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
+loghis_dataspace<-log2(his_dataspace+1)
+
+his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
+nrows<-nrow(his_long)
+his_long$Group <- rep(c("Final","Initial","Imputed"), each = (nrows/3))
+his_long_filtered <- his_long[his_long$value != 0,]
+imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
+  labs( x = "Log2 Parts per Million", y = "Count") +
+  geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") + theme_minimal() +
+  theme(plot.background = element_rect(fill = "white")) + theme(panel.background = element_rect(fill = "white"))
+
+imp_hist
+
+ggplot2::ggsave("Imputed_values_histogram.tiff", plot = imp_hist, device = "tiff", path = path_res,
+                scale = 1, width = 5, height = 4, units = "in",
+                dpi = 300, limitsize = TRUE)
+
+message("The excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+}
 if (imputation == FALSE){dataspace <- dataspace}
 
 ### - Mann-Whitney and Kruskal-Wallis starts here! - ###
