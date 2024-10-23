@@ -3701,7 +3701,7 @@ if (groups_number == 2){
 
 
 
-Group2<-unique(Group)
+Group2<-unique(namesc)
 
 log.dataspace <- log(dataspace[,-c(1:2)]+1)
 
@@ -3712,7 +3712,7 @@ pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
                        Y=pca$x[,2],
-                       Group = Group)
+                       Group = namesc)
 
 
 pca.var<-pca$sdev^2
@@ -3757,7 +3757,7 @@ pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
                        Y=pca$x[,2],
-                       Group = Group)
+                       Group = namesc)
 
 
 pca.var<-pca$sdev^2
