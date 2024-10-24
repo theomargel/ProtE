@@ -282,7 +282,7 @@ dir.create(path_res, showWarnings = FALSE)
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
       ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
     })
-
+name_dataspace <-  dataspace[, -1:-2] 
     dat.dataspace<-dataspace
 
     #assign values to case number
@@ -3760,9 +3760,9 @@ if (groups_number == 2){
 
 }
 
+Group <- colnames(name_dataspace)
 
-
-Group2<-unique(namesc)
+Group2<-unique(Group)
 
 log.dataspace <- log(dataspace[,-c(1:2)]+1)
 
@@ -3773,7 +3773,7 @@ pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
                        Y=pca$x[,2],
-                       Group = namesc)
+                       Group = Group)
 
 
 pca.var<-pca$sdev^2
@@ -3818,7 +3818,7 @@ pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
 pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
                        Y=pca$x[,2],
-                       Group = namesc)
+                       Group = Group)
 
 
 pca.var<-pca$sdev^2
