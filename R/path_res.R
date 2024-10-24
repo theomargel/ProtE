@@ -3760,9 +3760,9 @@ if (groups_number == 2){
 
 }
 
-Group <- colnames(name_dataspace)
+Group <- groups_for_test
 
-Group2<-unique(Group)
+Group2<-unique(groups_for_test)
 
 log.dataspace <- log(dataspace[,-c(1:2)]+1)
 
