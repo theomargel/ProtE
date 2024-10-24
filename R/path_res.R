@@ -66,7 +66,7 @@ assign(paste0("g",i,".name"),group_names[[i]])}
 #create the dataspace for all the data
 dataspace <- data.frame()
 
-
+print("this has succesfully been installed")
 
 #assign An excel files to a list
 file_names_g1<-list.files(path=group1,pattern="*.xlsx")
