@@ -17,10 +17,11 @@
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave aes geom_point xlab ylab ggtitle theme_bw theme element_text guides guide_legend geom_boxplot theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
 #' @importFrom forcats fct_inorder
+#' @importFrom limma topTable eBayes contrasts.fit lmFit
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -290,6 +291,8 @@ dir.create(path_res, showWarnings = FALSE)
     for (i in 1:groups_number) {
       case_number[i] <- length(get(paste0("file_names_g",i)))
     }
+
+
 
 if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
@@ -1504,7 +1507,7 @@ pre_dataspace <- dataspace
 ##imputation KNN
 if (imputation == TRUE) {
 dataspace[dataspace==0] <- NA
-dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= ceiling(length(colnames(dataspace)))/2)
+dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
 openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
 
 #create histogramm for imputed values
@@ -1533,8 +1536,40 @@ ggplot2::ggsave("Imputed_values_histogram.tiff", plot = imp_hist, device = "tiff
 message("The excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
 }
 if (imputation == FALSE){dataspace <- dataspace}
+groups_for_test<-NULL
+for (i in 1:groups_number) {
+  groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
+}
+print(groups_for_test)
+mm <- model.matrix(~groups_for_test + 0)
+colnames(mm)<- group_names
+nndataspace<- dataspace[,-1:-2]
+nndataspace <- log2(nndataspace+1)
+fit <- limma::lmFit(nndataspace, mm)
+fit<- limma::eBayes(fit)
+lima.res <- data.frame()
+message("ebayes.")
+for (i in 1:(ncol(mm)-1)) {
+  for (j in (i+1):ncol(mm)) {
+    comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
+    contrast_fref <- limma::makeContrasts(contrasts = paste0(colnames(mm)[i],"-",colnames(mm)[j]), levels = mm)
+    fit2 <- limma::contrasts.fit(fit, contrast_fref)
+    fit2 <- limma::eBayes(fit2)
+    top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf)
+    column_groups<- top_table[,c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
+    colnames(column_groups)<-paste(comparison, colnames(column_groups), sep = "_")
 
-### - Mann-Whitney and Kruskal-Wallis starts here! - ###
+    if (nrow(lima.res) == 0){
+      lima.res <- column_groups
+    } else {lima.res<- cbind(lima.res, column_groups)}
+  }}
+limma_dataspace <- cbind(lima.res,dataspace)
+limma_dataspace<-limma_dataspace %>%
+  dplyr::select(Accession, Description, dplyr::everything())
+openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.t-test.xlsx")
+message("limma test was created")
+#####
+###- Mann-Whitney and Kruskal-Wallis starts here! - ###
 if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
 ### 1 ### Specify file for statistical analysis
 data2 <- dataspace
