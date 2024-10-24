@@ -67,7 +67,7 @@ dataspace <- data.frame()
 
 
 
-#assign the excel files to a list
+#assign An excel files to a list
 file_names_g1<-list.files(path=group1,pattern="*.xlsx")
 
 setwd(group1)
@@ -275,7 +275,7 @@ dir.create(path_res, showWarnings = FALSE)
 
     setwd(path_res)
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
-    message("The excel of the list with all proteomics data was created as Masterlist.xlsx")
+    message("An excel of the list with all proteomics data was created as Masterlist.xlsx")
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
@@ -807,7 +807,7 @@ if (global_threshold == TRUE) {
 
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
-    message("The excel file with the normalized values for the proteomics data was created as Normalized.xlsx")
+    message("An excel file with the normalized values for the proteomics data was created as Normalized.xlsx")
     if (groups_number==1){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
@@ -830,7 +830,7 @@ if (global_threshold == TRUE) {
       dataspace <- dataspace[dataspace$Number_0_group1<threshold[1],]
 
       write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
       #write.xlsx(dataspace, "G:/LC-MS Analysis Normalized Area/weeks_6/Outputs/Dataset_threshold_applied.xlsx")
       dataspace$Number_0_group1 <- NULL
 
@@ -873,7 +873,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -927,7 +927,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
       }
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -995,7 +995,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
       }
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1072,7 +1072,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1159,7 +1159,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1256,7 +1256,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1364,7 +1364,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1485,7 +1485,7 @@ if (global_threshold == TRUE) {
 
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
-      message("The excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1530,7 +1530,7 @@ ggplot2::ggsave("Imputed_values_histogram.tiff", plot = imp_hist, device = "tiff
                 scale = 1, width = 5, height = 4, units = "in",
                 dpi = 300, limitsize = TRUE)
 
-message("The excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
 }
 if (imputation == FALSE){dataspace <- dataspace}
 
@@ -3706,7 +3706,7 @@ if (groups_number == 9){
 colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
 
 openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
-message("The excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
+message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
 if (groups_number == 2){
 
