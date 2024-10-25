@@ -10,8 +10,7 @@
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
-#' @importFrom readxl read_excel
-#' @importFrom openxlsx write.xlsx
+#' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
@@ -73,14 +72,14 @@ file_names_g1<-list.files(path=group1,pattern="*.xlsx")
 
 setwd(group1)
 for (i in 1:length(file_names_g1)) {
-  file_case <- readxl::read_excel(paste(group1,file_names_g1[i],sep = "/"), sheet = 1)
+  file_case <- openxlsx::read.xlsx(paste(group1,file_names_g1[i],sep = "/"), sheet = 1)
   dataspace <- rbind(dataspace,file_case[,1:2])
 }
 if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   file_names_g2<-list.files(path=group2,pattern="*.xlsx")
   setwd(group2)
   for (i in 1:length(file_names_g2)) {
-    file_case <- readxl::read_excel(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
     dataspace <- rbind(dataspace,file_case[,1:2])
   }
   # group 3 protein IDs
@@ -88,7 +87,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g3<-list.files(path=group3,pattern="*.xlsx")
     setwd(group3)
     for (i in 1:length(file_names_g3)) {
-      file_case <- readxl::read_excel(paste(group3,file_names_g3[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group3,file_names_g3[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -98,7 +97,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g4<-list.files(path=group4,pattern="*.xlsx")
     setwd(group4)
     for (i in 1:length(file_names_g4)) {
-      file_case <- readxl::read_excel(paste(group4,file_names_g4[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group4,file_names_g4[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -110,7 +109,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g5<-list.files(path=group5,pattern="*.xlsx")
     setwd(group5)
     for (i in 1:length(file_names_g5)) {
-      file_case <- readxl::read_excel(paste(group5,file_names_g5[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group5,file_names_g5[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -120,7 +119,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g6<-list.files(path=group6,pattern="*.xlsx")
     setwd(group6)
     for (i in 1:length(file_names_g6)) {
-      file_case <- readxl::read_excel(paste(group6,file_names_g6[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group6,file_names_g6[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -130,7 +129,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g7<-list.files(path=group7,pattern="*.xlsx")
     setwd(group7)
     for (i in 1:length(file_names_g7)) {
-      file_case <- readxl::read_excel(paste(group7,file_names_g7[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group7,file_names_g7[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -140,7 +139,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g8<-list.files(path=group8,pattern="*.xlsx")
     setwd(group8)
     for (i in 1:length(file_names_g8)) {
-      file_case <- readxl::read_excel(paste(group8,file_names_g8[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group8,file_names_g8[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -150,7 +149,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
     file_names_g9<-list.files(path=group9,pattern="*.xlsx")
     setwd(group9)
     for (i in 1:length(file_names_g9)) {
-      file_case <- readxl::read_excel(paste(group9,file_names_g9[i],sep = "/"), sheet = 1)
+      file_case <- openxlsx::read.xlsx(paste(group9,file_names_g9[i],sep = "/"), sheet = 1)
       dataspace <- rbind(dataspace,file_case[,1:2])
     }
   }
@@ -166,7 +165,7 @@ dataspace <- dataspace_no_dupl
 
 setwd(group1)
 for (i in 1:length(file_names_g1)) {
-  file_case <- readxl::read_excel(paste(group1,file_names_g1[i],sep = "/"), sheet = 1)
+  file_case <- openxlsx::read.xlsx(paste(group1,file_names_g1[i],sep = "/"), sheet = 1)
   file_case[file_case==0] <-1
   file_case[is.na(file_case)]<-0
   dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -178,7 +177,7 @@ for (i in 1:length(file_names_g1)) {
 if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number == 5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group2)
   for (i in 1:length(file_names_g2)) {
-    file_case <- readxl::read_excel(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group2,file_names_g2[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -189,7 +188,7 @@ if (groups_number == 2 | groups_number == 3 | groups_number == 4 | groups_number
 if (groups_number==3 | groups_number == 4 | groups_number == 5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group3)
   for (i in 1:length(file_names_g3)) {
-    file_case <- readxl::read_excel(paste(group3,file_names_g3[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group3,file_names_g3[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -201,7 +200,7 @@ if (groups_number==3 | groups_number == 4 | groups_number == 5 | groups_number==
 if (groups_number==4 | groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group4)
   for (i in 1:length(file_names_g4)) {
-    file_case <- readxl::read_excel(paste(group4,file_names_g4[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group4,file_names_g4[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -213,7 +212,7 @@ if (groups_number==4 | groups_number==5 | groups_number==6 | groups_number==7 | 
 if (groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group5)
   for (i in 1:length(file_names_g5)) {
-    file_case <- readxl::read_excel(paste(group5,file_names_g5[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group5,file_names_g5[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -225,7 +224,7 @@ if (groups_number==5 | groups_number==6 | groups_number==7 | groups_number==8 | 
 if (groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group6)
   for (i in 1:length(file_names_g6)) {
-    file_case <- readxl::read_excel(paste(group6,file_names_g6[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group6,file_names_g6[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -237,7 +236,7 @@ if (groups_number==6 | groups_number==7 | groups_number==8 | groups_number==9){
 if (groups_number==7 | groups_number==8 | groups_number==9){
   setwd(group7)
   for (i in 1:length(file_names_g7)) {
-    file_case <- readxl::read_excel(paste(group7,file_names_g7[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group7,file_names_g7[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -249,7 +248,7 @@ if (groups_number==7 | groups_number==8 | groups_number==9){
 if (groups_number==8 | groups_number==9){
   setwd(group8)
   for (i in 1:length(file_names_g8)) {
-    file_case <- readxl::read_excel(paste(group8,file_names_g8[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group8,file_names_g8[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -261,7 +260,7 @@ if (groups_number==8 | groups_number==9){
 if (groups_number==9){
   setwd(group9)
   for (i in 1:length(file_names_g9)) {
-    file_case <- readxl::read_excel(paste(group9,file_names_g9[i],sep = "/"), sheet = 1)
+    file_case <- openxlsx::read.xlsx(paste(group9,file_names_g9[i],sep = "/"), sheet = 1)
     file_case[file_case==0] <-1
     file_case[is.na(file_case)]<-0
     dataspace <- merge(x = dataspace,y = file_case[,c(1,9)], by = "Accession" ,all.x = TRUE)
@@ -1518,6 +1517,8 @@ imp.values<- dataspace1 - pre_dataspace1
 his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
 loghis_dataspace<-log2(his_dataspace+1)
 
+#his_long <- reshape2::melt(loghis_dataspace)
+
 his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
 nrows<-nrow(his_long)
 his_long$Group <- rep(c("Final","Initial","Imputed"), each = (nrows/3))
@@ -1563,7 +1564,7 @@ for (i in 1:(ncol(mm)-1)) {
     fit2 <- limma::eBayes(fit2)
     top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf)
     column_groups<- top_table[,c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
-    colnames(column_groups)<-paste(comparison, colnames(column_groups), sep = "_")
+    colnames(column_groups)<-paste(colnames(column_groups), comparison, sep = "_")
 
     if (nrow(lima.res) == 0){
       lima.res <- column_groups
@@ -3745,6 +3746,9 @@ if (groups_number == 9){
 }
 
 colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
+start_col <- 4 + as.numeric(sum(case_number))
+Fdataspace <- Fdataspace %>%
+  dplyr::select(1:3, start_col:ncol(Fdataspace), 4:(start_col - 1))
 
 openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
 message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
@@ -3854,10 +3858,12 @@ ggplot2::ggsave("PCA_plot_significant.tiff", plot = pca.sig, device = "tiff", pa
        dpi = 300, limitsize = TRUE)
 message("PCA plot with the significant data was created as PCA_plot_significant.tiff" )
 
+#Prec.var<- barplot(pca.var.per, xlab= "Principal Component", ylab= "Principal Variation")
+
 a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
              common.legend = TRUE, legend = "bottom")
 
-
+#hhedhewd
 
 ggplot2::ggsave("PCA_plots_combined.tiff", plot = a, device = "tiff", path = path_res,
        scale = 1, width = 8, height = 4.5, units = "in",
