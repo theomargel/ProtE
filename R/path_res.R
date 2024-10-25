@@ -17,9 +17,9 @@
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit lmFit
 #'
@@ -282,7 +282,7 @@ dir.create(path_res, showWarnings = FALSE)
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
       ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
     })
-name_dataspace <-  dataspace[, -1:-2] 
+name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
     #assign values to case number
@@ -1522,10 +1522,16 @@ his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
 nrows<-nrow(his_long)
 his_long$Group <- rep(c("Final","Initial","Imputed"), each = (nrows/3))
 his_long_filtered <- his_long[his_long$value != 0,]
+his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
+
 imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
-  labs( x = "Log2 Parts per Million", y = "Count") +
-  geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") + theme_minimal() +
+  labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
+ scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
+ scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
+ geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
+  theme_minimal() +
   theme(plot.background = element_rect(fill = "white")) + theme(panel.background = element_rect(fill = "white"))
+
 
 imp_hist
 

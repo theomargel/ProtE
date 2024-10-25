@@ -19,7 +19,8 @@ Imports:
     ggpubr,
     ggplot2, 
     VIM, 
-    forcats 
+    forcats,
+    limma
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2
