@@ -273,9 +273,24 @@ path_g1 <- dirname(group1)
 path_res <- file.path(path_g1, "MS_analysis")
 dir.create(path_res, showWarnings = FALSE)
 
+#assign values to case number
+case_number <- numeric(groups_number)
+
+for (i in 1:groups_number) {
+  case_number[i] <- length(get(paste0("file_names_g",i)))
+}
+
     setwd(path_res)
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
     message("An excel of the list with all proteomics data was created as Masterlist.xlsx")
+
+    zero_per_sample1 <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
+           for ( i in 1:length(zero_per_sample1)){
+             if  (zero_per_sample1[[i]] > 80)
+             {print(paste("warning: Sample ",colnames(dataspace_before_imp[i]),"had", zero_per_sample1[[i]], " % missing values.")) }}
+
+
+
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
@@ -284,12 +299,7 @@ dir.create(path_res, showWarnings = FALSE)
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
-    #assign values to case number
-    case_number <- numeric(groups_number)
 
-    for (i in 1:groups_number) {
-      case_number[i] <- length(get(paste0("file_names_g",i)))
-    }
 
 
 
@@ -834,6 +844,8 @@ if (global_threshold == TRUE) {
       write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
       #write.xlsx(dataspace, "G:/LC-MS Analysis Normalized Area/weeks_6/Outputs/Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
+
       dataspace$Number_0_group1 <- NULL
 
     }
@@ -876,6 +888,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -930,6 +943,7 @@ if (global_threshold == TRUE) {
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
       }
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -998,6 +1012,7 @@ if (global_threshold == TRUE) {
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")
       }
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1075,6 +1090,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1162,6 +1178,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1259,6 +1276,7 @@ if (global_threshold == TRUE) {
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1364,9 +1382,11 @@ if (global_threshold == TRUE) {
       if (global_threshold == FALSE) {  #Delete row with x or more zeros
       dataspace <- dataspace[dataspace$Number_0_group1<threshold[1] | dataspace$Number_0_group2<threshold[2]| dataspace$Number_0_group3<threshold[3] | dataspace$Number_0_group4<threshold[4] | dataspace$Number_0_group5<threshold[5] | dataspace$Number_0_group6<threshold[6] | dataspace$Number_0_group7<threshold[7] | dataspace$Number_0_group8<threshold[8],]
 
+
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1480,14 +1500,16 @@ if (global_threshold == TRUE) {
     setwd<-path_res
     if (global_threshold == TRUE) {
       dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
+      dataspace_0s<- dataspace
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
 
     if (global_threshold == FALSE) {  #Delete row with x or more zeros
       dataspace <- dataspace[dataspace$Number_0_group1<threshold[1] | dataspace$Number_0_group2<threshold[2]| dataspace$Number_0_group3<threshold[3] | dataspace$Number_0_group4<threshold[4] | dataspace$Number_0_group5<threshold[5] | dataspace$Number_0_group6<threshold[6] | dataspace$Number_0_group7<threshold[7] | dataspace$Number_0_group8<threshold[8] | dataspace$Number_0_group9<threshold[9],]
-
+     dataspace_0s<- dataspace
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace, file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      dataspace_0s<- dataspace
 
       dataspace$Number_0_group1 <- NULL
       dataspace$Number_0_group2 <- NULL
@@ -1500,6 +1522,10 @@ if (global_threshold == TRUE) {
       dataspace$Number_0_group9 <- NULL
        dataspace$Number_0_all_groups <- NULL
     }
+    zero_per_sample1 <- colSums(dataspace[,-1:-2] == 0)*100/nrow(dataspace)
+    for ( i in 1:length(zero_per_sample1)){
+      if  (zero_per_sample1[[i]] > 50)
+      {print(paste("warning: Sample ",colnames(dataspace_before_imp[i]),"had", zero_per_sample1[[i]], " % missing values, after filtering through proteins.")) }}
 
 pre_dataspace <- dataspace
 
@@ -1541,9 +1567,57 @@ ggplot2::ggsave("Imputed_values_histogram.tiff", plot = imp_hist, device = "tiff
                 dpi = 300, limitsize = TRUE)
 
 message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+
+dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+dataspace$percentage <- dataspace_0s$percentage
+dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
+dataspace$log<-log2(dataspace$mean)
+dataspace$rank <- rank(-dataspace$mean)
+
+ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+  geom_point(size = 3, alpha = 0.8) +
+  labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+  scale_color_gradient(low = "darkblue", high = "yellow",
+                       name = "Imputations\nin each\nprotein\n(%)") +
+  #theme_minimal(base_size = 15)  +
+  theme_linedraw()+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        panel.grid = element_line(color = "grey80"),  # Make grids more visible
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 9))
+
 }
-if (imputation == FALSE){dataspace <- dataspace}
+if (imputation == FALSE){dataspace <- dataspace
+
+dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+dataspace$percentage <- dataspace_0s$percentage
+dataspace$mean <- apply(dataspace[, 3:(2+sum(case_number))], 1, function(x) mean(x[x != 0]))
+dataspace$log<-log2(dataspace$mean)
+dataspace$rank <- rank(-dataspace$mean)
+
+ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+  geom_point(size = 3, alpha = 0.8) +
+  labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+  scale_color_gradient(low = "darkblue", high = "yellow",
+                       name = "MVs\nin each\nprotein\n(%)") +
+  #theme_minimal(base_size = 15)  +
+  theme_linedraw()+
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        panel.grid = element_line(color = "grey80"),  # Make grids more visible
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 9))
+}
+
+
+
+
+
+
+
+
+
 groups_for_test<-NULL
+
 for (i in 1:groups_number) {
   groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
 }
