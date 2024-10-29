@@ -46,7 +46,7 @@ user_inputs <- function(...,
                         threshold_value = 50,
                         bugs = 0)
   {
-  group1 = group2 = Accession =Description =Symbol =X =Y =Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
+  group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
 group_paths <- list(...)
 groups_number <- length(group_paths)
@@ -321,7 +321,7 @@ if (global_threshold == TRUE) {
 
     # Create identifier variables for the thhreshold and statistics
 
-    if (groups_number==2){
+    if (groups_number=2){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
       case_last <- (control_last+case_number[2])
@@ -1630,7 +1630,6 @@ nndataspace<- dataspace[,-1:-2]
 nndataspace <- log2(nndataspace+1)
 fit <- limma::lmFit(nndataspace, mm)
 fit<- limma::eBayes(fit)
-print(groups_number)
 if (groups_number>2){
 anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
 colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")}
@@ -3838,22 +3837,7 @@ Fdataspace <- Fdataspace %>%
 openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
 message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
-if (groups_number == 2){
 
-
-  Group<-list()
-  times<-vector()
-  for (i in (1:length(case_number))){
-    times<-case_number[i]
-    Group[[i]] <- rep(paste0("G",i), times)
-    times<-NULL
-  }
-
-  Group<-unlist(Group)
-  Group<-gsub("G1", g1.name, Group)
-  Group<-gsub("G2", g2.name, Group)
-
-}
 
 Group <- groups_for_test
 
@@ -3870,7 +3854,22 @@ pca.data <- data.frame(Sample=rownames(pca$x),
                        Y=pca$x[,2],
                        Group = Group)
 
+if (groups_number == 2){
 
+
+  Group<-list()
+  times<-vector()
+  for (i in (1:length(case_number))){
+    times<-case_number[i]
+    Group[[i]] <- rep(paste0("G",i), times)
+    times<-NULL
+  }
+
+  Group<-unlist(Group)
+  Group<-gsub("G1", g1.name, Group)
+  Group<-gsub("G2", g2.name, Group)
+
+}
 pca.var<-pca$sdev^2
 pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
@@ -3971,7 +3970,7 @@ for (i in seq_along(Group2)){
 melt.log.dataspace$Group <- unlist(storeres)
 melt.log.dataspace$Group <- factor(melt.log.dataspace$Group, levels = Group2)
 
-
+if (imputation == FALSE) {
 qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
   #scale_colour_manual(values=colors)+
@@ -3993,7 +3992,7 @@ ggplot2::ggsave("QC_dataDistribution_withZeros.tiff", plot = qc.boxplots, device
        scale = 1, width = 12, height = 5, units = "in",
        dpi = 300, limitsize = TRUE, bg = "white")
 
-
+}
 melt.log.dataspace.na <- melt.log.dataspace
 
 melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
@@ -4018,10 +4017,17 @@ qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorde
 
 
 qc.boxplots.na
-
+if (imputation == FALSE) {
 ggplot2::ggsave("QC_dataDistribution_NoZeros.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
        scale = 1, width = 12, height = 5, units = "in",
        dpi = 300, limitsize = TRUE, bg = "white")
+}
+else
+{
+  ggplot2::ggsave("QC_dataDistribution.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
+                  scale = 1, width = 12, height = 5, units = "in",
+                  dpi = 300, limitsize = TRUE, bg = "white")
+}
 message("The Boxplots for each sample have been created")
 
 
