@@ -321,125 +321,45 @@ if (global_threshold == TRUE) {
 
     # Create identifier variables for the thhreshold and statistics
 
-    if (groups_number== 2){
+    if (groups_number >= 2){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
       case_last <- (control_last+case_number[2])
       coln2 <- c((control_last+1):case_last)
     }
 
-    if (groups_number==3){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
+    if (groups_number >=3){
       case2_last <- (case_last+case_number[3])
       coln3 <- c((case_last+1):case2_last)
     }
 
 
-    if (groups_number==4){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
+    if (groups_number>=4){
       case3_last <- (case2_last+case_number[4])
       coln4 <- c((case2_last+1):case3_last)
     }
 
-
-    if (groups_number==5){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
-      case3_last <- (case2_last+case_number[4])
-      coln4 <- c((case2_last+1):case3_last)
+    if (groups_number>=5){
       case4_last <- (case3_last+case_number[5])
       coln5 <- c((case3_last+1):case4_last)
     }
 
 
-    if (groups_number==6){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
-      case3_last <- (case2_last+case_number[4])
-      coln4 <- c((case2_last+1):case3_last)
-      case4_last <- (case3_last+case_number[5])
-      coln5 <- c((case3_last+1):case4_last)
+    if (groups_number>=6){
       case5_last <- (case4_last+case_number[6])
       coln6 <- c((case4_last+1):case5_last)
     }
-
-    if (groups_number==7){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
-      case3_last <- (case2_last+case_number[4])
-      coln4 <- c((case2_last+1):case3_last)
-      case4_last <- (case3_last+case_number[5])
-      coln5 <- c((case3_last+1):case4_last)
-      case5_last <- (case4_last+case_number[6])
-      coln6 <- c((case4_last+1):case5_last)
+    if (groups_number>=7){
       case6_last <- (case5_last+case_number[7])
       coln7 <- c((case5_last+1):case6_last)
     }
 
-
-    if (groups_number==8){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
-      case3_last <- (case2_last+case_number[4])
-      coln4 <- c((case2_last+1):case3_last)
-      case4_last <- (case3_last+case_number[5])
-      coln5 <- c((case3_last+1):case4_last)
-      case5_last <- (case4_last+case_number[6])
-      coln6 <- c((case4_last+1):case5_last)
-      case6_last <- (case5_last+case_number[7])
-      coln7 <- c((case5_last+1):case6_last)
+    if (groups_number>=8){
       case7_last <- (case6_last+case_number[8])
       coln8 <- c((case6_last+1):case7_last)
     }
 
-    if (groups_number==9){
-
-      control_last <-(3+case_number[1]-1)
-      coln <- c(3:control_last)
-      case_last <- (control_last+case_number[2])
-      coln2 <- c((control_last+1):case_last)
-      case2_last <- (case_last+case_number[3])
-      coln3 <- c((case_last+1):case2_last)
-      case3_last <- (case2_last+case_number[4])
-      coln4 <- c((case2_last+1):case3_last)
-      case4_last <- (case3_last+case_number[5])
-      coln5 <- c((case3_last+1):case4_last)
-      case5_last <- (case4_last+case_number[6])
-      coln6 <- c((case4_last+1):case5_last)
-      case6_last <- (case5_last+case_number[7])
-      coln7 <- c((case5_last+1):case6_last)
-      case7_last <- (case6_last+case_number[8])
-      coln8 <- c((case6_last+1):case7_last)
+    if (groups_number>=9){
       case8_last <- (case7_last+case_number[9])
       coln9 <- c((case7_last+1):case8_last)
     }
@@ -450,7 +370,7 @@ if (global_threshold == TRUE) {
       dat.dataspace[dat.dataspace==0] <- 1
       dat.dataspace[is.na(dat.dataspace)] <- 0
 
-      if (groups_number==2){
+      if (groups_number>=2){
         dat.data.1 <- dat.dataspace[,coln]
         dat.data.2 <- dat.dataspace[,coln2]
 
@@ -471,261 +391,107 @@ if (global_threshold == TRUE) {
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2)
       }
-      if (groups_number==3){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
+      if (groups_number>=3){
+
         dat.data.3 <- dat.dataspace[,coln3]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
         rep.data.3 <- dataspace[,coln3]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
         m3<-rowMeans(rep.data.3)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
         idx3 <- dat.data.3 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
         tmp3 <- idx3 * m3
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
         rep.data.3[idx3] <- tmp3[idx3]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3)
       }
 
-      if (groups_number==4){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
+      if (groups_number>=4){
+
         dat.data.4 <- dat.dataspace[,coln4]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
         rep.data.4 <- dataspace[,coln4]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
         m4<-rowMeans(rep.data.4)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- rep.data.2 == 1
-        idx3 <- rep.data.3 == 1
+
         idx4 <- rep.data.4 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
         tmp4 <- idx4 * m4
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
         rep.data.4[idx4] <- tmp4[idx4]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3, rep.data.4)
       }
 
-      if (groups_number==5){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
-        dat.data.4 <- dat.dataspace[,coln4]
+      if (groups_number>=5){
+
         dat.data.5 <- dat.dataspace[,coln5]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
-        rep.data.4 <- dataspace[,coln4]
         rep.data.5 <- dataspace[,coln5]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
-        m4<-rowMeans(rep.data.4)
         m5<-rowMeans(rep.data.5)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
-        idx3 <- dat.data.3 == 1
-        idx4 <- dat.data.4 == 1
         idx5 <- dat.data.5 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
-        tmp4 <- idx4 * m4
         tmp5 <- idx5 * m5
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
-        rep.data.4[idx4] <- tmp4[idx4]
         rep.data.5[idx5] <- tmp5[idx5]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3, rep.data.4, rep.data.5)
       }
 
-      if (groups_number==6){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
-        dat.data.4 <- dat.dataspace[,coln4]
-        dat.data.5 <- dat.dataspace[,coln5]
+      if (groups_number>=6){
+
         dat.data.6 <- dat.dataspace[,coln6]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
-        rep.data.4 <- dataspace[,coln4]
-        rep.data.5 <- dataspace[,coln5]
         rep.data.6 <- dataspace[,coln6]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
-        m4<-rowMeans(rep.data.4)
-        m5<-rowMeans(rep.data.5)
         m6<-rowMeans(rep.data.6)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
-        idx3 <- dat.data.3 == 1
-        idx4 <- dat.data.4 == 1
-        idx5 <- dat.data.5 == 1
         idx6 <- dat.data.6 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
-        tmp4 <- idx4 * m4
-        tmp5 <- idx5 * m5
         tmp6 <- idx6 * m6
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
-        rep.data.4[idx4] <- tmp4[idx4]
-        rep.data.5[idx5] <- tmp5[idx5]
         rep.data.6[idx6] <- tmp6[idx6]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3,
                                 rep.data.4, rep.data.5, rep.data.6)
       }
 
-      if (groups_number==7){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
-        dat.data.4 <- dat.dataspace[,coln4]
-        dat.data.5 <- dat.dataspace[,coln5]
-        dat.data.6 <- dat.dataspace[,coln6]
+      if (groups_number>=7){
+
         dat.data.7 <- dat.dataspace[,coln7]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
-        rep.data.4 <- dataspace[,coln4]
-        rep.data.5 <- dataspace[,coln5]
-        rep.data.6 <- dataspace[,coln6]
         rep.data.7 <- dataspace[,coln7]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
-        m4<-rowMeans(rep.data.4)
-        m5<-rowMeans(rep.data.5)
-        m6<-rowMeans(rep.data.6)
         m7<-rowMeans(rep.data.7)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
-        idx3 <- dat.data.3 == 1
-        idx4 <- dat.data.4 == 1
-        idx5 <- dat.data.5 == 1
-        idx6 <- dat.data.6 == 1
         idx7 <- dat.data.7 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
-        tmp4 <- idx4 * m4
-        tmp5 <- idx5 * m5
-        tmp6 <- idx6 * m6
         tmp7 <- idx7 * m7
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
-        rep.data.4[idx4] <- tmp4[idx4]
-        rep.data.5[idx5] <- tmp5[idx5]
-        rep.data.6[idx6] <- tmp6[idx6]
         rep.data.7[idx7] <- tmp7[idx7]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3,
                                 rep.data.4, rep.data.5, rep.data.6, rep.data.7)
       }
 
-      if (groups_number==8){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
-        dat.data.4 <- dat.dataspace[,coln4]
-        dat.data.5 <- dat.dataspace[,coln5]
-        dat.data.6 <- dat.dataspace[,coln6]
-        dat.data.7 <- dat.dataspace[,coln7]
+      if (groups_number>=8){
+
         dat.data.8 <- dat.dataspace[,coln8]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
-        rep.data.4 <- dataspace[,coln4]
-        rep.data.5 <- dataspace[,coln5]
-        rep.data.6 <- dataspace[,coln6]
-        rep.data.7 <- dataspace[,coln7]
+
         rep.data.8 <- dataspace[,coln8]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
-        m4<-rowMeans(rep.data.4)
-        m5<-rowMeans(rep.data.5)
-        m6<-rowMeans(rep.data.6)
-        m7<-rowMeans(rep.data.7)
         m8<-rowMeans(rep.data.8)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
-        idx3 <- dat.data.3 == 1
-        idx4 <- dat.data.4 == 1
-        idx5 <- dat.data.5 == 1
-        idx6 <- dat.data.6 == 1
-        idx7 <- dat.data.7 == 1
         idx8 <- dat.data.8 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
-        tmp4 <- idx4 * m4
-        tmp5 <- idx5 * m5
-        tmp6 <- idx6 * m6
-        tmp7 <- idx7 * m7
         tmp8 <- idx8 * m8
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
-        rep.data.4[idx4] <- tmp4[idx4]
-        rep.data.5[idx5] <- tmp5[idx5]
-        rep.data.6[idx6] <- tmp6[idx6]
-        rep.data.7[idx7] <- tmp7[idx7]
         rep.data.8[idx8] <- tmp8[idx8]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3,
@@ -734,64 +500,17 @@ if (global_threshold == TRUE) {
 
 
       if (groups_number==9){
-        dat.data.1 <- dat.dataspace[,coln]
-        dat.data.2 <- dat.dataspace[,coln2]
-        dat.data.3 <- dat.dataspace[,coln3]
-        dat.data.4 <- dat.dataspace[,coln4]
-        dat.data.5 <- dat.dataspace[,coln5]
-        dat.data.6 <- dat.dataspace[,coln6]
-        dat.data.7 <- dat.dataspace[,coln7]
-        dat.data.8 <- dat.dataspace[,coln8]
+
         dat.data.9 <- dat.dataspace[,coln9]
 
-        rep.data.1 <- dataspace[,coln]
-        rep.data.2 <- dataspace[,coln2]
-        rep.data.3 <- dataspace[,coln3]
-        rep.data.4 <- dataspace[,coln4]
-        rep.data.5 <- dataspace[,coln5]
-        rep.data.6 <- dataspace[,coln6]
-        rep.data.7 <- dataspace[,coln7]
-        rep.data.8 <- dataspace[,coln8]
         rep.data.9 <- dataspace[,coln9]
 
-        m1<-rowMeans(rep.data.1)
-        m2<-rowMeans(rep.data.2)
-        m3<-rowMeans(rep.data.3)
-        m4<-rowMeans(rep.data.4)
-        m5<-rowMeans(rep.data.5)
-        m6<-rowMeans(rep.data.6)
-        m7<-rowMeans(rep.data.7)
-        m8<-rowMeans(rep.data.8)
         m9<-rowMeans(rep.data.9)
 
-        idx1 <- dat.data.1 == 1
-        idx2 <- dat.data.2 == 1
-        idx3 <- dat.data.3 == 1
-        idx4 <- dat.data.4 == 1
-        idx5 <- dat.data.5 == 1
-        idx6 <- dat.data.6 == 1
-        idx7 <- dat.data.7 == 1
-        idx8 <- dat.data.8 == 1
         idx9 <- dat.data.9 == 1
 
-        tmp1 <- idx1 * m1
-        tmp2 <- idx2 * m2
-        tmp3 <- idx3 * m3
-        tmp4 <- idx4 * m4
-        tmp5 <- idx5 * m5
-        tmp6 <- idx6 * m6
-        tmp7 <- idx7 * m7
-        tmp8 <- idx8 * m8
         tmp9 <- idx9 * m9
 
-        rep.data.1[idx1] <- tmp1[idx1]
-        rep.data.2[idx2] <- tmp2[idx2]
-        rep.data.3[idx3] <- tmp3[idx3]
-        rep.data.4[idx4] <- tmp4[idx4]
-        rep.data.5[idx5] <- tmp5[idx5]
-        rep.data.6[idx6] <- tmp6[idx6]
-        rep.data.7[idx7] <- tmp7[idx7]
-        rep.data.8[idx8] <- tmp8[idx8]
         rep.data.9[idx9] <- tmp9[idx9]
 
         dataspace <- data.frame(dat.dataspace[,c(1:2)], rep.data.1, rep.data.2, rep.data.3,
@@ -814,7 +533,7 @@ if (global_threshold == TRUE) {
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
     message("An excel file with the normalized values for the proteomics data was created as Normalized.xlsx")
-    if (groups_number==1){
+    if (groups_number>=1){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
 
@@ -827,8 +546,8 @@ if (global_threshold == TRUE) {
         } else{
           dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
         }
-      }
-
+      }}
+    if (groups_number==1){
       setwd<-path_res
       write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
       #write.xlsx(dataspace, "C:/Users/Raf/Desktop/Cell lines GFP/high_con/test/Dataset_before_threshold.xlsx")
@@ -843,19 +562,7 @@ if (global_threshold == TRUE) {
       dataspace$Number_0_group1 <- NULL
 
     }
-    if (groups_number==2){
-
-
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
+    if (groups_number>=2){
 
       #Count the number of 0 for group 2
       for (i in c(1:length(dataspace[,1]))){
@@ -866,7 +573,9 @@ if (global_threshold == TRUE) {
           dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
         }
       }
- dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2
+ dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2}
+
+    if (groups_number==2){
            openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
        setwd<-path_res
@@ -878,7 +587,6 @@ if (global_threshold == TRUE) {
       #Delete row with x or more zeros
       dataspace <- dataspace[dataspace$Number_0_group1<threshold[1] | dataspace$Number_0_group2<threshold[2],]
 
-
       #write.table(dataspace, file=paste(path_res,"Dataset_threshold_applied.xlsx",sep=""), dec=".",sep="\t", row.names=FALSE)
       openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
       message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
@@ -888,29 +596,7 @@ if (global_threshold == TRUE) {
       dataspace$Number_0_group2 <- NULL
       dataspace$Number_0_all_groups <- NULL }
 
-    if (groups_number==3){
-
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
+    if (groups_number>=3){
 
       #Count the number of 0 for group 3
       for (i in c(1:length(dataspace[,1]))){
@@ -921,8 +607,13 @@ if (global_threshold == TRUE) {
           dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
         }
       }
-      dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3
-      openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
+
+
+     dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3
+    }
+    if (groups_number ==3){
+
+       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       setwd<-path_res
       if (global_threshold == TRUE) {
@@ -945,39 +636,7 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
 
-    if (groups_number==4){
-
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
+    if (groups_number>=4){
 
       #Count the number of 0 for group 4
       for (i in c(1:length(dataspace[,1]))){
@@ -988,11 +647,12 @@ if (global_threshold == TRUE) {
           dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
         }
       }
-      setwd <- path_res
       dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4
-      openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
+    }
+    if (groups_number==4){
+       setwd<-path_res
+       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
-      setwd<-path_res
       if (global_threshold == TRUE) {
         dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
         openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
@@ -1014,49 +674,7 @@ if (global_threshold == TRUE) {
       dataspace$Number_0_group4 <- NULL
        dataspace$Number_0_all_groups <- NULL
     }
-    if (groups_number==5){
-
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 4
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln4]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group4"] <- 0
-        } else{
-          dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
-        }
-      }
+    if (groups_number >=5){
 
       #Count the number of 0 for group 5
       for (i in c(1:length(dataspace[,1]))){
@@ -1069,7 +687,10 @@ if (global_threshold == TRUE) {
       }
 
       dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4 +dataspace$Number_0_group5
-      openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
+    }
+    if (groups_number == 5){
+
+       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       setwd<-path_res
       if (global_threshold == TRUE) {
@@ -1094,61 +715,9 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
 
-    if (groups_number==6){
+    if (groups_number>=6){
 
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 4
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln4]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group4"] <- 0
-        } else{
-          dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 5
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln5]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group5"] <- 0
-        } else{
-          dataspace[i,"Number_0_group5"] <- table(dataspace[i,coln5]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 6
+          #Count the number of 0 for group 6
       for (i in c(1:length(dataspace[,1]))){
         a <- table(dataspace[i,coln6]==0)["TRUE"]
         if(is.na(a)){
@@ -1157,9 +726,11 @@ if (global_threshold == TRUE) {
           dataspace[i,"Number_0_group6"] <- table(dataspace[i,coln6]==0)["TRUE"]
         }
       }
-
       dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4 +dataspace$Number_0_group5 +dataspace$Number_0_group6
-      openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
+    }
+    if (groups_number == 6){
+
+    openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       setwd<-path_res
       if (global_threshold == TRUE) {
@@ -1183,69 +754,7 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
 
-    if (groups_number==7){
-
-      #Count the numberof 0 for group1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 4
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln4]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group4"] <- 0
-        } else{
-          dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 5
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln5]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group5"] <- 0
-        } else{
-          dataspace[i,"Number_0_group5"] <- table(dataspace[i,coln5]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 6
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln6]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group6"] <- 0
-        } else{
-          dataspace[i,"Number_0_group6"] <- table(dataspace[i,coln6]==0)["TRUE"]
-        }
-      }
+    if (groups_number>=7){
 
       #Count the number of 0 for group 7
       for (i in c(1:length(dataspace[,1]))){
@@ -1257,6 +766,8 @@ if (global_threshold == TRUE) {
         }
       }
       dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4 +dataspace$Number_0_group5 +dataspace$Number_0_group6 +dataspace$Number_0_group7
+    }
+    if (groups_number == 7){
       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       setwd<-path_res
@@ -1282,79 +793,7 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
 
-    if (groups_number==8){
-
-      #Count the numberof 0 for group 1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 4
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln4]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group4"] <- 0
-        } else{
-          dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 5
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln5]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group5"] <- 0
-        } else{
-          dataspace[i,"Number_0_group5"] <- table(dataspace[i,coln5]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 6
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln6]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group6"] <- 0
-        } else{
-          dataspace[i,"Number_0_group6"] <- table(dataspace[i,coln6]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 7
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln7]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group7"] <- 0
-        } else{
-          dataspace[i,"Number_0_group7"] <- table(dataspace[i,coln7]==0)["TRUE"]
-        }
-      }
+    if (groups_number>=8){
 
       #Count the number of 0 for group 8
       for (i in c(1:length(dataspace[,1]))){
@@ -1366,6 +805,9 @@ if (global_threshold == TRUE) {
         }
       }
       dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4 +dataspace$Number_0_group5 +dataspace$Number_0_group6 +dataspace$Number_0_group7 +dataspace$Number_0_group8
+    }
+    if (groups_number == 8){
+
       openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
 
       setwd<-path_res
@@ -1394,90 +836,7 @@ if (global_threshold == TRUE) {
     }
 
     if (groups_number==9){
-
-      #Count the numberof 0 for group 1
-      dataspace[is.na(dataspace)] <- 0
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group1"] <- 0
-        } else{
-          dataspace[i,"Number_0_group1"] <- table(dataspace[i,coln]==0)["TRUE"]
-        }
-      }
-
-
-      #Count the number of 0 for group 2
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln2]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group2"] <- 0
-        } else{
-          dataspace[i,"Number_0_group2"] <- table(dataspace[i,coln2]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 3
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln3]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group3"] <- 0
-        } else{
-          dataspace[i,"Number_0_group3"] <- table(dataspace[i,coln3]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 4
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln4]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group4"] <- 0
-        } else{
-          dataspace[i,"Number_0_group4"] <- table(dataspace[i,coln4]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 5
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln5]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group5"] <- 0
-        } else{
-          dataspace[i,"Number_0_group5"] <- table(dataspace[i,coln5]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 6
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln6]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group6"] <- 0
-        } else{
-          dataspace[i,"Number_0_group6"] <- table(dataspace[i,coln6]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 7
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln7]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group7"] <- 0
-        } else{
-          dataspace[i,"Number_0_group7"] <- table(dataspace[i,coln7]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 8
-      for (i in c(1:length(dataspace[,1]))){
-        a <- table(dataspace[i,coln8]==0)["TRUE"]
-        if(is.na(a)){
-          dataspace[i,"Number_0_group8"] <- 0
-        } else{
-          dataspace[i,"Number_0_group8"] <- table(dataspace[i,coln8]==0)["TRUE"]
-        }
-      }
-
-      #Count the number of 0 for group 9
+  #Count the number of 0 for group 9
       for (i in c(1:length(dataspace[,1]))){
         a <- table(dataspace[i,coln9]==0)["TRUE"]
         if(is.na(a)){
@@ -1486,7 +845,6 @@ if (global_threshold == TRUE) {
           dataspace[i,"Number_0_group9"] <- table(dataspace[i,coln9]==0)["TRUE"]
         }
       }
-
 
     dataspace$Number_0_all_groups <- dataspace$Number_0_group1 + dataspace$Number_0_group2 +dataspace$Number_0_group3 +dataspace$Number_0_group4 +dataspace$Number_0_group5 +dataspace$Number_0_group6 +dataspace$Number_0_group7 +dataspace$Number_0_group8 +dataspace$Number_0_group9
     openxlsx::write.xlsx(dataspace, file = "Dataset_before_threshold.xlsx")
