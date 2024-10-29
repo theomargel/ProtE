@@ -16,7 +16,7 @@
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
@@ -283,12 +283,6 @@ for (i in 1:groups_number) {
     setwd(path_res)
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
     message("An excel of the list with all proteomics data was created as Masterlist.xlsx")
-
-    zero_per_sample1 <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
-           for ( i in 1:length(zero_per_sample1)){
-             if  (zero_per_sample1[[i]] > 80)
-             {print(paste("warning: Sample ",colnames(dataspace_before_imp[i]),"had", zero_per_sample1[[i]], " % missing values.")) }}
-
 
 
     #normalize PPm
@@ -1525,7 +1519,7 @@ if (global_threshold == TRUE) {
     zero_per_sample1 <- colSums(dataspace[,-1:-2] == 0)*100/nrow(dataspace)
     for ( i in 1:length(zero_per_sample1)){
       if  (zero_per_sample1[[i]] > 50)
-      {print(paste("warning: Sample ",colnames(dataspace_before_imp[i]),"had", zero_per_sample1[[i]], " % missing values, after filtering through proteins.")) }}
+      {print(paste("warning: Sample ",colnames(dataspace[i]),"had", zero_per_sample1[[i]], " % missing values, after filtering through proteins.")) }}
 
 pre_dataspace <- dataspace
 
@@ -1574,7 +1568,7 @@ dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
 dataspace$log<-log2(dataspace$mean)
 dataspace$rank <- rank(-dataspace$mean)
 
-ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
   geom_point(size = 3, alpha = 0.8) +
   labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
   scale_color_gradient(low = "darkblue", high = "yellow",
@@ -1585,6 +1579,11 @@ ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
         panel.grid = element_line(color = "grey80"),  # Make grids more visible
         legend.title = element_text(size = 10, face = "bold"),
         legend.text = element_text(size = 9))
+abund.plot
+
+ggplot2::ggsave("Proteins_abundance_rank.tiff", plot = abund.plot , device = "tiff", path = path_res,
+                scale = 1, width = 12, height = 5, units = "in",
+                dpi = 300, limitsize = TRUE, bg = "white")
 
 }
 if (imputation == FALSE){dataspace <- dataspace
@@ -1595,7 +1594,7 @@ dataspace$mean <- apply(dataspace[, 3:(2+sum(case_number))], 1, function(x) mean
 dataspace$log<-log2(dataspace$mean)
 dataspace$rank <- rank(-dataspace$mean)
 
-ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
   geom_point(size = 3, alpha = 0.8) +
   labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
   scale_color_gradient(low = "darkblue", high = "yellow",
@@ -1606,28 +1605,36 @@ ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
         panel.grid = element_line(color = "grey80"),  # Make grids more visible
         legend.title = element_text(size = 10, face = "bold"),
         legend.text = element_text(size = 9))
+
+abund.plot
+
+ggplot2::ggsave("Proteins_abundance_rank.tiff", plot = abund.plot , device = "tiff", path = path_res,
+                scale = 1, width = 12, height = 5, units = "in",
+                dpi = 300, limitsize = TRUE, bg = "white")
 }
 
 
 
-
-
-
-
-
-
+dataspace$percentage <- NULL
+dataspace$mean <- NULL
+dataspace$log<- NULL
+dataspace$rank <- NULL
 groups_for_test<-NULL
 
 for (i in 1:groups_number) {
   groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
 }
-print(groups_for_test)
 mm <- model.matrix(~groups_for_test + 0)
 colnames(mm)<- group_names
 nndataspace<- dataspace[,-1:-2]
 nndataspace <- log2(nndataspace+1)
 fit <- limma::lmFit(nndataspace, mm)
 fit<- limma::eBayes(fit)
+print(groups_number)
+if (groups_number>2){
+anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
+colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")}
+
 lima.res <- data.frame()
 message("ebayes.")
 for (i in 1:(ncol(mm)-1)) {
@@ -1644,7 +1651,11 @@ for (i in 1:(ncol(mm)-1)) {
       lima.res <- column_groups
     } else {lima.res<- cbind(lima.res, column_groups)}
   }}
-limma_dataspace <- cbind(lima.res,dataspace)
+
+if (groups_number>2){
+
+limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
+else {limma_dataspace <- cbind(lima.res,dataspace)}
 limma_dataspace<-limma_dataspace %>%
   dplyr::select(Accession, Description, dplyr::everything())
 openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.t-test.xlsx")
