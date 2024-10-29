@@ -321,7 +321,7 @@ if (global_threshold == TRUE) {
 
     # Create identifier variables for the thhreshold and statistics
 
-    if (groups_number=2){
+    if (groups_number== 2){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
       case_last <- (control_last+case_number[2])
