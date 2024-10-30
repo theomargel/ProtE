@@ -278,7 +278,7 @@ for (i in 1:groups_number) {
 
     setwd(path_res)
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
-    message("An excel of the list with all proteomics data was created as Masterlist.xlsx")
+    message("Concatenating all data files to a matrix, saved as Masterlist.xlsx")
 
 
     #normalize PPm
@@ -525,7 +525,7 @@ if (global_threshold == TRUE) {
 
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
-    message("An excel file with the normalized values for the proteomics data was created as Normalized.xlsx")
+    message("Applying Parts Per Million normalization, saved as Normalized.xlsx")
     if (groups_number>=1){
       control_last <-(3+case_number[1]-1)
       coln <- c(3:control_last)
