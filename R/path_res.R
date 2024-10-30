@@ -35,10 +35,6 @@
 #'
 #' @export
 
-
-
-
-
 user_inputs <- function(...,
                         imputation = TRUE,
                         global_threshold = TRUE,
@@ -292,9 +288,6 @@ for (i in 1:groups_number) {
     })
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
-
-
-
 
 
 if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
@@ -1010,11 +1003,11 @@ for (i in 1:(ncol(mm)-1)) {
   }}
 
 if (groups_number>2){
-
 limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
 else {limma_dataspace <- cbind(lima.res,dataspace)}
+
 limma_dataspace<-limma_dataspace %>%
-  dplyr::select(Accession, Description, dplyr::everything())
+dplyr::select(Accession, Description, dplyr::everything())
 openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.t-test.xlsx")
 message("limma test was created")
 #####
@@ -1023,7 +1016,7 @@ if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assi
 ### 1 ### Specify file for statistical analysis
 data2 <- dataspace
 
-if (groups_number==2){
+if (groups_number>=2){
   data2$Average_G1 <- rowMeans(data2[,coln])
   data2$Average_G2 <- rowMeans(data2[,coln2])
   data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
@@ -1046,39 +1039,13 @@ if (groups_number==2){
   data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, dplyr::everything())
-  Fdataspace<-Ddataspace
 }
 
-if (groups_number==3){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
+if (groups_number>=3){
+
   data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
   data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
   ### Calculate unadjusted p-value
-
-      if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G2vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
       if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1112,58 +1079,11 @@ if (groups_number==3){
   data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
-
-
-  Fdataspace<-Ddataspace
-
-
 }
 
-if (groups_number==4){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
+if (groups_number>=4){
   data2$Average_G4 <- rowMeans(data2[,coln4])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
   data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
-### Calculate unadjusted p-value
-      if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G2vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-      if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1181,21 +1101,6 @@ if (groups_number==4){
   data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG2"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-          data2[i,"MW_G3vsG2"]<-test_list[[3]] }
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1229,79 +1134,11 @@ if (groups_number==4){
   data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
-
-
-  #Ddataspace <- replace(Ddataspace, is.nan(Ddataspace), "Not Applicable")
-
-
-  Fdataspace<-Ddataspace
-
-
 }
 
-if (groups_number==5){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$Average_G4 <- rowMeans(data2[,coln4])
+if (groups_number>=5){
   data2$Average_G5 <- rowMeans(data2[,coln5])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
-  data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
   data2$St_Dv_G5 <- apply(data2[,coln5], 1, sd)
-  ### Calculate unadjusted p-value
-      if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G2vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-
-     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG1"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G4vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G4vsG1 <- p.adjust(data2$MW_G4vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG1 <- (data2$Average_G4)/(data2$Average_G1)
-  data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1317,37 +1154,6 @@ if (groups_number==5){
   #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
   data2$Ratio_G5vsG1 <- (data2$Average_G5)/(data2$Average_G1)
   data2$Log2_Ratio.G5vsG1 <- log2(data2$Ratio_G5vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG2"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG2"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G4vsG2"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG2"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G4vsG2 <- p.adjust(data2$MW_G4vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG2 <- (data2$Average_G4)/(data2$Average_G2)
-  data2$Log2_Ratio.G4vsG2 <- log2(data2$Ratio_G4vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
@@ -1366,21 +1172,6 @@ if (groups_number==5){
   data2$Log2_Ratio.G5vsG2 <- log2(data2$Ratio_G5vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G4vsG3"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG3"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G4vsG3 <- p.adjust(data2$MW_G4vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG3 <- (data2$Average_G4)/(data2$Average_G3)
-  data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1414,96 +1205,11 @@ if (groups_number==5){
   data2$Log2_Ratio.G5vsG4 <- log2(data2$Ratio_G5vsG4)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
-
-
-  #Ddataspace <- replace(Ddataspace, is.nan(Ddataspace), "Not Applicable")
-
-
-  Fdataspace<-Ddataspace
-
 }
 
-if (groups_number==6){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$Average_G4 <- rowMeans(data2[,coln4])
-  data2$Average_G5 <- rowMeans(data2[,coln5])
+if (groups_number>=6){
   data2$Average_G6 <- rowMeans(data2[,coln6])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
-  data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
-  data2$St_Dv_G5 <- apply(data2[,coln5], 1, sd)
   data2$St_Dv_G6 <- apply(data2[,coln6], 1, sd)
-### Calculate unadjusted p-value
-    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G2vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG1"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G4vsG1"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G4vsG1 <- p.adjust(data2$MW_G4vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG1 <- (data2$Average_G4)/(data2$Average_G1)
-  data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-    if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G5sG1"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG1"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G5vsG1 <- p.adjust(data2$MW_G5vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG1 <- (data2$Average_G5)/(data2$Average_G1)
-  data2$Log2_Ratio.G5vsG1 <- log2(data2$Ratio_G5vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
         test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1521,54 +1227,6 @@ if (groups_number==6){
   data2$Log2_Ratio.G6vsG1 <- log2(data2$Ratio_G6vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G3vsG2"]<-test_list[[3]]
-      }  }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG2"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-
-     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G4vsG2"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG2"]<-test_list[[3]]}
-    }
-
-  #### adjust the p-values
-  data2$BH_p_G4vsG2 <- p.adjust(data2$MW_G4vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG2 <- (data2$Average_G4)/(data2$Average_G2)
-  data2$Log2_Ratio.G4vsG2 <- log2(data2$Ratio_G4vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-     if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-        test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-        data2[i,"MW_G5vsG2"]<-test_list[[3]]
-      } }
-        if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){
-      test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG2"]<-test_list[[3]]
-    }}
-
-  #### adjust the p-values
-  data2$BH_p_G5vsG2 <- p.adjust(data2$MW_G5vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG2 <- (data2$Average_G5)/(data2$Average_G2)
-  data2$Log2_Ratio.G5vsG2 <- log2(data2$Ratio_G5vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G6vsG2"]<-test_list[[3]]
@@ -1585,35 +1243,6 @@ if (groups_number==6){
   data2$Log2_Ratio.G6vsG2 <- log2(data2$Ratio_G6vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG3 <- p.adjust(data2$MW_G4vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG3 <- (data2$Average_G4)/(data2$Average_G3)
-  data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG3 <- p.adjust(data2$MW_G5vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG3 <- (data2$Average_G5)/(data2$Average_G3)
-  data2$Log2_Ratio.G5vsG3 <- log2(data2$Ratio_G5vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1628,21 +1257,6 @@ if (groups_number==6){
   #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
   data2$Ratio_G6vsG3 <- (data2$Average_G6)/(data2$Average_G3)
   data2$Log2_Ratio.G6vsG3 <- log2(data2$Ratio_G6vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){ test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG4 <- p.adjust(data2$MW_G5vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG4 <- (data2$Average_G5)/(data2$Average_G4)
-  data2$Log2_Ratio.G5vsG4 <- log2(data2$Ratio_G5vsG4)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
@@ -1675,111 +1289,12 @@ if (groups_number==6){
   data2$Log2_Ratio.G6vsG5 <- log2(data2$Ratio_G6vsG5)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
-
-
-  #Ddataspace <- replace(Ddataspace, is.nan(Ddataspace), "Not Applicable")
-
-
-  Fdataspace<-Ddataspace
-
-
-
 }
 
-if (groups_number==7){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$Average_G4 <- rowMeans(data2[,coln4])
-  data2$Average_G5 <- rowMeans(data2[,coln5])
-  data2$Average_G6 <- rowMeans(data2[,coln6])
+if (groups_number>=7){
   data2$Average_G7 <- rowMeans(data2[,coln7])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
-  data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
-  data2$St_Dv_G5 <- apply(data2[,coln5], 1, sd)
-  data2$St_Dv_G6 <- apply(data2[,coln6], 1, sd)
   data2$St_Dv_G7 <- apply(data2[,coln7], 1, sd)
-  ### Calculate unadjusted p-value
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G2vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG1 <- p.adjust(data2$MW_G4vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG1 <- (data2$Average_G4)/(data2$Average_G1)
-  data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG1 <- p.adjust(data2$MW_G5vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG1 <- (data2$Average_G5)/(data2$Average_G1)
-  data2$Log2_Ratio.G5vsG1 <- log2(data2$Ratio_G5vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG1 <- p.adjust(data2$MW_G6vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG1 <- (data2$Average_G6)/(data2$Average_G1)
-  data2$Log2_Ratio.G6vsG1 <- log2(data2$Ratio_G6vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G7vsG1"]<-test_list[[3]]
@@ -1795,65 +1310,6 @@ if (groups_number==7){
   data2$Log2_Ratio.G7vsG1 <- log2(data2$Ratio_G7vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG2 <- p.adjust(data2$MW_G4vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG2 <- (data2$Average_G4)/(data2$Average_G2)
-  data2$Log2_Ratio.G4vsG2 <- log2(data2$Ratio_G4vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG2 <- p.adjust(data2$MW_G5vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG2 <- (data2$Average_G5)/(data2$Average_G2)
-  data2$Log2_Ratio.G5vsG2 <- log2(data2$Ratio_G5vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){ test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG2 <- p.adjust(data2$MW_G6vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG2 <- (data2$Average_G6)/(data2$Average_G2)
-  data2$Log2_Ratio.G6vsG2 <- log2(data2$Ratio_G6vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1870,49 +1326,6 @@ if (groups_number==7){
   data2$Log2_Ratio.G7vsG2 <- log2(data2$Ratio_G7vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G2vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){ test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG3 <- p.adjust(data2$MW_G4vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG3 <- (data2$Average_G4)/(data2$Average_G3)
-  data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){ test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG3 <- p.adjust(data2$MW_G5vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG3 <- (data2$Average_G5)/(data2$Average_G3)
-  data2$Log2_Ratio.G5vsG3 <- log2(data2$Ratio_G5vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG3 <- p.adjust(data2$MW_G6vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG3 <- (data2$Average_G6)/(data2$Average_G3)
-  data2$Log2_Ratio.G6vsG3 <- log2(data2$Ratio_G6vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -1931,35 +1344,6 @@ if (groups_number==7){
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG4 <- p.adjust(data2$MW_G5vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG4 <- (data2$Average_G5)/(data2$Average_G4)
-  data2$Log2_Ratio.G5vsG4 <- log2(data2$Ratio_G5vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG4 <- p.adjust(data2$MW_G6vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG4 <- (data2$Average_G6)/(data2$Average_G4)
-  data2$Log2_Ratio.G6vsG4 <- log2(data2$Ratio_G6vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G7vsG4"]<-test_list[[3]]
   }  }
   if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
@@ -1972,22 +1356,7 @@ if (groups_number==7){
   data2$Ratio_G7vsG4 <- (data2$Average_G7)/(data2$Average_G4)
   data2$Log2_Ratio.G7vsG4 <- log2(data2$Ratio_G7vsG4)
   #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG5 <- p.adjust(data2$MW_G6vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG5 <- (data2$Average_G6)/(data2$Average_G5)
-  data2$Log2_Ratio.G6vsG5 <- log2(data2$Ratio_G6vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G7vsG5"]<-test_list[[3]]
   }  }
@@ -2016,127 +1385,11 @@ if (groups_number==7){
   data2$Log2_Ratio.G7vsG6 <- log2(data2$Ratio_G7vsG6)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
+ }
 
-
-  # Ddataspace <- replace(Ddataspace, is.nan(Ddataspace), "Not Applicable")
-
-
-  Fdataspace<-Ddataspace
-
-
-}
-
-if (groups_number==8){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$Average_G4 <- rowMeans(data2[,coln4])
-  data2$Average_G5 <- rowMeans(data2[,coln5])
-  data2$Average_G6 <- rowMeans(data2[,coln6])
-  data2$Average_G7 <- rowMeans(data2[,coln7])
+if (groups_number>=8){
   data2$Average_G8 <- rowMeans(data2[,coln8])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
-  data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
-  data2$St_Dv_G5 <- apply(data2[,coln5], 1, sd)
-  data2$St_Dv_G6 <- apply(data2[,coln6], 1, sd)
-  data2$St_Dv_G7 <- apply(data2[,coln7], 1, sd)
   data2$St_Dv_G8 <- apply(data2[,coln8], 1, sd)
-  ### Calculate unadjusted p-value
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G2vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG1 <- p.adjust(data2$MW_G4vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG1 <- (data2$Average_G4)/(data2$Average_G1)
-  data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG1 <- p.adjust(data2$MW_G5vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG1 <- (data2$Average_G5)/(data2$Average_G1)
-  data2$Log2_Ratio.G5vsG1 <- log2(data2$Ratio_G5vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG1 <- p.adjust(data2$MW_G6vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG1 <- (data2$Average_G6)/(data2$Average_G1)
-  data2$Log2_Ratio.G6vsG1 <- log2(data2$Ratio_G6vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG1 <- p.adjust(data2$MW_G7vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG1 <- (data2$Average_G7)/(data2$Average_G1)
-  data2$Log2_Ratio.G7vsG1 <- log2(data2$Ratio_G7vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G8vsG1"]<-test_list[[3]]
@@ -2152,82 +1405,7 @@ if (groups_number==8){
   data2$Log2_Ratio.G8vsG1 <- log2(data2$Ratio_G8vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG2 <- p.adjust(data2$MW_G4vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG2 <- (data2$Average_G4)/(data2$Average_G2)
-  data2$Log2_Ratio.G4vsG2 <- log2(data2$Ratio_G4vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG2 <- p.adjust(data2$MW_G5vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG2 <- (data2$Average_G5)/(data2$Average_G2)
-  data2$Log2_Ratio.G5vsG2 <- log2(data2$Ratio_G5vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG2 <- p.adjust(data2$MW_G6vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG2 <- (data2$Average_G6)/(data2$Average_G2)
-  data2$Log2_Ratio.G6vsG2 <- log2(data2$Ratio_G6vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG2 <- p.adjust(data2$MW_G7vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG2 <- (data2$Average_G7)/(data2$Average_G2)
-  data2$Log2_Ratio.G7vsG2 <- log2(data2$Ratio_G7vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+ if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G8vsG2"]<-test_list[[3]]
   }  }
@@ -2243,65 +1421,6 @@ if (groups_number==8){
   data2$Log2_Ratio.G8vsG2 <- log2(data2$Ratio_G8vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG3 <- p.adjust(data2$MW_G4vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG3 <- (data2$Average_G4)/(data2$Average_G3)
-  data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG3 <- p.adjust(data2$MW_G5vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG3 <- (data2$Average_G5)/(data2$Average_G3)
-  data2$Log2_Ratio.G5vsG3 <- log2(data2$Ratio_G5vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG3 <- p.adjust(data2$MW_G6vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG3 <- (data2$Average_G6)/(data2$Average_G3)
-  data2$Log2_Ratio.G6vsG3 <- log2(data2$Ratio_G6vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG3 <- p.adjust(data2$MW_G7vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG3 <- (data2$Average_G7)/(data2$Average_G3)
-  data2$Log2_Ratio.G7vsG3 <- log2(data2$Ratio_G7vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -2318,52 +1437,7 @@ if (groups_number==8){
   data2$Log2_Ratio.G8vsG3 <- log2(data2$Ratio_G8vsG3)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG4 <- p.adjust(data2$MW_G5vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG4 <- (data2$Average_G5)/(data2$Average_G4)
-  data2$Log2_Ratio.G5vsG4 <- log2(data2$Ratio_G5vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG4 <- p.adjust(data2$MW_G6vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG4 <- (data2$Average_G6)/(data2$Average_G4)
-  data2$Log2_Ratio.G6vsG4 <- log2(data2$Ratio_G6vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG4 <- p.adjust(data2$MW_G7vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG4 <- (data2$Average_G7)/(data2$Average_G4)
-  data2$Log2_Ratio.G7vsG4 <- log2(data2$Ratio_G7vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+ if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G8vsG4"]<-test_list[[3]]
   }  }
@@ -2377,37 +1451,6 @@ if (groups_number==8){
   data2$Ratio_G8vsG4 <- (data2$Average_G8)/(data2$Average_G4)
   data2$Log2_Ratio.G8vsG4 <- log2(data2$Ratio_G8vsG4)
   #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG5 <- p.adjust(data2$MW_G6vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG5 <- (data2$Average_G6)/(data2$Average_G5)
-  data2$Log2_Ratio.G6vsG5 <- log2(data2$Ratio_G6vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG5 <- p.adjust(data2$MW_G7vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG5 <- (data2$Average_G7)/(data2$Average_G5)
-  data2$Log2_Ratio.G7vsG5 <- log2(data2$Ratio_G7vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G8vsG5"]<-test_list[[3]]
@@ -2422,23 +1465,7 @@ if (groups_number==8){
   data2$Ratio_G8vsG5 <- (data2$Average_G8)/(data2$Average_G5)
   data2$Log2_Ratio.G8vsG5 <- log2(data2$Ratio_G8vsG5)
   #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG6"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln6]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG6"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG6 <- p.adjust(data2$MW_G7vsG6, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG6 <- (data2$Average_G7)/(data2$Average_G6)
-  data2$Log2_Ratio.G7vsG6 <- log2(data2$Ratio_G7vsG6)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+ if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G8vsG6"]<-test_list[[3]]
   }  }
@@ -2468,146 +1495,13 @@ if (groups_number==8){
   data2$Log2_Ratio.G8vsG7 <- log2(data2$Ratio_G8vsG7)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  Ddataspace<-data2
-  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Accession, Description, Symbol, everything())
-
-
-  #Ddataspace <- replace(Ddataspace, is.nan(Ddataspace), "Not Applicable")
-
-
-  Fdataspace<-Ddataspace
-
-
-}
+ }
 
 
 if (groups_number==9){
-  data2$Average_G1 <- rowMeans(data2[,coln])
-  data2$Average_G2 <- rowMeans(data2[,coln2])
-  data2$Average_G3 <- rowMeans(data2[,coln3])
-  data2$Average_G4 <- rowMeans(data2[,coln4])
-  data2$Average_G5 <- rowMeans(data2[,coln5])
-  data2$Average_G6 <- rowMeans(data2[,coln6])
-  data2$Average_G7 <- rowMeans(data2[,coln7])
-  data2$Average_G8 <- rowMeans(data2[,coln8])
   data2$Average_G9 <- rowMeans(data2[,coln9])
-  data2$St_Dv_G1 <- apply(data2[,coln], 1, sd)
-  data2$St_Dv_G2 <- apply(data2[,coln2], 1, sd)
-  data2$St_Dv_G3 <- apply(data2[,coln3], 1, sd)
-  data2$St_Dv_G4 <- apply(data2[,coln4], 1, sd)
-  data2$St_Dv_G5 <- apply(data2[,coln5], 1, sd)
-  data2$St_Dv_G6 <- apply(data2[,coln6], 1, sd)
-  data2$St_Dv_G7 <- apply(data2[,coln7], 1, sd)
-  data2$St_Dv_G8 <- apply(data2[,coln8], 1, sd)
   data2$St_Dv_G9 <- apply(data2[,coln9], 1, sd)
-  ### Calculate unadjusted p-value
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G2vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){      test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G2vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G2vsG1 <- p.adjust(data2$MW_G2vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G2vsG1 <- (data2$Average_G2)/(data2$Average_G1)
-  data2$Log2_Ratio.G2vsG1 <- log2(data2$Ratio_G2vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG1 <- p.adjust(data2$MW_G3vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG1 <- (data2$Average_G3)/(data2$Average_G1)
-  data2$Log2_Ratio.G3vsG1 <- log2(data2$Ratio_G3vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG1 <- p.adjust(data2$MW_G4vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG1 <- (data2$Average_G4)/(data2$Average_G1)
-  data2$Log2_Ratio.G4vsG1 <- log2(data2$Ratio_G4vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG1 <- p.adjust(data2$MW_G5vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG1 <- (data2$Average_G5)/(data2$Average_G1)
-  data2$Log2_Ratio.G5vsG1 <- log2(data2$Ratio_G5vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG1 <- p.adjust(data2$MW_G6vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG1 <- (data2$Average_G6)/(data2$Average_G1)
-  data2$Log2_Ratio.G6vsG1 <- log2(data2$Ratio_G6vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG1 <- p.adjust(data2$MW_G7vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG1 <- (data2$Average_G7)/(data2$Average_G1)
-  data2$Log2_Ratio.G7vsG1 <- log2(data2$Ratio_G7vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG1"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG1"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG1 <- p.adjust(data2$MW_G8vsG1, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG1 <- (data2$Average_G8)/(data2$Average_G1)
-  data2$Log2_Ratio.G8vsG1 <- log2(data2$Ratio_G8vsG1)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG1"]<-test_list[[3]]
   }  }
@@ -2621,98 +1515,7 @@ if (groups_number==9){
   data2$Ratio_G9vsG1 <- (data2$Average_G9)/(data2$Average_G1)
   data2$Log2_Ratio.G9vsG1 <- log2(data2$Ratio_G9vsG1)
   #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G3vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln3]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G3vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G3vsG2 <- p.adjust(data2$MW_G3vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G3vsG2 <- (data2$Average_G3)/(data2$Average_G2)
-  data2$Log2_Ratio.G3vsG2 <- log2(data2$Ratio_G3vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG2 <- p.adjust(data2$MW_G4vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG2 <- (data2$Average_G4)/(data2$Average_G2)
-  data2$Log2_Ratio.G4vsG2 <- log2(data2$Ratio_G4vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG2 <- p.adjust(data2$MW_G5vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG2 <- (data2$Average_G5)/(data2$Average_G2)
-  data2$Log2_Ratio.G5vsG2 <- log2(data2$Ratio_G5vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG2 <- p.adjust(data2$MW_G6vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG2 <- (data2$Average_G6)/(data2$Average_G2)
-  data2$Log2_Ratio.G6vsG2 <- log2(data2$Ratio_G6vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG2 <- p.adjust(data2$MW_G7vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG2 <- (data2$Average_G7)/(data2$Average_G2)
-  data2$Log2_Ratio.G7vsG2 <- log2(data2$Ratio_G7vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG2"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln2]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG2"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG2 <- p.adjust(data2$MW_G8vsG2, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG2 <- (data2$Average_G8)/(data2$Average_G2)
-  data2$Log2_Ratio.G8vsG2 <- log2(data2$Ratio_G8vsG2)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+ if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG2"]<-test_list[[3]]
   }  }
@@ -2726,81 +1529,6 @@ if (groups_number==9){
   data2$Ratio_G9vsG2 <- (data2$Average_G9)/(data2$Average_G2)
   data2$Log2_Ratio.G9vsG2 <- log2(data2$Ratio_G9vsG2)
   #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G4vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln4]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G4vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G4vsG3 <- p.adjust(data2$MW_G4vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G4vsG3 <- (data2$Average_G4)/(data2$Average_G3)
-  data2$Log2_Ratio.G4vsG3 <- log2(data2$Ratio_G4vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG3 <- p.adjust(data2$MW_G5vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG3 <- (data2$Average_G5)/(data2$Average_G3)
-  data2$Log2_Ratio.G5vsG3 <- log2(data2$Ratio_G5vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG3 <- p.adjust(data2$MW_G6vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG3 <- (data2$Average_G6)/(data2$Average_G3)
-  data2$Log2_Ratio.G6vsG3 <- log2(data2$Ratio_G6vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG3 <- p.adjust(data2$MW_G7vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG3 <- (data2$Average_G7)/(data2$Average_G3)
-  data2$Log2_Ratio.G7vsG3 <- log2(data2$Ratio_G7vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG3"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln3]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG3"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG3 <- p.adjust(data2$MW_G8vsG3, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG3 <- (data2$Average_G8)/(data2$Average_G3)
-  data2$Log2_Ratio.G8vsG3 <- log2(data2$Ratio_G8vsG3)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG3"]<-test_list[[3]]
@@ -2818,65 +1546,6 @@ if (groups_number==9){
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G5vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln5]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G5vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G5vsG4 <- p.adjust(data2$MW_G5vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G5vsG4 <- (data2$Average_G5)/(data2$Average_G4)
-  data2$Log2_Ratio.G5vsG4 <- log2(data2$Ratio_G5vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG4 <- p.adjust(data2$MW_G6vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG4 <- (data2$Average_G6)/(data2$Average_G4)
-  data2$Log2_Ratio.G6vsG4 <- log2(data2$Ratio_G6vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG4 <- p.adjust(data2$MW_G7vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG4 <- (data2$Average_G7)/(data2$Average_G4)
-  data2$Log2_Ratio.G7vsG4 <- log2(data2$Ratio_G7vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG4"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG4"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG4 <- p.adjust(data2$MW_G8vsG4, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG4 <- (data2$Average_G8)/(data2$Average_G4)
-  data2$Log2_Ratio.G8vsG4 <- log2(data2$Ratio_G8vsG4)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG4"]<-test_list[[3]]
   }  }
   if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln4]),as.numeric(data2[i,coln9]), exact=FALSE, paired=TRUE,)
@@ -2889,51 +1558,6 @@ if (groups_number==9){
   data2$Ratio_G9vsG4 <- (data2$Average_G9)/(data2$Average_G4)
   data2$Log2_Ratio.G9vsG4 <- log2(data2$Ratio_G9vsG4)
   #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G6vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln6]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G6vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G6vsG5 <- p.adjust(data2$MW_G6vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G6vsG5 <- (data2$Average_G6)/(data2$Average_G5)
-  data2$Log2_Ratio.G6vsG5 <- log2(data2$Ratio_G6vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){    test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG5 <- p.adjust(data2$MW_G7vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG5 <- (data2$Average_G7)/(data2$Average_G5)
-  data2$Log2_Ratio.G7vsG5 <- log2(data2$Ratio_G7vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG5"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln5]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG5"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG5 <- p.adjust(data2$MW_G8vsG5, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG5 <- (data2$Average_G8)/(data2$Average_G5)
-  data2$Log2_Ratio.G8vsG5 <- log2(data2$Ratio_G8vsG5)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG5"]<-test_list[[3]]
@@ -2949,35 +1573,6 @@ if (groups_number==9){
   data2$Log2_Ratio.G9vsG5 <- log2(data2$Ratio_G9vsG5)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G7vsG6"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){   test_list<-wilcox.test(as.numeric(data2[i,coln6]),as.numeric(data2[i,coln7]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G7vsG6"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G7vsG6 <- p.adjust(data2$MW_G7vsG6, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G7vsG6 <- (data2$Average_G7)/(data2$Average_G6)
-  data2$Log2_Ratio.G7vsG6 <- log2(data2$Ratio_G7vsG6)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG6"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln6]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG6"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG6 <- p.adjust(data2$MW_G8vsG6, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG6 <- (data2$Average_G8)/(data2$Average_G6)
-  data2$Log2_Ratio.G8vsG6 <- log2(data2$Ratio_G8vsG6)
-  #data$subtraction <- (data$average_case)-(data$average_control)
 
   if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
@@ -2994,22 +1589,7 @@ if (groups_number==9){
   data2$Log2_Ratio.G9vsG6 <- log2(data2$Ratio_G9vsG6)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
-    test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
-    data2[i,"MW_G8vsG7"]<-test_list[[3]]
-  }  }
-  if (MWtest == "Paired"){ for (i in c(1:length(data2[,1]))){  test_list<-wilcox.test(as.numeric(data2[i,coln7]),as.numeric(data2[i,coln8]), exact=FALSE, paired=TRUE,)
-      data2[i,"MW_G8vsG7"]<-test_list[[3]]
-    }
-  }
-  #### adjust the p-values
-  data2$BH_p_G8vsG7 <- p.adjust(data2$MW_G8vsG7, method = "BH")
-  #### calculate the ratio, use the subtraction (instead of ratio) only when the values of the data are zero centered
-  data2$Ratio_G8vsG7 <- (data2$Average_G8)/(data2$Average_G7)
-  data2$Log2_Ratio.G8vsG7 <- log2(data2$Ratio_G8vsG7)
-  #data$subtraction <- (data$average_case)-(data$average_control)
-
-  if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
+ if (MWtest == "Independent"){ for (i in c(1:length(data2[,1]))){
     test_list<-stats::wilcox.test(as.numeric(data2[i,coln]),as.numeric(data2[i,coln2]), exact=FALSE, paired=FALSE)
     data2[i,"MW_G9vsG7"]<-test_list[[3]]
   }  }
@@ -3039,6 +1619,8 @@ if (groups_number==9){
   data2$Log2_Ratio.G9vsG8 <- log2(data2$Ratio_G9vsG8)
   #data$subtraction <- (data$average_case)-(data$average_control)
 
+}
+
   Ddataspace<-data2
   Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
   Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
@@ -3052,8 +1634,6 @@ if (groups_number==9){
   Fdataspace<-Ddataspace
 
 
-
-}
 if (groups_number != 2){
 
 
@@ -3102,87 +1682,52 @@ if (groups_number != 2){
 
 }
 
-if (groups_number == 2){
+if (groups_number >= 2){
   namesc<-colnames(Fdataspace)
   namesc<-gsub("G1", g1.name, namesc)
   namesc<-gsub("G2", g2.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 3){
+if (groups_number >= 3){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
   namesc<-gsub("G3", g3.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 4){
+if (groups_number >= 4){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
   namesc<-gsub("G4", g4.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 5){
+if (groups_number >= 5){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g4.name, namesc)
   namesc<-gsub("G5", g5.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 6){
+if (groups_number >= 6){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g4.name, namesc)
-  namesc<-gsub("G5", g5.name, namesc)
   namesc<-gsub("G6", g6.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 7){
+if (groups_number >= 7){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g4.name, namesc)
-  namesc<-gsub("G5", g5.name, namesc)
-  namesc<-gsub("G6", g6.name, namesc)
   namesc<-gsub("G7", g7.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
 
-if (groups_number == 8){
+if (groups_number >= 8){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g4.name, namesc)
-  namesc<-gsub("G5", g5.name, namesc)
-  namesc<-gsub("G6", g6.name, namesc)
-  namesc<-gsub("G7", g7.name, namesc)
   namesc<-gsub("G8", g8.name, namesc)
   colnames(Fdataspace)<-namesc
 }
 
-if (groups_number == 9){
+if (groups_number >= 9){
   namesc<-colnames(Fdataspace)
-  namesc<-gsub("G1", g1.name, namesc)
-  namesc<-gsub("G2", g2.name, namesc)
-  namesc<-gsub("G3", g3.name, namesc)
-  namesc<-gsub("G4", g4.name, namesc)
-  namesc<-gsub("G5", g5.name, namesc)
-  namesc<-gsub("G6", g6.name, namesc)
-  namesc<-gsub("G7", g7.name, namesc)
-  namesc<-gsub("G8", g8.name, namesc)
   namesc<-gsub("G9", g9.name, namesc)
   colnames(Fdataspace)<-namesc
 }
