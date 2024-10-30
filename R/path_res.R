@@ -280,6 +280,8 @@ for (i in 1:groups_number) {
     openxlsx::write.xlsx(dataspace, file = "Masterlist.xlsx")
     message("An excel of the list with all proteomics data was created as Masterlist.xlsx")
 
+    zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
+    IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
@@ -868,9 +870,11 @@ if (global_threshold == TRUE) {
        dataspace$Number_0_all_groups <- NULL
     }
     zero_per_sample1 <- colSums(dataspace[,-1:-2] == 0)*100/nrow(dataspace)
-    for ( i in 1:length(zero_per_sample1)){
-      if  (zero_per_sample1[[i]] > 50)
-      {print(paste("warning: Sample ",colnames(dataspace[i]),"had", zero_per_sample1[[i]], " % missing values, after filtering through proteins.")) }}
+    sample_names <- colnames(dataspace[,-1:-2])
+    qc <- cbind(sample_names,zero_per_sample,zero_per_sample1,IDs)
+    colnames(qc) <- c("Sample Name","% of Missing values before filtering","% of Missing values after filtering","Number of proteins detected in the sample")
+    rownames(qc) <- NULL
+    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
 pre_dataspace <- dataspace
 
