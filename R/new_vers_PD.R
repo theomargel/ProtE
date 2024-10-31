@@ -157,6 +157,9 @@ for (j in 1:groups_number){
   }
 }
 dataspace$Number_0_all_groups <- rowSums(dataspace[,paste0("Number_0_group", 1:groups_number)])
+#omiting empty rows
+dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
+
 if (global_threshold == TRUE) {
   openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
   dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
@@ -583,7 +586,8 @@ if (imputation == FALSE) {
   ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
-}
+
+  }
 melt.log.dataspace.na <- melt.log.dataspace
 melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
 melt.log.dataspace.na$Group <- factor(melt.log.dataspace.na$Group, levels = Group2)
@@ -614,7 +618,7 @@ else
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
 qc.violin<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
-  geom_violin(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+  geom_violin(aes(color = Group),lwd=1)+
   xlab("Sample")+
   ylab("Log parts per million")+
   theme_classic()+
@@ -625,7 +629,7 @@ qc.violin<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variab
   guides(color = guide_legend(override.aes = list(size = 1)))+
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
-ggplot2::ggsave("violin.pdf", plot = qc.violin,  path = path_res,
+ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
                 scale = 1, width = 12, height = 5, units = "in",
                 dpi = 300, limitsize = TRUE, bg = "white")
 

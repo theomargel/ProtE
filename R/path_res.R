@@ -180,7 +180,10 @@ if (global_threshold == TRUE) {
         }
       }
     }
-              dataspace$Number_0_all_groups <- rowSums(dataspace[,paste0("Number_0_group", 1:groups_number)])
+
+   dataspace$Number_0_all_groups <- rowSums(dataspace[,paste0("Number_0_group", 1:groups_number)])
+   #omiting empty rows
+   dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
      if (global_threshold == TRUE) {
                 openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
                 dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
