@@ -20,7 +20,7 @@
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
@@ -583,7 +583,6 @@ if (imputation == FALSE) {
   ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
-
 }
 melt.log.dataspace.na <- melt.log.dataspace
 melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
@@ -592,7 +591,6 @@ is.factor(melt.log.dataspace.na$variable)
 
 qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
-  #scale_colour_manual(values=colors)+
   xlab("Sample")+
   ylab("Log parts per million")+
   theme_classic()+
@@ -601,7 +599,6 @@ qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorde
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
 qc.boxplots.na
@@ -616,6 +613,22 @@ else
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
+qc.violin<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
+  geom_violin(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+  xlab("Sample")+
+  ylab("Log parts per million")+
+  theme_classic()+
+  theme(text = element_text(size = 19),
+        axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+        axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))+
+  guides(color = guide_legend(override.aes = list(size = 1)))+
+  geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
+
+ggplot2::ggsave("violin.pdf", plot = qc.violin,  path = path_res,
+                scale = 1, width = 12, height = 5, units = "in",
+                dpi = 300, limitsize = TRUE, bg = "white")
+
 message("The Boxplots for each sample have been created!!!!")
 
 }
