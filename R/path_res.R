@@ -243,7 +243,7 @@ imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group
 
 imp_hist
 
-ggplot2::ggsave("Imputed_values_histogram.tiff", plot = imp_hist, device = "tiff", path = path_res,
+ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                 scale = 1, width = 5, height = 4, units = "in",
                 dpi = 300, limitsize = TRUE)
 
@@ -267,7 +267,7 @@ abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
         legend.text = element_text(size = 9))
 abund.plot
 
-ggplot2::ggsave("Proteins_abundance_rank.tiff", plot = abund.plot , device = "tiff", path = path_res,
+ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                 scale = 1, width = 12, height = 5, units = "in",
                 dpi = 300, limitsize = TRUE, bg = "white")
 }
@@ -293,7 +293,7 @@ abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
 
 abund.plot
 
-ggplot2::ggsave("Proteins_abundance_rank.tiff", plot = abund.plot , device = "tiff", path = path_res,
+ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                 scale = 1, width = 12, height = 5, units = "in",
                 dpi = 300, limitsize = TRUE, bg = "white")
 }
@@ -491,10 +491,10 @@ pca.ent<-ggplot2::ggplot(data=pca.data, ggplot2::aes(x=X, y=Y, label=Sample))+
 
 pca.ent
 
-ggplot2::ggsave("PCA_plot_alldata.tiff", plot = pca.ent, device = "tiff", path = path_res,
+ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_res,
        scale = 1, width = 5, height = 4, units = "in",
        dpi = 300, limitsize = TRUE)
-message("PCA plot using all data was created as PCA_plot_alldata.tiff")
+message("PCA plot using all data was created as PCA_plot_alldata.pdf")
 # PCA of the significant data. If number of groups = 2, the script uses the
 # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
 
@@ -556,18 +556,18 @@ pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
 
 pca.sig
 
-ggplot2::ggsave("PCA_plot_significant.tiff", plot = pca.sig, device = "tiff", path = path_res,
+ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_res,
        scale = 1, width = 5, height = 4, units = "in",
        dpi = 300, limitsize = TRUE)
-message("PCA plot with the significant data was created as PCA_plot_significant.tiff" )
+message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
 
 a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
              common.legend = TRUE, legend = "bottom")
 
-ggplot2::ggsave("PCA_plots_combined.tiff", plot = a, device = "tiff", path = path_res,
+ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
        scale = 1, width = 8, height = 4.5, units = "in",
        dpi = 300, limitsize = TRUE)
-message ("The 2 PCA plots are combined in PCA_plots_combined.tiff")
+message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
 
 # Quality check - boxplots of data distribution
 melt.log.dataspace <- reshape2::melt(log.dataspace)
@@ -600,7 +600,7 @@ qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(vari
 
 qc.boxplots
 
-ggplot2::ggsave("QC_dataDistribution_withZeros.tiff", plot = qc.boxplots, device = "tiff", path = path_res,
+ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
        scale = 1, width = 12, height = 5, units = "in",
        dpi = 300, limitsize = TRUE, bg = "white")
 
@@ -626,13 +626,13 @@ qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorde
 
 qc.boxplots.na
 if (imputation == FALSE) {
-ggplot2::ggsave("QC_dataDistribution_NoZeros.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
+ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
        scale = 1, width = 12, height = 5, units = "in",
        dpi = 300, limitsize = TRUE, bg = "white")
 }
 else
 {
-  ggplot2::ggsave("QC_dataDistribution.tiff", plot = qc.boxplots.na, device = "tiff", path = path_res,
+  ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
