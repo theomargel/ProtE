@@ -506,6 +506,26 @@ if (groups_number != 2){
 which(Ddataspace$MW_G2vsG1< 0.05)
 log.dataspace.sig <- log.dataspace[which.sig,]
 
+zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
+colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
+
+mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+heatmap<-Heatmap(zlog.dataspace.sig,
+                 cluster_rows = TRUE,
+                 cluster_columns = TRUE ,
+                 show_row_names = FALSE,
+                 show_column_names = FALSE,
+                 column_split = groups_for_test,
+                 top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
+                                                                                     labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
+                 col = mycols, column_title = NULL,
+                 heatmap_legend_param = list(
+                   title = "Z-Score",
+                   color_bar = "continuous"
+                 ))
+pdf("heatmap.pdf", width = 7.37, height = 6.09)
+draw(heatmap)
+dev.off()
 
 pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
 
