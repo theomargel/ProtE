@@ -46,7 +46,6 @@ user_inputs <- function(...,
 
 group_paths <- list(...)
 groups_number <- length(group_paths)
-if (groups_number>9){stop("You can add up to 9 groups")}
 
 group_paths<- gsub( "\\\\", "/", group_paths)
 for (i in 1:groups_number) {
