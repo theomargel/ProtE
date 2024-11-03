@@ -30,15 +30,9 @@
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
-#' user_inputs(
-#'   "C:/Users/User/Documents/samples_analysis.xlsx",
-#'   groups_number = 2,
-#'   group_names = c("T0","T1"),
-#'   case_number = c(10,13)
-#'   MWtest = "Paired",
-#'   imputation = TRUE,
-#'   global_threshold = TRUE
-#' )}
+#' new_user_inputs(excel_file = "C:/Users/User/Documents/itern/new_version_PD.xlsx",
+#' groups_number = 2,group_names = c("exp_2020","exp_2024"),
+#'  case_number = c(18,8), imputation = FALSE, threshold_value = 100)
 #'
 #' @export
 
@@ -483,6 +477,9 @@ if (groups_number != 2){
 } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
 
 which(Ddataspace$MW_G2vsG1< 0.05)
+if (length(which.sig) == 0){
+  message("There are no significant proteins, to create a PCA plot with them and a heatmap")
+} else {
 log.dataspace.sig <- log.dataspace[which.sig,]
 
 
@@ -551,7 +548,7 @@ ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
                 scale = 1, width = 8, height = 4.5, units = "in",
                 dpi = 300, limitsize = TRUE)
 message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
-
+}
 # Quality check - boxplots of data distribution
 melt.log.dataspace <- reshape2::melt(log.dataspace)
 repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)

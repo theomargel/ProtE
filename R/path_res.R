@@ -26,8 +26,9 @@
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
 #' user_inputs(
-#'   "C:/Users/User/Documents/T0_samples",
-#'   "C:/Users/User/Documents/T0_samples",
+#'   user_inputs(
+#'   "C:/Users/User/Documents/itern/RforPD/Before",
+#'   "C:/Users/User/Documents/itern/RforPD/After",
 #'   MWtest = "Paired",
 #'   imputation = TRUE,
 #'   global_threshold = TRUE
@@ -507,6 +508,9 @@ if (groups_number != 2){
 } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
 
 which(Ddataspace$MW_G2vsG1< 0.05)
+if (length(which.sig) == 0){
+  message("There are no significant proteins, to create a PCA plot with them and a heatmap")
+} else {
 log.dataspace.sig <- log.dataspace[which.sig,]
 
 zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
@@ -571,7 +575,7 @@ ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
        scale = 1, width = 8, height = 4.5, units = "in",
        dpi = 300, limitsize = TRUE)
 message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
-
+}
 # Quality check - boxplots of data distribution
 melt.log.dataspace <- reshape2::melt(log.dataspace)
 repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
