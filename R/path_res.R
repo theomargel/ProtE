@@ -157,7 +157,7 @@ if (global_threshold == TRUE) {
 
     if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
-    # Create identifier variables for the thhreshold and statistics
+    # Create identifier variables for the threshold and statistics
     coln <- list()
     case_last <- 2
 
@@ -239,8 +239,7 @@ if (global_threshold == TRUE) {
 
 pre_dataspace <- dataspace
 
-if (sum(name_dataspace==0)== 0){ message("There are no Missing Values to impute")}
-else {
+
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
@@ -314,7 +313,7 @@ else {
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     }}
-}
+
 if (imputation == FALSE){dataspace <- dataspace
 
 dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)

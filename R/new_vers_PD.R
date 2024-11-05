@@ -189,9 +189,7 @@ openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
 pre_dataspace <- dataspace
 
-##imputation KNN
-if (sum(name_dataspace==0)== 0){ message("There are no Missing Values to impute")}
-else {
+
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
@@ -265,7 +263,7 @@ else {
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     }}
-}
+
 if (imputation == FALSE){dataspace <- dataspace
 
 dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -307,8 +305,7 @@ colnames(mm)<- group_names
 
 nndataspace<- dataspace[,-1:-2]
 nndataspace <- log2(nndataspace+1)
-print(colnames(nndataspace))
-print(mm)
+
 fit <- limma::lmFit(nndataspace, mm)
 fit<- limma::eBayes(fit)
 if (groups_number>2){
@@ -525,7 +522,6 @@ heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
                                          title = "Z-Score",
                                          color_bar = "continuous"
                                        ))
-print(class(heatmap_data))
 pdf("heatmap.pdf", width = 7.37, height = 6.09)
 ComplexHeatmap::draw(heatmap_data)
 dev.off()

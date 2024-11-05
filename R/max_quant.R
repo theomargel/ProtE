@@ -182,7 +182,6 @@ max_quant <- function(excel_file,
     dplyr::select(Accession, Description, Symbol, everything())
   colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
   openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
-  message("Applying Parts Per Million normalization, saved as Normalized.xlsx")
 
   dataspace[is.na(dataspace)] <- 0
 
@@ -230,8 +229,6 @@ max_quant <- function(excel_file,
   openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
   pre_dataspace <- dataspace
-  if (sum(name_dataspace==0)== 0){ message("There are no Missing Values to impute")}
-  else {
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
@@ -305,7 +302,7 @@ max_quant <- function(excel_file,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     }}
-  }
+
   if (imputation == FALSE){dataspace <- dataspace
 
   dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
