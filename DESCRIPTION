@@ -19,7 +19,10 @@ Imports:
     ggplot2, 
     VIM, 
     forcats,
-    limma
+    limma,
+    ComplexHeatmap,
+    grDevices,
+    grid
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2

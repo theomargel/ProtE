@@ -8,24 +8,27 @@
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its omittion.
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
+#' @param normalization PpM, Quantile, VST
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
+#' @importFrom grid gpar
+#' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix heatmap median
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit
+#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
+#' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
-#' user_inputs(
 #'   user_inputs(
 #'   "C:/Users/User/Documents/itern/RforPD/Before",
 #'   "C:/Users/User/Documents/itern/RforPD/After",
@@ -41,7 +44,8 @@ user_inputs <- function(...,
                         global_threshold = TRUE,
                         MWtest = "Independent",
                         threshold_value = 50,
-                        bugs = 0)
+                        bugs = 0,
+                        normalization = FALSE)
   {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -85,7 +89,7 @@ for (i in 1:groups_number) {
   file_names <- list.files(path = group_path, pattern = "*.xlsx")
   for (j in seq_along(file_names)){
   file_case <- openxlsx::read.xlsx(file.path(group_path, file_names[j]), sheet = 1)
-  dataspace <- merge(x = dataspace,y = file_case[,grep("Accession|Area",colnames(file_case))], by = "Accession" ,all.x = TRUE)
+  dataspace <- merge(x = dataspace,y = file_case[,grep("Accession|Area|Abundance:",colnames(file_case))], by = "Accession" ,all.x = TRUE)
   colnames(dataspace)[length(colnames(dataspace))] <- file_names[j]
 }
 }
@@ -103,11 +107,31 @@ setwd(path_res)
     zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
     IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
+    if (normalization == FALSE ){
+      dataspace <- dataspace
+    }
+    if (normalization == "PPM"){
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
       ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
-    })
+    })}
+
+    if (normalization == "Quantile"){
+      dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+      dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
+    }
+    if (normalization == "log2"){
+      dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+    }
+    if (normalization == "Total_Ion_Current") {
+      dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
+    }
+    if (normalization == "median") {
+      sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
+      dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
+    }
+
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
@@ -215,65 +239,81 @@ if (global_threshold == TRUE) {
 
 pre_dataspace <- dataspace
 
-##imputation KNN
-if (imputation == TRUE) {
-dataspace[dataspace==0] <- NA
-dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
-openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+if (sum(dataspace[dataspace==0])== 0){ message("There are no Missing Values to impute")}
+else {
+  ##imputation KNN
+  if (imputation == "kNN") {
+    dataspace[dataspace==0] <- NA
+    dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+  if (imputation == "LOD"){
+    dataspace[dataspace==0] <- NA
+    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
+    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+  if (imputation == "LOD/2"){
+    dataspace[dataspace==0] <- NA
+    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
+    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+  if (imputation == "kNN"){    #create histogramm for imputed values
+    pre_dataspace1<-pre_dataspace[,-1:-2]
+    dataspace1<-dataspace[,-1:-2]
+    imp.values<- dataspace1 - pre_dataspace1
 
-#create histogramm for imputed values
-pre_dataspace1<-pre_dataspace[,-1:-2]
-dataspace1<-dataspace[,-1:-2]
-imp.values<- dataspace1 - pre_dataspace1
+    his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
+    loghis_dataspace<-log2(his_dataspace+1)
 
-his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
-loghis_dataspace<-log2(his_dataspace+1)
+    #his_long <- reshape2::melt(loghis_dataspace)
 
-#his_long <- reshape2::melt(loghis_dataspace)
+    his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
+    nrows<-nrow(his_long)
+    his_long$Group <- rep(c("Final","Initial","Imputed"), each = (nrows/3))
+    his_long_filtered <- his_long[his_long$value != 0,]
+    his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
 
-his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
-nrows<-nrow(his_long)
-his_long$Group <- rep(c("Final","Initial","Imputed"), each = (nrows/3))
-his_long_filtered <- his_long[his_long$value != 0,]
-his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
+    imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
+      labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
+      scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
+      scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
+      geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
+      theme_minimal() +
+      theme(plot.background = element_rect(fill = "white")) + theme(panel.background = element_rect(fill = "white"))
 
-imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
-  labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
- scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
- scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
- geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
-  theme_minimal() +
-  theme(plot.background = element_rect(fill = "white")) + theme(panel.background = element_rect(fill = "white"))
+    imp_hist
 
-imp_hist
+    ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
+                    scale = 1, width = 5, height = 4, units = "in",
+                    dpi = 300, limitsize = TRUE)
 
-ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
-                scale = 1, width = 5, height = 4, units = "in",
-                dpi = 300, limitsize = TRUE)
+    message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+    if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
-message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+      dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+      dataspace$percentage <- dataspace_0s$percentage
+      dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
+      dataspace$log<-log2(dataspace$mean)
+      dataspace$rank <- rank(-dataspace$mean)
 
-dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
-dataspace$percentage <- dataspace_0s$percentage
-dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
-dataspace$log<-log2(dataspace$mean)
-dataspace$rank <- rank(-dataspace$mean)
+      abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+        geom_point(size = 3, alpha = 0.8) +
+        labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+        scale_color_gradient(low = "darkblue", high = "yellow",
+                             name = "Imputations\nin each\nprotein\n(%)") +
+        theme_linedraw()+
+        theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+              panel.grid = element_line(color = "grey80"),
+              legend.title = element_text(size = 10, face = "bold"),
+              legend.text = element_text(size = 9))
+      abund.plot
 
-abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
-  geom_point(size = 3, alpha = 0.8) +
-  labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
-  scale_color_gradient(low = "darkblue", high = "yellow",
-                       name = "Imputations\nin each\nprotein\n(%)") +
-  theme_linedraw()+
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        panel.grid = element_line(color = "grey80"),
-        legend.title = element_text(size = 10, face = "bold"),
-        legend.text = element_text(size = 9))
-abund.plot
-
-ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
-                scale = 1, width = 12, height = 5, units = "in",
-                dpi = 300, limitsize = TRUE, bg = "white")
+      ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
+                      scale = 1, width = 12, height = 5, units = "in",
+                      dpi = 300, limitsize = TRUE, bg = "white")
+    }}
 }
 if (imputation == FALSE){dataspace <- dataspace
 
@@ -517,21 +557,21 @@ zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
 colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
 
 mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-heatmap<-Heatmap(zlog.dataspace.sig,
-                 cluster_rows = TRUE,
-                 cluster_columns = TRUE ,
-                 show_row_names = FALSE,
-                 show_column_names = FALSE,
-                 column_split = groups_for_test,
-                 top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
-                                                                                     labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
-                 col = mycols, column_title = NULL,
-                 heatmap_legend_param = list(
-                   title = "Z-Score",
-                   color_bar = "continuous"
-                 ))
+heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
+                                       cluster_rows = TRUE,
+                                       cluster_columns = TRUE ,
+                                       show_row_names = FALSE,
+                                       show_column_names = FALSE,
+                                       column_split = groups_for_test,
+                                       top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
+                                                                                                           labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
+                                       col = mycols, column_title = NULL,
+                                       heatmap_legend_param = list(
+                                         title = "Z-Score",
+                                         color_bar = "continuous"
+                                       ))
 pdf("heatmap.pdf", width = 7.37, height = 6.09)
-draw(heatmap)
+ComplexHeatmap::draw(heatmap_data)
 dev.off()
 
 pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)

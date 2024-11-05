@@ -13,7 +13,8 @@ new_user_inputs(
   global_threshold = TRUE,
   MWtest = "Independent",
   threshold_value = 50,
-  bugs = 0
+  bugs = 0,
+  normalization = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ new_user_inputs(
 \item{threshold_value}{The percentage of missing values per protein that will cause its deletion}
 
 \item{bugs}{Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.}
+
+\item{normalization}{PPM, TIC etc.}
 }
 \value{
 Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
@@ -45,14 +48,8 @@ It takes Proteomics Data from samples in different groups, in the format they ar
 #' # Example of running the function with paths for two groups.
 #Do not add if (interactive()){} condition in your code
 if (interactive()){
-user_inputs(
-  "C:/Users/User/Documents/samples_analysis.xlsx",
-  groups_number = 2,
-  group_names = c("T0","T1"),
-  case_number = c(10,13)
-  MWtest = "Paired",
-  imputation = TRUE,
-  global_threshold = TRUE
-)}
+new_user_inputs(excel_file = "C:/Users/User/Documents/itern/new_version_PD.xlsx",
+groups_number = 2,group_names = c("exp_2020","exp_2024"),
+ case_number = c(18,8), imputation = FALSE, threshold_value = 100)}
 
 }

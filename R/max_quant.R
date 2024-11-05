@@ -1,4 +1,4 @@
-#' Proteome Discoverer analysis
+#' MaX quANT analysis
 #'
 #' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descriptions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 #'
@@ -11,10 +11,11 @@
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
+#' @param normalization PPM, TIC etc.
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices colorRampPalette
+#' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
@@ -22,10 +23,11 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix median
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit
-#' @importFrom ComplexHeatmap HeatmapAnnotation
+#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
+#' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
+#' @importFrom grid gpar
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -34,7 +36,7 @@
 #'"C:/Users/User/Documents/proteinGroups.xlsx",
 #' groups_number = 2,
 #' group_names = c("T0","T1"),
-#' case_number = c(3,3), threshold_value = 100)
+#' case_number = c(3,3), threshold_value = 100)}
 #'
 #' @export
 
@@ -46,7 +48,7 @@ max_quant <- function(excel_file,
                             global_threshold = TRUE,
                             MWtest = "Independent",
                             threshold_value = 50,
-                            bugs = 0)
+                            bugs = 0,normalization = FALSE)
 {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -93,11 +95,31 @@ max_quant <- function(excel_file,
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
-  #normalize PPm
-  dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
-    sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
-    ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
-  })
+  if (normalization == FALSE ){
+    dataspace <- dataspace
+  }
+  if (normalization == "PPM"){
+    #normalize PPm
+    dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
+      sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
+      ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
+    })}
+
+  if (normalization == "Quantile"){
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+    dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
+  }
+
+  if (normalization == "log2"){
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+  }
+  if (normalization == "Total_Ion_Current") {
+    dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
+  }
+  if (normalization == "median") {
+    sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
+    dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
+  }
   name_dataspace <-  dataspace[, -1:-2]
   dat.dataspace<-dataspace
 
@@ -208,14 +230,27 @@ max_quant <- function(excel_file,
   openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
   pre_dataspace <- dataspace
-
+if (sum(dataspace[dataspace==0])== 0){ message("There are no Missing Values to impute")}
+  else {
   ##imputation KNN
-  if (imputation == TRUE) {
+  if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
     dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-
-    #create histogramm for imputed values
+  }
+  if (imputation == "LOD"){
+    dataspace[dataspace==0] <- NA
+    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
+    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+  if (imputation == "LOD/2"){
+    dataspace[dataspace==0] <- NA
+    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
+    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+  if (imputation == "kNN"){    #create histogramm for imputed values
     pre_dataspace1<-pre_dataspace[,-1:-2]
     dataspace1<-dataspace[,-1:-2]
     imp.values<- dataspace1 - pre_dataspace1
@@ -246,6 +281,7 @@ max_quant <- function(excel_file,
                     dpi = 300, limitsize = TRUE)
 
     message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+    if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
     dataspace$percentage <- dataspace_0s$percentage
@@ -268,6 +304,7 @@ max_quant <- function(excel_file,
     ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
+    }}
   }
   if (imputation == FALSE){dataspace <- dataspace
 
@@ -516,7 +553,7 @@ if (length(which.sig) == 0){
    zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
   colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
   mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-  heatmap<-Heatmap(zlog.dataspace.sig,
+  heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
                    cluster_rows = TRUE,
                    cluster_columns = TRUE ,
                    show_row_names = FALSE,
@@ -530,7 +567,7 @@ if (length(which.sig) == 0){
                      color_bar = "continuous"
                    ))
   pdf("heatmap.pdf", width = 7.37, height = 6.09)
-  draw(heatmap)
+  ComplexHeatmap::draw(heatmap_data)
   dev.off()
 
 
