@@ -10,7 +10,6 @@
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
-#' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #' @param normalization PPM, TIC etc.
 
 #'
@@ -46,8 +45,8 @@ new_user_inputs <- function(excel_file,
                         imputation = TRUE,
                         global_threshold = TRUE,
                         MWtest = "Independent",
-                        threshold_value = 50,
-                        bugs = 0,normalization = FALSE)
+                        threshold_value = 50
+                        ,normalization = FALSE)
 {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -122,7 +121,6 @@ if (global_threshold == FALSE) {
 }
 
 
-if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
 # Create identifier variables for the thhreshold and statistics
 coln <- list()
@@ -133,23 +131,7 @@ for (i in 1:groups_number) {
   coln[[i]] <- (case_last - case_number[i] + 1):case_last
 }
 
-# assign average of group to discoverer bugs!
-if (bugs== "average"){
-  dat.dataspace[dat.dataspace==0] <- 1
-  dat.dataspace[is.na(dat.dataspace)] <- 0
 
-  rep.df <- data.frame()
-  for ( i in 1:groups_number) {
-    dat.data<-dat.dataspace[,coln[[i]]]
-    rep.data<-dataspace[,coln[[i]]]
-    m<-rowMeans(rep.data[i])
-    idx <- dat.data == 1
-    tmp<-idx*m
-    rep.data[idx]<-tmp[idx]
-    rep.df<-data.frame(rep.df,rep.data)
-  }
-  dataspace <- data.frame(dat.dataspace[,c(1:2)],rep.df)
-}
 setwd(path_res)
 Gdataspace<-dataspace
 Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)

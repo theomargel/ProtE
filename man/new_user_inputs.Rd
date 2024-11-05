@@ -13,7 +13,6 @@ new_user_inputs(
   global_threshold = TRUE,
   MWtest = "Independent",
   threshold_value = 50,
-  bugs = 0,
   normalization = FALSE
 )
 }
@@ -33,8 +32,6 @@ new_user_inputs(
 \item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its deletion}
-
-\item{bugs}{Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.}
 
 \item{normalization}{PPM, TIC etc.}
 }
