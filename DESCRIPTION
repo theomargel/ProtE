@@ -23,6 +23,7 @@ Imports:
     ComplexHeatmap,
     grDevices,
     grid
+Suggests: limma, ComplexHeatmap, BiocManager
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2

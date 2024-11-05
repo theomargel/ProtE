@@ -190,7 +190,7 @@ openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 pre_dataspace <- dataspace
 
 ##imputation KNN
-if (sum(dataspace[dataspace==0])== 0){ message("There are no Missing Values to impute")}
+if (sum(name_dataspace==0)== 0){ message("There are no Missing Values to impute")}
 else {
   ##imputation KNN
   if (imputation == "kNN") {
