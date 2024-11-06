@@ -359,6 +359,7 @@ fit<- limma::eBayes(fit)
 if (groups_number>2){
 anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
 colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")}
+anova_res<- anova_res[,-c(1:groups_number)]
 
 lima.res <- data.frame()
 message("ebayes.")
