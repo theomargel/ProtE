@@ -635,7 +635,7 @@ else
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
-qc.violin<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
+qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_violin(aes(color = Group),lwd=1)+
   xlab("Sample")+
   ylab("Log parts per million")+

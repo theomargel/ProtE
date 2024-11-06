@@ -61,6 +61,7 @@ groups_number <- length(group_names)
 
   #modify PD masterlist to exclude unwanted stats
   dataspace <- dataspace[,-c(1,4:5)]
+  dataspace[, -c(1,2)] <- lapply(dataspace[, -c(1,2)], as.numeric)
   colnames(dataspace[,-1:-2])<- basename(colnames(dataspace[,-1:-2]))
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
@@ -270,9 +271,7 @@ groups_number <- length(group_names)
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
   nndataspace <- log2(nndataspace+1)
-  print("message")
   fit <- limma::lmFit(nndataspace, mm)
-    print("message")
 fit<- limma::eBayes(fit)
   if (groups_number>2){
     anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
@@ -303,7 +302,6 @@ fit<- limma::eBayes(fit)
     dplyr::select(Protein.Ids, Protein.Names, dplyr::everything())
   openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.test.xlsx")
   message("limma test was created")
-  #####
   ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
   if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
   ### 1 ### Specify file for statistical analysis
@@ -594,7 +592,7 @@ fit<- limma::eBayes(fit)
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
-  qc.violin<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
+  qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_violin(aes(color = Group),lwd=1)+
     xlab("Sample")+
     ylab("Log parts per million")+
