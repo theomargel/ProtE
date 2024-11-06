@@ -16,6 +16,7 @@
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom stringr str_trunc
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
@@ -106,12 +107,12 @@ max_quant <- function(excel_file,
     })}
 
   if (normalization == "Quantile"){
-    dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1)
     dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
   }
 
   if (normalization == "log2"){
-    dataspace[, -1:-2] <- log(dataspace[, -1:-2])
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
   }
   if (normalization == "Total_Ion_Current") {
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
@@ -187,7 +188,7 @@ max_quant <- function(excel_file,
 
   for (j in 1:groups_number){
 
-    for (i in c(1:length(dataspace[,1]))){
+    for (i in c(1:nrow(dataspace))){
       a <- table(dataspace[i,coln[[j]]]==0)["TRUE"]
       if(is.na(a)){
         dataspace[i,paste0("Number_0_group",j)] <- 0
@@ -347,8 +348,8 @@ max_quant <- function(excel_file,
   fit<- limma::eBayes(fit)
   if (groups_number>2){
     anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
-    colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")}
-  anova_res<- anova_res[,-c(1:groups_number)]
+    colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
+  anova_res<- anova_res[,-c(1:groups_number)]}
 
   lima.res <- data.frame()
   message("ebayes.")
@@ -441,7 +442,8 @@ max_quant <- function(excel_file,
 
   Group<-unlist(Group)
   dataspace3<-t(dataspace[,-c(1:2)])
-  dataspace3<-as.data.frame(dataspace3)
+  dataspace3<-data.frame(dataspace3)
+  dataspace<-data.frame(dataspace)
   colnames(dataspace3)<-dataspace[,1]
   dataspace4<-cbind(Group,dataspace3)
   dataspace4$Group<-as.factor(dataspace4$Group)
@@ -487,7 +489,7 @@ max_quant <- function(excel_file,
 
   Group2<-unique(groups_for_test)
 
-  log.dataspace <- log(dataspace[,-c(1:2)]+1)
+  log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
   # PCA of the entire data
 
@@ -610,6 +612,13 @@ if (length(which.sig) == 0){
   message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
 }
   # Quality check - boxplots of data distribution
+  p<- scale_x_discrete(labels = function(x) {
+    sapply(x, function(label) {
+      # Get the last 25 characters from each label
+      truncated_label <- substr(label, nchar(label) - 24, nchar(label))
+      truncated_label
+    })
+  })
   melt.log.dataspace <- reshape2::melt(log.dataspace)
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
@@ -634,6 +643,7 @@ if (length(which.sig) == 0){
             axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
+      p +
       guides(color = guide_legend(override.aes = list(size = 1)))+
       #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
       geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
@@ -654,6 +664,7 @@ if (length(which.sig) == 0){
     geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
     xlab("Sample")+
     ylab("Log parts per million")+
+      p +
     theme_classic()+
     theme(text = element_text(size = 19),
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
@@ -684,6 +695,7 @@ if (length(which.sig) == 0){
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
     guides(color = guide_legend(override.aes = list(size = 1)))+
+    p+
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
   ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,

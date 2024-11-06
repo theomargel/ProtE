@@ -19,13 +19,14 @@
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave geom_violin  scale_x_discrete scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
+#' @importFrom stringr str_trunc
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -62,7 +63,12 @@ groups_number <- length(group_names)
   #modify PD masterlist to exclude unwanted stats
   dataspace <- dataspace[,-c(1,4:5)]
   dataspace[, -c(1,2)] <- lapply(dataspace[, -c(1,2)], as.numeric)
-  colnames(dataspace[,-1:-2])<- basename(colnames(dataspace[,-1:-2]))
+  col_names <- colnames(dataspace)
+  col_names[-1:-2] <- gsub("\\\\", "/", col_names[-1:-2])
+  col_names[-1:-2] <- basename(col_names[-1:-2])
+  colnames(dataspace) <- col_names
+
+
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
@@ -112,7 +118,7 @@ groups_number <- length(group_names)
 
   for (j in 1:groups_number){
 
-    for (i in c(1:length(dataspace[,1]))){
+    for (i in c(1:nrow(dataspace))){
       a <- table(dataspace[i,coln[[j]]]==0)["TRUE"]
       if(is.na(a)){
         dataspace[i,paste0("Number_0_group",j)] <- 0
@@ -267,6 +273,7 @@ groups_number <- length(group_names)
   for (i in 1:groups_number) {
     groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
   }
+
   mm <- model.matrix(~groups_for_test + 0)
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
@@ -274,9 +281,10 @@ groups_number <- length(group_names)
   fit <- limma::lmFit(nndataspace, mm)
 fit<- limma::eBayes(fit)
   if (groups_number>2){
+    anova_res <- data.frame()
     anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
-    colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")}
-anova_res<- anova_res[,-c(1:groups_number)]
+    colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
+anova_res<- anova_res[,-c(1:groups_number)]}
 
   lima.res <- data.frame()
   message("ebayes.")
@@ -362,7 +370,8 @@ anova_res<- anova_res[,-c(1:groups_number)]
 
   Group<-unlist(Group)
   dataspace3<-t(dataspace[,-c(1:2)])
-  dataspace3<-as.data.frame(dataspace3)
+  dataspace3<-data.frame(dataspace3)
+  dataspace<-data.frame(dataspace)
   colnames(dataspace3)<-dataspace[,1]
   dataspace4<-cbind(Group,dataspace3)
   dataspace4$Group<-as.factor(dataspace4$Group)
@@ -404,7 +413,7 @@ anova_res<- anova_res[,-c(1:groups_number)]
 
   Group2<-unique(groups_for_test)
 
-  log.dataspace <- log(dataspace[,-c(1:2)]+1)
+  log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
   # PCA of the entire data
   dataspace[is.na(dataspace)] <- 0
@@ -456,6 +465,7 @@ anova_res<- anova_res[,-c(1:groups_number)]
   message("PCA plot using all data was created as PCA_plot_alldata.pdf")
   # PCA of the significant data. If number of groups = 2, the script uses the
   # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
+  groups_for_test <- factor(groups_for_test, levels=c(unique(groups_for_test)))
 
   which.sig<-vector()
   if (groups_number != 2){
@@ -469,6 +479,8 @@ anova_res<- anova_res[,-c(1:groups_number)]
     log.dataspace.sig <- log.dataspace[which.sig,]
     zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
+    stopifnot(all(colnames(log.dataspace.sig) == names(groups_for_test)))
+
     mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
     heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
                                            cluster_rows = TRUE,
@@ -529,6 +541,13 @@ anova_res<- anova_res[,-c(1:groups_number)]
     message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
   }
   # Quality check - boxplots of data distribution
+ p<- scale_x_discrete(labels = function(x) {
+    sapply(x, function(label) {
+      # Get the last 25 characters from each label
+      truncated_label <- substr(label, nchar(label) - 24, nchar(label))
+      truncated_label
+    })
+  })
   melt.log.dataspace <- reshape2::melt(log.dataspace)
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
@@ -549,18 +568,20 @@ anova_res<- anova_res[,-c(1:groups_number)]
       xlab("Sample")+
       ylab("Log parts per million")+
       theme_classic()+
+      scale_x_discrete(labels = function(x) str_trunc(x, 20)) +
       theme(text = element_text(size = 19),
             axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
+      p +
       #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
       geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
     qc.boxplots
 
     ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
-                    scale = 1, width = 12, height = 5, units = "in",
+                    scale = 1, width = 15, height = 8, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
 
   }
@@ -574,23 +595,25 @@ anova_res<- anova_res[,-c(1:groups_number)]
     xlab("Sample")+
     ylab("Log parts per million")+
     theme_classic()+
+    scale_x_discrete(labels = function(x) str_trunc(x, 20)) +
     theme(text = element_text(size = 19),
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
+   p +
     guides(color = guide_legend(override.aes = list(size = 1)))+
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
   qc.boxplots.na
   if (imputation == FALSE) {
     ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na,  path = path_res,
-                    scale = 1, width = 12, height = 5, units = "in",
+                    scale = 1, width = 15, height = 8, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
   else
   {
     ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na,  path = path_res,
-                    scale = 1, width = 12, height = 5, units = "in",
+                    scale = 1, width = 15, height = 8, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
   qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
@@ -602,11 +625,11 @@ anova_res<- anova_res[,-c(1:groups_number)]
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
-    guides(color = guide_legend(override.aes = list(size = 1)))+
+   p +     guides(color = guide_legend(override.aes = list(size = 1)))+
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
-  ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
-                  scale = 1, width = 12, height = 5, units = "in",
+  ggplot2::ggsave("Violin_plot1.pdf", plot = qc.violin,  path = path_res,
+                  scale = 1, width = 15, height = 8, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 
   message("The Boxplots for each sample have been created!!!!")

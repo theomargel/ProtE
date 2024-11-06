@@ -39,12 +39,7 @@ It takes Proteomics Data from samples in different groups, in the format they ar
 #' # Example of running the function with paths for two groups.
 #Do not add if (interactive()){} condition in your code
 if (interactive()){
-  user_inputs(
-  "C:/Users/User/Documents/itern/RforPD/Before",
-  "C:/Users/User/Documents/itern/RforPD/After",
-  MWtest = "Paired",
-  imputation = TRUE,
-  global_threshold = TRUE
-)}
+  user_inputs("C:/Users/User/Documents/itern/RforPD/Before","C:/Users/User/Documents/itern/RforPD/After",
+  MWtest = "Paired",imputation = TRUE, global_threshold = TRUE )}
 
 }
