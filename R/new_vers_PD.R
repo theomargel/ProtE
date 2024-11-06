@@ -3,7 +3,6 @@
 #' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descriptions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 #'
 #' @param excel_file The whole path to the excel .xlsx file, that will be analysed. Attention: Add '/' between the directories.
-#' @param groups_number The number of the different groups
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
 #' @param case_number The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
@@ -40,7 +39,6 @@
 #' @export
 
 new_user_inputs <- function(excel_file,
-                            groups_number,
                             group_names,
                             case_number,
                         imputation = TRUE,
@@ -51,8 +49,7 @@ new_user_inputs <- function(excel_file,
 {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
-   if (length(group_names) != groups_number) {
-    stop("The length of 'group_names' must match 'groups_number'")}
+  groups_number <- length(group_names)
   if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match 'groups_number'") }
 #  if (groups_number>9){stop("You can add up to 9 groups")}
@@ -70,6 +67,7 @@ new_user_inputs <- function(excel_file,
 dataspace <- dataspace[,grep("Accession|Description|Abundance:",colnames(dataspace))]
 
 colnames(dataspace) <- gsub("Abundance:.|:.Sample", "", colnames(dataspace))
+dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
 zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
 IDs <- colSums(!is.na(dataspace[,-1:-2]))
@@ -573,13 +571,13 @@ ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
 message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
 }
 # Quality check - boxplots of data distribution
-p<- scale_x_discrete(labels = function(x) {
+p<- function(x) {
   sapply(x, function(label) {
     # Get the last 25 characters from each label
     truncated_label <- substr(label, nchar(label) - 24, nchar(label))
     truncated_label
   })
-})
+}
 melt.log.dataspace <- reshape2::melt(log.dataspace)
 repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
 storevec <- NULL
@@ -598,15 +596,14 @@ if (imputation == FALSE) {
     geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
     #scale_colour_manual(values=colors)+
     xlab("Sample")+
-    ylab("Log parts per million")+
+    ylab(expression(Log[2]~"Protein Abundance"))+
     theme_classic()+
     theme(text = element_text(size = 19),
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
-  p +
     guides(color = guide_legend(override.aes = list(size = 1)))+
-    #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
+    scale_x_discrete(labels = p) +
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
   qc.boxplots
@@ -615,7 +612,7 @@ if (imputation == FALSE) {
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 
-  }
+}
 melt.log.dataspace.na <- melt.log.dataspace
 melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
 melt.log.dataspace.na$Group <- factor(melt.log.dataspace.na$Group, levels = Group2)
@@ -623,46 +620,47 @@ is.factor(melt.log.dataspace.na$variable)
 
 qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+  #scale_colour_manual(values=colors)+
   xlab("Sample")+
-  ylab("Log parts per million")+
+  ylab(expression(Log[2]~"Protein Abundance"))+
   theme_classic()+
   theme(text = element_text(size = 19),
         axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  p +
+  scale_x_discrete(labels = p) +
+  #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
 qc.boxplots.na
 if (imputation == FALSE) {
-  ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na,  path = path_res,
+  ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
 else
 {
-  ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na,  path = path_res,
+  ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
 qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_violin(aes(color = Group),lwd=1)+
   xlab("Sample")+
-  ylab("Log parts per million")+
+  ylab(expression(Log[2]~"Protein Abundance"))+
   theme_classic()+
   theme(text = element_text(size = 19),
         axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  p +
+  scale_x_discrete(labels = p) +
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
 ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
                 scale = 1, width = 12, height = 5, units = "in",
                 dpi = 300, limitsize = TRUE, bg = "white")
-
-message("The Boxplots for each sample have been created!!!!")
+message("The Boxplots for each sample have been created!!")
 
 }

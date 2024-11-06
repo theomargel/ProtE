@@ -89,6 +89,7 @@ for (i in 1:groups_number) {
   colnames(dataspace)[length(colnames(dataspace))] <- file_names[j]
 }
 }
+dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
@@ -186,7 +187,7 @@ if (global_threshold == TRUE) {
       dplyr::select(Accession, Description, Symbol, everything())
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
     openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
-    message("Applying Parts Per Million normalization, saved as Normalized.xlsx")
+    message("Applying the selected normalization, saved as Normalized.xlsx")
 
               dataspace[is.na(dataspace)] <- 0
 
@@ -271,7 +272,7 @@ pre_dataspace <- dataspace
     his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
 
     imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
-      labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
+      labs( x = expression(Log[2]~"Protein Abundance"), y = "Count") +
       scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
       scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
       geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
@@ -295,7 +296,7 @@ pre_dataspace <- dataspace
 
       abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
         geom_point(size = 3, alpha = 0.8) +
-        labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+        labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Protein Abundance")) +
         scale_color_gradient(low = "darkblue", high = "yellow",
                              name = "Imputations\nin each\nprotein\n(%)") +
         theme_linedraw()+
@@ -614,13 +615,13 @@ ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
 message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
 }
 # Quality check - boxplots of data distribution
-p<- scale_x_discrete(labels = function(x) {
+ p<- function(x) {
   sapply(x, function(label) {
     # Get the last 25 characters from each label
     truncated_label <- substr(label, nchar(label) - 24, nchar(label))
     truncated_label
   })
-})
+}
 melt.log.dataspace <- reshape2::melt(log.dataspace)
 repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
 storevec <- NULL
@@ -639,15 +640,14 @@ qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(vari
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
   #scale_colour_manual(values=colors)+
   xlab("Sample")+
-  ylab("Log parts per million")+
+  ylab(expression(Log[2]~"Protein Abundance"))+
   theme_classic()+
   theme(text = element_text(size = 19),
         axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  p +
-  #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
+  scale_x_discrete(labels = p) +
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
 qc.boxplots
@@ -666,14 +666,14 @@ qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorde
   geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
   #scale_colour_manual(values=colors)+
   xlab("Sample")+
-  ylab("Log parts per million")+
+  ylab(expression(Log[2]~"Protein Abundance"))+
   theme_classic()+
   theme(text = element_text(size = 19),
         axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  p +
+  scale_x_discrete(labels = p) +
   #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
@@ -692,14 +692,14 @@ else
 qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_violin(aes(color = Group),lwd=1)+
   xlab("Sample")+
-  ylab("Log parts per million")+
+  ylab(expression(Log[2]~"Protein Abundance"))+
   theme_classic()+
   theme(text = element_text(size = 19),
         axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
         axis.title.x=element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"))+
   guides(color = guide_legend(override.aes = list(size = 1)))+
-  p +
+  scale_x_discrete(labels = p) +
   geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
 ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,

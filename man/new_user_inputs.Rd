@@ -6,7 +6,6 @@
 \usage{
 new_user_inputs(
   excel_file,
-  groups_number,
   group_names,
   case_number,
   imputation = TRUE,
@@ -18,8 +17,6 @@ new_user_inputs(
 }
 \arguments{
 \item{excel_file}{The whole path to the excel .xlsx file, that will be analysed. Attention: Add '/' between the directories.}
-
-\item{groups_number}{The number of the different groups}
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
 

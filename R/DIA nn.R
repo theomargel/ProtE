@@ -68,6 +68,7 @@ groups_number <- length(group_names)
   col_names[-1:-2] <- basename(col_names[-1:-2])
   colnames(dataspace) <- col_names
 
+  dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
@@ -476,13 +477,14 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   if (length(which.sig) == 0){
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")
   } else {
+    print(groups_for_test)
     log.dataspace.sig <- log.dataspace[which.sig,]
-    zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
+ zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
-    stopifnot(all(colnames(log.dataspace.sig) == names(groups_for_test)))
+ zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_for_test)]
 
     mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-    heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
+    heatmap_data<- ComplexHeatmap::Heatmap(log.dataspace.sig,
                                            cluster_rows = TRUE,
                                            cluster_columns = TRUE ,
                                            show_row_names = FALSE,
@@ -541,13 +543,13 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
   }
   # Quality check - boxplots of data distribution
- p<- scale_x_discrete(labels = function(x) {
+  p<- function(x) {
     sapply(x, function(label) {
       # Get the last 25 characters from each label
       truncated_label <- substr(label, nchar(label) - 24, nchar(label))
       truncated_label
     })
-  })
+  }
   melt.log.dataspace <- reshape2::melt(log.dataspace)
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
@@ -566,22 +568,20 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
       #scale_colour_manual(values=colors)+
       xlab("Sample")+
-      ylab("Log parts per million")+
+      ylab(expression(Log[2]~"Protein Abundance"))+
       theme_classic()+
-      scale_x_discrete(labels = function(x) str_trunc(x, 20)) +
       theme(text = element_text(size = 19),
             axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
-      p +
-      #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
+      scale_x_discrete(labels = p) +
       geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
     qc.boxplots
 
     ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
-                    scale = 1, width = 15, height = 8, units = "in",
+                    scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
 
   }
@@ -592,46 +592,47 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
+    #scale_colour_manual(values=colors)+
     xlab("Sample")+
-    ylab("Log parts per million")+
+    ylab(expression(Log[2]~"Protein Abundance"))+
     theme_classic()+
-    scale_x_discrete(labels = function(x) str_trunc(x, 20)) +
     theme(text = element_text(size = 19),
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
-   p +
     guides(color = guide_legend(override.aes = list(size = 1)))+
+    scale_x_discrete(labels = p) +
+    #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
   qc.boxplots.na
   if (imputation == FALSE) {
-    ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na,  path = path_res,
-                    scale = 1, width = 15, height = 8, units = "in",
+    ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
+                    scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
   else
   {
-    ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na,  path = path_res,
-                    scale = 1, width = 15, height = 8, units = "in",
+    ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
+                    scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
   qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_violin(aes(color = Group),lwd=1)+
     xlab("Sample")+
-    ylab("Log parts per million")+
+    ylab(expression(Log[2]~"Protein Abundance"))+
     theme_classic()+
     theme(text = element_text(size = 19),
           axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
-   p +     guides(color = guide_legend(override.aes = list(size = 1)))+
+    guides(color = guide_legend(override.aes = list(size = 1)))+
+    scale_x_discrete(labels = p) +
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
-  ggplot2::ggsave("Violin_plot1.pdf", plot = qc.violin,  path = path_res,
-                  scale = 1, width = 15, height = 8, units = "in",
+  ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
+                  scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
-
-  message("The Boxplots for each sample have been created!!!!")
+  message("The Boxplots for each sample have been created!!")
 
 }
