@@ -552,7 +552,7 @@ max_quant <- function(excel_file,
 
 if (length(which.sig) == 0){
   message("There are no significant proteins, to create a PCA plot with them and a heatmap")
-  qc[,-1] <- as.numeric(qc[,-1])
+  qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
   qc[,-1]<-round(qc[,-1],3)
   openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 }
@@ -587,7 +587,7 @@ if (length(which.sig) == 0){
 
   qc$PC1.score.Significant <- pca$x[,1]
   qc$PC2.score.Significant <-pca$x[,2]
-  qc[,-1] <- as.numeric(qc[,-1])
+  qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
   qc[,-1]<-round(qc[,-1],3)
   openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
   pca.var<-pca$sdev^2
