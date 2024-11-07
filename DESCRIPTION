@@ -25,7 +25,12 @@ Imports:
     ComplexHeatmap,
     grDevices,
     grid
-Suggests: limma, ComplexHeatmap, BiocManager
+Suggests: 
+    limma,
+    ComplexHeatmap,
+    BiocManager,
+    testthat (>= 3.0.0)
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2
+Config/testthat/edition: 3
