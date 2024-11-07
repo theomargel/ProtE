@@ -28,6 +28,7 @@
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
+#' @importFrom missRanger missRanger
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -207,7 +208,12 @@ pre_dataspace <- dataspace
     dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
   }
-  if (imputation == "kNN"){    #create histogramm for imputed values
+if(imputation == "missRanger"){
+    dataspace[dataspace==0] <- NA
+    dataspace <- missRanger::missRanger(dataspace)
+    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+  }
+if (imputation %in% c("kNN","missRanger"))    {
     pre_dataspace1<-pre_dataspace[,-1:-2]
     dataspace1<-dataspace[,-1:-2]
     imp.values<- dataspace1 - pre_dataspace1

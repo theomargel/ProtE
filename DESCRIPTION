@@ -12,6 +12,7 @@ LazyData: true
 Imports:
     dplyr,
     stringr,
+    missRanger,
     openxlsx,
     tidyr,
     broom,
