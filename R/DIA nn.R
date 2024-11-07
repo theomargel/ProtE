@@ -3,7 +3,6 @@
 #' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Protein.Ids IDs, Protein.Namess and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 #'
 #' @param excel_file The whole path to the excel .xlsx file, that will be analysed. Attention: Add '/' between the directories.
-#' @param groups_number The number of the different groups
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
 #' @param case_number The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
@@ -156,10 +155,10 @@ groups_number <- length(group_names)
 
   zero_per_sample1 <- colSums(dataspace[,-1:-2] == 0)*100/nrow(dataspace)
   sample_names <- colnames(dataspace[,-1:-2])
-  qc <- cbind(sample_names,zero_per_sample,zero_per_sample1,IDs)
-  colnames(qc) <- c("Sample Name","% of Missing values before filtering","% of Missing values after filtering","Number of proteins detected in the sample")
+  qc <- cbind(sample_names,IDs,zero_per_sample,zero_per_sample1)
+  qc <- as.data.frame(qc)
+  colnames(qc) <- c("Sample Name","Number of proteins detected in the sample","% of Missing values before filtering","% of Missing values after filtering")
   rownames(qc) <- NULL
-  openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
   pre_dataspace <- dataspace
 
@@ -430,7 +429,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                          X=pca$x[,1],
                          Y=pca$x[,2],
                          Group = Group)
-
+  qc$PC1.score <- pca$x[,1]
+  qc$PC2.score <-pca$x[,2]
   if (groups_number == 2){
     Group<-list()
     times<-vector()
@@ -482,7 +482,10 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   if (length(which.sig) == 0){
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")
-  } else {
+    qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+    qc[,-1]<-round(qc[,-1],3)
+    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
+    } else {
     print(groups_for_test)
     log.dataspace.sig <- log.dataspace[which.sig,]
  zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
@@ -514,6 +517,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                            Y=pca$x[,2],
                            Group = Group)
 
+    qc$PC1.score.Significant <- pca$x[,1]
+    qc$PC2.score.Significant <-pca$x[,2]
+    qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+    qc[,-1]<-round(qc[,-1],3)
+    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
     pca.var<-pca$sdev^2
 

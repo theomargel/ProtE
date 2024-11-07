@@ -28,8 +28,6 @@ dianno(
 \item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its deletion}
-
-\item{groups_number}{The number of the different groups}
 }
 \value{
 Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.

@@ -230,10 +230,10 @@ if (global_threshold == TRUE) {
 
     zero_per_sample1 <- colSums(dataspace[,-1:-2] == 0)*100/nrow(dataspace)
     sample_names <- colnames(dataspace[,-1:-2])
-    qc <- cbind(sample_names,zero_per_sample,zero_per_sample1,IDs)
-    colnames(qc) <- c("Sample Name","% of Missing values before filtering","% of Missing values after filtering","Number of proteins detected in the sample")
+    qc <- cbind(sample_names,IDs,zero_per_sample,zero_per_sample1)
+  qc <- as.data.frame(qc)
+      colnames(qc) <- c("Sample Name","Number of proteins detected in the sample","% of Missing values before filtering","% of Missing values after filtering")
     rownames(qc) <- NULL
-    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 
 pre_dataspace <- dataspace
 
@@ -505,6 +505,8 @@ pca.data <- data.frame(Sample=rownames(pca$x),
                        X=pca$x[,1],
                        Y=pca$x[,2],
                        Group = Group)
+qc$PC1.score <- pca$x[,1]
+qc$PC2.score <-pca$x[,2]
 
 if (groups_number == 2){
   Group<-list()
@@ -553,6 +555,10 @@ if (groups_number != 2){
 
 which(Ddataspace$MW_G2vsG1< 0.05)
 if (length(which.sig) == 0){
+  qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+  qc[,-1]<-round(qc[,-1],3)
+
+  openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
   message("There are no significant proteins, to create a PCA plot with them and a heatmap")
 } else {
 log.dataspace.sig <- log.dataspace[which.sig,]
@@ -585,7 +591,11 @@ pca.data <- data.frame(Sample=rownames(pca$x),
                        Y=pca$x[,2],
                        Group = Group)
 
-
+qc$PC1.score.Significant <- pca$x[,1]
+qc$PC2.score.Significant <-pca$x[,2]
+qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+qc[,-1]<-round(qc[,-1],3)
+openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 pca.var<-pca$sdev^2
 pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
