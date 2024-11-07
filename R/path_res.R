@@ -26,6 +26,7 @@
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
+#' @importFrom missRanger missRanger
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -240,7 +241,7 @@ pre_dataspace <- dataspace
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
-    dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
+    dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
   }
   if (imputation == "LOD"){
@@ -257,7 +258,7 @@ pre_dataspace <- dataspace
   }
   if(imputation == "missRanger"){
     dataspace[dataspace==0] <- NA
-    dataspace <- missRanger::missRanger(dataspace)
+    dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
   }
 if (imputation %in% c("kNN","missRanger"))    {

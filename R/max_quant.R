@@ -231,7 +231,7 @@ max_quant <- function(excel_file,
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
-    dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
+    dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
   }
   if (imputation == "LOD"){
@@ -248,7 +248,7 @@ max_quant <- function(excel_file,
   }
   if(imputation == "missRanger"){
     dataspace[dataspace==0] <- NA
-    dataspace <- missRanger::missRanger(dataspace)
+    dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
     openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
   }
   if (imputation %in% c("kNN","missRanger"))    {

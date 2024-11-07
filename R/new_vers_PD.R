@@ -190,29 +190,29 @@ openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
 pre_dataspace <- dataspace
 
 
-  ##imputation KNN
-  if (imputation == "kNN") {
-    dataspace[dataspace==0] <- NA
-    dataspace <- VIM::kNN(dataspace, imp_var = FALSE, k= 5)
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
-  if (imputation == "LOD"){
-    dataspace[dataspace==0] <- NA
-    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
-    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
-  if (imputation == "LOD/2"){
-    dataspace[dataspace==0] <- NA
-    impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
-    dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+##imputation KNN
+if (imputation == "kNN") {
+  dataspace[dataspace==0] <- NA
+  dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
+  openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+}
+if (imputation == "LOD"){
+  dataspace[dataspace==0] <- NA
+  impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
+  dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+  openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+}
+if (imputation == "LOD/2"){
+  dataspace[dataspace==0] <- NA
+  impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
+  dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+  openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+}
 if(imputation == "missRanger"){
-    dataspace[dataspace==0] <- NA
-    dataspace <- missRanger::missRanger(dataspace)
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+  dataspace[dataspace==0] <- NA
+  dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
+  openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+}
 if (imputation %in% c("kNN","missRanger"))    {
     pre_dataspace1<-pre_dataspace[,-1:-2]
     dataspace1<-dataspace[,-1:-2]
