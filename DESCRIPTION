@@ -21,15 +21,12 @@ Imports:
     ggplot2, 
     VIM, 
     forcats,
-    limma,
-    ComplexHeatmap,
     grDevices,
-    grid
-Suggests: 
+    grid,
     limma,
     ComplexHeatmap,
-    BiocManager,
-    testthat (>= 3.0.0)
+Suggests: 
+    BiocManager
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2

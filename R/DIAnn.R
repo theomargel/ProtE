@@ -31,7 +31,8 @@
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
-#'  dianno("C:/Users/User/Documents/itern/analysis/report.pg_matrix.xlsx",group_names= c("MM","MGUS"),case_number= c(24,20),imputation = FALSE,
+#'  dianno("C:/Users/User/Documents/itern/analysis/report.pg_matrix.xlsx",
+#'  group_names= c("MM","MGUS"),case_number= c(24,20),imputation = FALSE,
 #'    global_threshold = TRUE, MWtest = "Independent",
 #'  threshold_value = 50)}
 #' @export
@@ -44,7 +45,7 @@ dianno <- function(excel_file,
                       MWtest = "Independent",
                       threshold_value = 50)
 {
- Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value = NULL
+ Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match 'groups_number'") }
