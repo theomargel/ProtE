@@ -302,11 +302,15 @@ dataspace$mean <- NULL
 dataspace$log<- NULL
 dataspace$rank <- NULL
 
-groups_for_test <- NULL
-for (i in 1:groups_number) {
-  groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
-}
-mm <- model.matrix(~groups_for_test + 0)
+groups_list <- list("character")
+  for (i in 1:groups_number) {
+    groups_list[[i]] <- rep(group_names[i], times = case_number[i])
+  }
+  
+  groups_list_u <- unlist(groups_list)
+  groups_list_f <- factor(groups_list_u, levels = unique(groups_list_u))
+
+mm <- model.matrix(~groups_list_f + 0)
 colnames(mm)<- group_names
 
 nndataspace<- dataspace[,-1:-2]
@@ -445,9 +449,9 @@ message("An excel with the statistical tests for the normalized data was created
 
 
 
-Group <- groups_for_test
+Group <- groups_list_f
 
-Group2<-unique(groups_for_test)
+Group2<-unique(groups_list_f)
 
 log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
@@ -527,7 +531,7 @@ heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
                                        cluster_columns = TRUE ,
                                        show_row_names = FALSE,
                                        show_column_names = FALSE,
-                                       column_split = groups_for_test,
+                                       column_split = groups_list_f,
                                        top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
                                                                                                            labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
                                        col = mycols, column_title = NULL,
