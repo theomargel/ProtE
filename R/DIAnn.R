@@ -275,13 +275,18 @@ groups_number <- length(group_names)
   dataspace$mean <- NULL
   dataspace$log<- NULL
   dataspace$rank <- NULL
-  groups_for_test<-NULL
-
+                          
+  groups_list <- list("character")
+                          
   for (i in 1:groups_number) {
-    groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
+    groups_list[[i]] <- rep(group_names[i], times = case_number[i])
   }
+  
+  groups_list_u <- unlist(groups_list)
+  groups_list_f <- factor(groups_list_u, levels = unique(groups_list_u))
+  
 
-  mm <- model.matrix(~groups_for_test + 0)
+  mm <- model.matrix(~groups_list_f + 0)
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
   nndataspace <- log2(nndataspace+1)
@@ -416,9 +421,9 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   dataspace[is.na(dataspace)] <- 0
 
 
-  Group <- groups_for_test
+  Group <- groups_list_f
 
-  Group2<-unique(groups_for_test)
+  Group2<-unique(groups_list_f)
 
   log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
@@ -473,7 +478,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   message("PCA plot using all data was created as PCA_plot_alldata.pdf")
   # PCA of the significant data. If number of groups = 2, the script uses the
   # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
-  groups_for_test <- factor(groups_for_test, levels=c(unique(groups_for_test)))
+  groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
   which.sig<-vector()
   if (groups_number != 2){
@@ -487,11 +492,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     qc[,-1]<-round(qc[,-1],3)
     openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
     } else {
-    print(groups_for_test)
+    print(groups_list_f)
     log.dataspace.sig <- log.dataspace[which.sig,]
  zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
- zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_for_test)]
+ zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
     mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
     heatmap_data<- ComplexHeatmap::Heatmap(log.dataspace.sig,
@@ -499,7 +504,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                                            cluster_columns = TRUE ,
                                            show_row_names = FALSE,
                                            show_column_names = FALSE,
-                                           column_split = groups_for_test,
+                                           column_split = groups_list_f,
                                            top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
                                                                                                                labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
                                            col = mycols, column_title = NULL,
