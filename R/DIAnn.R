@@ -9,6 +9,10 @@
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
+#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
+#' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
+#'
+#'
 #'
 #' @return Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom openxlsx write.xlsx  read.xlsx
@@ -43,7 +47,9 @@ dianno <- function(excel_file,
                       imputation = FALSE,
                       global_threshold = TRUE,
                       MWtest = "Independent",
-                      threshold_value = 50)
+                      threshold_value = 50,
+                   parametric= FALSE,
+                   significancy = "pV")
 {
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
@@ -280,16 +286,16 @@ groups_number <- length(group_names)
   dataspace$mean <- NULL
   dataspace$log<- NULL
   dataspace$rank <- NULL
-                          
+
   groups_list <- list("character")
-                          
+
   for (i in 1:groups_number) {
     groups_list[[i]] <- rep(group_names[i], times = case_number[i])
   }
-  
+
   groups_list_u <- unlist(groups_list)
   groups_list_f <- factor(groups_list_u, levels = unique(groups_list_u))
-  
+
 
   mm <- model.matrix(~groups_list_f + 0)
   colnames(mm)<- group_names
@@ -488,10 +494,30 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
   which.sig<-vector()
-  if (groups_number != 2){
-    which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
-  } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
-  which(Ddataspace$MW_G2vsG1< 0.05)
+  if (parametric == TRUE) {
+    if (significancy == "pV"){
+      if (groups_number != 2){
+        which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
+      } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
+    }
+    if (significancy == "adj.pV"){
+      if (groups_number != 2){
+        which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
+      } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
+    }
+  }
+
+  if (parametric == FALSE) {
+    if (significancy == "pV"){
+      if (groups_number != 2){
+        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
+      } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
+    }
+    if (significancy == "adj.pV"){
+      which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
+    } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
+  }
+
 
   if (length(which.sig) == 0){
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")

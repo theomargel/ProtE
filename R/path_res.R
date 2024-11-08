@@ -9,6 +9,9 @@
 #' @param threshold_value The percentage of missing values per protein that will cause its omittion.
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #' @param normalization PpM, Quantile, VST
+#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
+#' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
+#'
 #'
 #' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
 #' @importFrom openxlsx write.xlsx  read.xlsx
@@ -54,7 +57,9 @@ user_inputs <- function(...,
                         MWtest = "Independent",
                         threshold_value = 50,
                         bugs = 0,
-                        normalization = FALSE)
+                        normalization = FALSE,
+                        parametric= FALSE,
+                        significancy = "pV")
   {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -568,11 +573,31 @@ if (global_threshold == TRUE) {
     # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
 
     which.sig<-vector()
+    if (parametric == TRUE) {
+      if (significancy == "pV"){
+      if (groups_number != 2){
+        which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
+      } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
+      }
+      if (significancy == "adj.pV"){
+        if (groups_number != 2){
+          which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
+        } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
+      }
+      }
+
+    if (parametric == FALSE) {
+      if (significancy == "pV"){
     if (groups_number != 2){
       which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
     } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
+      }
+      if (significancy == "adj.pV"){
+        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
+      } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
+      }
 
-    which(Ddataspace$MW_G2vsG1< 0.05)
+
     if (length(which.sig) == 0){
       message("There are no significant proteins, to create a PCA plot with them and a heatmap")
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
