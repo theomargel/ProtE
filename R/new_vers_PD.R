@@ -558,7 +558,7 @@ else {
   mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
   heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                          cluster_rows = TRUE,
-                                         cluster_columns = TRUE ,
+                                         cluster_columns = FALSE,
                                          show_row_names = FALSE,
                                          show_column_names = FALSE,
                                          column_split = groups_list_f,
