@@ -11,7 +11,7 @@
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
-#'
+#' @param description TRUE/FALSE
 #'
 #'
 #' @return Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
@@ -31,6 +31,8 @@
 #' @importFrom grid gpar
 #' @importFrom stringr str_trunc
 #'@importFrom missRanger missRanger
+#' @importFrom httr GET content
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #'
 #' @examples
 #'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
@@ -49,7 +51,7 @@ dianno <- function(excel_file,
                       MWtest = "Independent",
                       threshold_value = 50,
                    parametric= FALSE,
-                   significancy = "pV")
+                   significancy = "pV",description = TRUE)
 {
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
@@ -690,5 +692,58 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
   message("The Boxplots for each sample have been created!!")
+  if (description == FALSE){ stop("Analysis is over.")}
+
+  if (description == TRUE)
+  { message("Patience:")
+    id_numbers <- dataspace$Protein.Ids
+    id_numbers_matrix <- as.matrix(id_numbers)
+
+    description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
+    pb <- utils::txtProgressBar(min = 0, max = nrow(id_numbers), style = 3)
+
+    for (i in 1:nrow(id_numbers)) {
+      entry_id <- id_numbers_matrix[[i, 1]]
+      url <- paste0("https://www.uniprot.org/uniprot/", entry_id, ".json")
+      response <- httr::GET(url)
+      if (status_code(response)==200){
+        json_data<-httr::content(response,"parsed")
+        organism<-json_data$organism$scientificName
+        if (is.null(organism)==TRUE){
+          organism<-"NA"}
+        gene<-json_data$genes[[1]]$geneName$value
+        if (is.null(gene)==TRUE){
+          gene<-"NA"}
+        entry <- json_data$uniProtkbId
+        if (is.null(entry)) {
+          entry <- "NA"}
+        protein_name <- json_data[["proteinDescription"]][["recommendedName"]][["fullName"]][["value"]]
+        if (is.null(protein_name)) {
+          protein_name <- "NA"}
+        pe<- substr(json_data$proteinExistence,1,1)
+        if (is.null(pe)) {
+          pe <- "NA"}
+        sv <- json_data[["entryAudit"]][["sequenceVersion"]]
+        if (is.null(sv)) {
+          sv <- "NA"}
+
+        details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry,"]")
+
+
+        description <- rbind(description, data.frame(Description = details, stringsAsFactors = FALSE))
+
+
+      }else{
+        print(paste("ERROR",status_code(response)))
+      }
+    utils::setTxtProgressBar(pb, i)
+      }
+      annotated_dataspace<-cbind(dataspace[,1:2],description,dataspace[,3:ncol(dataspace)])
+
+  close(bp)
+  des_file_path <- file.path(path_res, "Description_included.xlsx")
+  openxlsx::write.xlsx(qc, file = des_file_path)
+  }
+
 
 }

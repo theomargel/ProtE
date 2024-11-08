@@ -13,7 +13,8 @@ dianno(
   MWtest = "Independent",
   threshold_value = 50,
   parametric = FALSE,
-  significancy = "pV"
+  significancy = "pV",
+  description = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ dianno(
 \item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)}
 
 \item{significancy}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.}
+
+\item{description}{TRUE/FALSE}
 }
 \value{
 Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.

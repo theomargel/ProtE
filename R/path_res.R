@@ -38,12 +38,12 @@
 #'  "T1_BLCA", package = "PACKAGE")
 #' T2_path <- system.file("extdata", "PDexports(single_file)",
 #' "T2_BLCA", package = "PACKAGE")
-#' T3_path <- system.file("extdata", "PDexports(single_file)",
-#' "T3_BLCA", package = "PACKAGE")
+#' Ta_path <- system.file("extdata", "PDexports(single_file)",
+#' "Ta_BLCA", package = "PACKAGE")
 #'
 #' # Run the function with these paths
-#' user_inputs(
-#'   T1_path, T2_path, T3_path,
+#' ProtoAnalysis(
+#'   T1_path, T2_path, Ta_path,
 #'   normalization = "PPM", MWtest = "Paired",
 #'   imputation = "LOD", global_threshold = TRUE
 #' )
@@ -51,7 +51,7 @@
 #'
 #' @export
 
-user_inputs <- function(...,
+ProtoAnalysis <- function(...,
                         imputation = TRUE,
                         global_threshold = TRUE,
                         MWtest = "Independent",
@@ -61,7 +61,7 @@ user_inputs <- function(...,
                         parametric= FALSE,
                         significancy = "pV")
   {
-  group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
+   Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
 
 group_paths <- list(...)
 groups_number <- length(group_paths)

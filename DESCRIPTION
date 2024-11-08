@@ -16,6 +16,8 @@ Imports:
     openxlsx,
     tidyr,
     broom,
+    utils,
+    httr,
     reshape2,
     ggpubr,
     ggplot2, 
@@ -26,10 +28,13 @@ Imports:
     limma,
     ComplexHeatmap,
 Suggests: 
-    BiocManager
+    BiocManager,
+    knitr,
+    rmarkdown
 URL: https://github.com/theomargel/PACKAGE
 BugReports: https://github.com/theomargel/PACKAGE/issues
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
+VignetteBuilder: knitr

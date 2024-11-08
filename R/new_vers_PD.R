@@ -125,7 +125,6 @@ if (global_threshold == FALSE) {
 }
 
 
-if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
 # Create identifier variables for the threshold and statistics
 coln <- list()
@@ -137,22 +136,7 @@ for (i in 1:groups_number) {
 }
 
 # assign average of group to discoverer bugs!
-if (bugs== "average"){
-  dat.dataspace[dat.dataspace==0] <- 1
-  dat.dataspace[is.na(dat.dataspace)] <- 0
 
-  rep.df <- data.frame()
-  for ( i in 1:groups_number) {
-    dat.data<-dat.dataspace[,coln[[i]]]
-    rep.data<-dataspace[,coln[[i]]]
-    m<-rowMeans(rep.data[i])
-    idx <- dat.data == 1
-    tmp<-idx*m
-    rep.data[idx]<-tmp[idx]
-    rep.df<-data.frame(rep.df,rep.data)
-  }
-  dataspace <- data.frame(dat.dataspace[,c(1:2)],rep.df)
-}
 Gdataspace<-dataspace
 Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
 Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
