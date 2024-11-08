@@ -9,7 +9,6 @@
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
-#' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #' @param normalization PPM, TIC etc.
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
@@ -51,7 +50,7 @@ max_quant <- function(excel_file,
                             global_threshold = TRUE,
                             MWtest = "Independent",
                             threshold_value = 50,
-                            bugs = 0,normalization = FALSE,
+                            normalization = FALSE,
                       parametric= FALSE,
                       significancy = "pV")
 {
@@ -97,6 +96,7 @@ max_quant <- function(excel_file,
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
+
   if (normalization == FALSE ){
     dataspace <- dataspace
   }
@@ -108,10 +108,9 @@ max_quant <- function(excel_file,
     })}
 
   if (normalization == "Quantile"){
-    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1)
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
     dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
   }
-
   if (normalization == "log2"){
     dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
   }
@@ -122,6 +121,7 @@ max_quant <- function(excel_file,
     sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
     dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
   }
+
   name_dataspace <-  dataspace[, -1:-2]
   dat.dataspace<-dataspace
 
@@ -145,9 +145,8 @@ max_quant <- function(excel_file,
   }
 
 
-  if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
-  # Create identifier variables for the thhreshold and statistics
+  # Create identifier variables for the threshold and statistics
   coln <- list()
   case_last <- 2
 
@@ -156,34 +155,16 @@ max_quant <- function(excel_file,
     coln[[i]] <- (case_last - case_number[i] + 1):case_last
   }
 
-  # assign average of group to discoverer bugs!
-  if (bugs== "average"){
-    dat.dataspace[dat.dataspace==0] <- 1
-    dat.dataspace[is.na(dat.dataspace)] <- 0
 
-    rep.df <- data.frame()
-    for ( i in 1:groups_number) {
-      dat.data<-dat.dataspace[,coln[[i]]]
-      rep.data<-dataspace[,coln[[i]]]
-      m<-rowMeans(rep.data[i])
-      idx <- dat.data == 1
-      tmp<-idx*m
-      rep.data[idx]<-tmp[idx]
-      rep.df<-data.frame(rep.df,rep.data)
-    }
-    dataspace <- data.frame(dat.dataspace[,c(1:2)],rep.df)
-  }
-  setwd(path_res)
   Gdataspace<-dataspace
-  Gdataspace$Symbol <- ifelse(
-    grepl(".*GN=.*", dataspace$Description),
-    sub(".*GN=([^ ]*).*PE.*","\\1",dataspace$Description),
-    dataspace$Description)
+  Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
   Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
   Gdataspace<-Gdataspace %>%
     dplyr::select(Accession, Description, Symbol, everything())
   colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-  openxlsx::write.xlsx(Gdataspace, file = "Normalized.xlsx")
+  norm_file_path <- file.path(path_res, "Normalized.xlsx")
+  openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+  message("Applying the selected normalization, saved as Normalized.xlsx")
 
   dataspace[is.na(dataspace)] <- 0
 
@@ -203,20 +184,24 @@ max_quant <- function(excel_file,
   dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
 
   if (global_threshold == TRUE) {
-    openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
+    bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
+    openxlsx::write.xlsx(dataspace, file = bt_file_path)
     dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-    openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
+    at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+    openxlsx::write.xlsx(dataspace, file = at_file_path)
   }
 
   if (global_threshold == FALSE) {
-    openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
+    bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
+    openxlsx::write.xlsx(dataspace, file = bt_file_path)
     keep_rows <- rep(FALSE, nrow(dataspace))
     for (j in 1:groups_number) {
       keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
     }
     dataspace <- dataspace[keep_rows, ]
-    openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
-  message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+    at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+    openxlsx::write.xlsx(dataspace, file = at_file_path)
+    message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")}
   dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -231,29 +216,31 @@ max_quant <- function(excel_file,
   rownames(qc) <- NULL
 
   pre_dataspace <- dataspace
+
   ##imputation KNN
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
     dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
   if (imputation == "LOD"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
     dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation == "LOD/2"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
     dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if(imputation == "missRanger"){
     dataspace[dataspace==0] <- NA
     dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation %in% c("kNN","missRanger"))    {
     pre_dataspace1<-pre_dataspace[,-1:-2]
     dataspace1<-dataspace[,-1:-2]
@@ -287,27 +274,27 @@ max_quant <- function(excel_file,
     message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
     if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
-    dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
-    dataspace$percentage <- dataspace_0s$percentage
-    dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
-    dataspace$log<-log2(dataspace$mean)
-    dataspace$rank <- rank(-dataspace$mean)
+      dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+      dataspace$percentage <- dataspace_0s$percentage
+      dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
+      dataspace$log<-log2(dataspace$mean)
+      dataspace$rank <- rank(-dataspace$mean)
 
-    abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
-      geom_point(size = 3, alpha = 0.8) +
-      labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
-      scale_color_gradient(low = "darkblue", high = "yellow",
-                           name = "Imputations\nin each\nprotein\n(%)") +
-      theme_linedraw()+
-      theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-            panel.grid = element_line(color = "grey80"),
-            legend.title = element_text(size = 10, face = "bold"),
-            legend.text = element_text(size = 9))
-    abund.plot
+      abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+        geom_point(size = 3, alpha = 0.8) +
+        labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+        scale_color_gradient(low = "darkblue", high = "yellow",
+                             name = "Imputations\nin each\nprotein\n(%)") +
+        theme_linedraw()+
+        theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+              panel.grid = element_line(color = "grey80"),
+              legend.title = element_text(size = 10, face = "bold"),
+              legend.text = element_text(size = 9))
+      abund.plot
 
-    ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
-                    scale = 1, width = 12, height = 5, units = "in",
-                    dpi = 300, limitsize = TRUE, bg = "white")
+      ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
+                      scale = 1, width = 12, height = 5, units = "in",
+                      dpi = 300, limitsize = TRUE, bg = "white")
     }}
 
   if (imputation == FALSE){dataspace <- dataspace
@@ -343,7 +330,6 @@ max_quant <- function(excel_file,
   dataspace$rank <- NULL
 
   groups_list <- list("character")
-
   for (i in 1:groups_number) {
     groups_list[[i]] <- rep(group_names[i], times = case_number[i])
   }
@@ -353,15 +339,16 @@ max_quant <- function(excel_file,
 
   mm <- model.matrix(~groups_list_f + 0)
   colnames(mm)<- group_names
+
   nndataspace<- dataspace[,-1:-2]
   nndataspace <- log2(nndataspace+1)
+
   fit <- limma::lmFit(nndataspace, mm)
   fit<- limma::eBayes(fit)
   if (groups_number>2){
     anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
     colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
-  anova_res<- anova_res[,-c(1:groups_number)]}
-
+    anova_res<- anova_res[,-c(1:groups_number)]}
   lima.res <- data.frame()
   message("ebayes.")
   for (i in 1:(ncol(mm)-1)) {
@@ -385,7 +372,8 @@ max_quant <- function(excel_file,
 
   limma_dataspace<-limma_dataspace %>%
     dplyr::select(Accession, Description, dplyr::everything())
-  openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.test.xlsx")
+  limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
+  openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
   message("limma test was created")
   #####
   ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
@@ -430,10 +418,6 @@ max_quant <- function(excel_file,
 
   Ddataspace<-data2
   Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
-  Gdataspace$Symbol <- ifelse(
-    grepl(".*GN=.*", dataspace$Description),
-    sub(".*GN=([^ ]*).*PE.*","\\1",dataspace$Description),
-    dataspace$Description)
   Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
   Ddataspace<-Ddataspace %>%
     dplyr::select(Accession, Description, Symbol, everything())
@@ -471,12 +455,9 @@ max_quant <- function(excel_file,
 
     #Create gene symbols and write the data
     Fdataspace<-data3
-    Fdataspace$Symbol <- ifelse(
-      grepl(".*GN=.*", dataspace$Description),
-      sub(".*GN=([^ ]*).*PE.*","\\1",dataspace$Description),
-      dataspace$Description)
-     Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
-      Fdataspace<-Fdataspace %>%
+    Fdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Fdataspace$Description)
+    Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
+    Fdataspace<-Fdataspace %>%
       dplyr::select(Accession, Description, Symbol, everything())
 
   }
@@ -491,7 +472,8 @@ max_quant <- function(excel_file,
   Fdataspace <- Fdataspace %>%
     dplyr::select(1:3, start_col:ncol(Fdataspace), 4:(start_col - 1))
 
-  openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
+  stats_file_path <- file.path(path_res, "Normalized_stats.xlsx")
+  openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
   message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
 
@@ -573,84 +555,92 @@ max_quant <- function(excel_file,
       } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
     }
     if (significancy == "adj.pV"){
-      which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
-    } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
-  }
+      if (groups_number != 2){
+        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
+      } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
+    }}
 
+  if (length(which.sig) == 0){
+    message("There are no significant proteins, to create a PCA plot with them and a heatmap")
+    qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+    qc[,-1]<-round(qc[,-1],3)
 
-if (length(which.sig) == 0){
-  message("There are no significant proteins, to create a PCA plot with them and a heatmap")
-  qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
-  qc[,-1]<-round(qc[,-1],3)
-  openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
-}
+    qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+    openxlsx::write.xlsx(qc, file = qc_file_path)    }
   else {
-  log.dataspace.sig <- log.dataspace[which.sig,]
-   zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
-  colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
-  mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-  heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
-                   cluster_rows = TRUE,
-                   cluster_columns = TRUE ,
-                   show_row_names = FALSE,
-                   show_column_names = FALSE,
-                   column_split = groups_list_f,
-                   top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
-                   labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
-                   col = mycols, column_title = NULL,
-                   heatmap_legend_param = list(
-                     title = "Z-Score",
-                     color_bar = "continuous"
-                   ))
-  pdf("heatmap.pdf", width = 7.37, height = 6.09)
-  ComplexHeatmap::draw(heatmap_data)
-  dev.off()
+    log.dataspace.sig <- log.dataspace[which.sig,]
 
 
-  pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
-  pca.data <- data.frame(Sample=rownames(pca$x),
-                         X=pca$x[,1],
-                         Y=pca$x[,2],
-                         Group = Group)
+    zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
+    colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
 
-  qc$PC1.score.Significant <- pca$x[,1]
-  qc$PC2.score.Significant <-pca$x[,2]
-  qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
-  qc[,-1]<-round(qc[,-1],3)
-  openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
-  pca.var<-pca$sdev^2
+    mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+    heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
+                                           cluster_rows = TRUE,
+                                           cluster_columns = TRUE ,
+                                           show_row_names = FALSE,
+                                           show_column_names = FALSE,
+                                           column_split = groups_list_f,
+                                           top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
+                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
+                                           col = mycols, column_title = NULL,
+                                           heatmap_legend_param = list(
+                                             title = "Z-Score",
+                                             color_bar = "continuous"
+                                           ))
+    pdf_file_path <- file.path(path_res, "heatmap.pdf")
+    pdf(pdf_file_path, width = 7.37, height = 6.09)
+    ComplexHeatmap::draw(heatmap_data)
+    dev.off()
 
-  pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
-  pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
-    geom_point(aes(color=Group), size = 2, alpha = 1)+
-    #scale_colour_manual(values=cbbPalette)+
-    xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
-    ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
-    #ylim(-60,60)+
-    ggtitle("Statistically significant proteins")+
-    theme_bw()+
-    theme(plot.title = element_text(hjust=0.5))+
-    guides(color = guide_legend(override.aes = list(size=5)))+
-    theme(legend.text = element_text(size = 12))+
-    theme(legend.title = element_text(size = 12))+
-    theme(legend.position="right")
 
-  pca.sig
+    pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
 
-  ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_res,
-                  scale = 1, width = 5, height = 4, units = "in",
-                  dpi = 300, limitsize = TRUE)
-  message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
+    pca.data <- data.frame(Sample=rownames(pca$x),
+                           X=pca$x[,1],
+                           Y=pca$x[,2],
+                           Group = Group)
+    qc$PC1.score.Significant <- pca$x[,1]
+    qc$PC2.score.Significant <-pca$x[,2]
+    qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
+    qc[,-1]<-round(qc[,-1],3)
+    qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+    openxlsx::write.xlsx(qc, file = qc_file_path)
+    pca.var<-pca$sdev^2
+    pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
-  a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
-                       common.legend = TRUE, legend = "bottom")
+    pca.data$Group<-factor(pca.data$Group, levels=Group2)
 
-  ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
-                  scale = 1, width = 8, height = 4.5, units = "in",
-                  dpi = 300, limitsize = TRUE)
-  message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
-}
+    pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
+      geom_point(aes(color=Group), size = 2, alpha = 1)+
+      #scale_colour_manual(values=cbbPalette)+
+      xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
+      ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
+      #ylim(-60,60)+
+      ggtitle("Statistically significant proteins")+
+      theme_bw()+
+      theme(plot.title = element_text(hjust=0.5))+
+      guides(color = guide_legend(override.aes = list(size=5)))+
+      theme(legend.text = element_text(size = 12))+
+      theme(legend.title = element_text(size = 12))+
+      theme(legend.position="right")
+
+    pca.sig
+
+    ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_res,
+                    scale = 1, width = 5, height = 4, units = "in",
+                    dpi = 300, limitsize = TRUE)
+    message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
+
+    a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
+                         common.legend = TRUE, legend = "bottom")
+
+    ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
+                    scale = 1, width = 8, height = 4.5, units = "in",
+                    dpi = 300, limitsize = TRUE)
+    message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
+  }
   # Quality check - boxplots of data distribution
   p<- function(x) {
     sapply(x, function(label) {

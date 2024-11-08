@@ -514,10 +514,10 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
     }
     if (significancy == "adj.pV"){
-      which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
-    } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
-  }
-
+      if (groups_number != 2){
+        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
+      } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
+    }}
 
   if (length(which.sig) == 0){
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")

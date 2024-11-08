@@ -575,28 +575,28 @@ if (global_threshold == TRUE) {
     which.sig<-vector()
     if (parametric == TRUE) {
       if (significancy == "pV"){
-      if (groups_number != 2){
-        which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
-      } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
+        if (groups_number != 2){
+          which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
+        } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
       }
       if (significancy == "adj.pV"){
         if (groups_number != 2){
           which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
         } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
       }
-      }
+    }
 
     if (parametric == FALSE) {
       if (significancy == "pV"){
-    if (groups_number != 2){
-      which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
-    } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
+        if (groups_number != 2){
+          which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
+        } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
       }
       if (significancy == "adj.pV"){
-        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
-      } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
-      }
-
+        if (groups_number != 2){
+          which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
+        } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
+      }}
 
     if (length(which.sig) == 0){
       message("There are no significant proteins, to create a PCA plot with them and a heatmap")
