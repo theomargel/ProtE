@@ -330,57 +330,58 @@ if (global_threshold == TRUE) {
                         dpi = 300, limitsize = TRUE, bg = "white")
       }}
 
-    if (imputation == FALSE){
-      dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
-      dataspace$percentage <- dataspace_0s$percentage
-      dataspace[, 3:(2 + sum(case_number))] <- lapply(dataspace[, 3:(2 + sum(case_number))], as.numeric)
-      dataspace$mean <- apply(dataspace[, 3:(2+sum(case_number))], 1, function(x) mean(x[x != 0]))
-      dataspace$log<-log2(dataspace$mean)
-      dataspace$rank <- rank(-dataspace$mean)
+    if (imputation == FALSE){dataspace <- dataspace
 
-      abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
-        geom_point(size = 3, alpha = 0.8) +
-        labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
-        scale_color_gradient(low = "darkblue", high = "yellow",
-                             name = "MVs\nin each\nprotein\n(%)") +
-        #theme_minimal(base_size = 15)  +
-        theme_linedraw()+
-        theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-              panel.grid = element_line(color = "grey80"),  # Make grids more visible
-              legend.title = element_text(size = 10, face = "bold"),
-              legend.text = element_text(size = 9))
+    dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+    dataspace$percentage <- dataspace_0s$percentage
+    dataspace$mean <- apply(dataspace[, 3:(2+sum(case_number))], 1, function(x) mean(x[x != 0]))
+    dataspace$log<-log2(dataspace$mean)
+    dataspace$rank <- rank(-dataspace$mean)
 
-      abund.plot
+    abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
+      geom_point(size = 3, alpha = 0.8) +
+      labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+      scale_color_gradient(low = "darkblue", high = "yellow",
+                           name = "MVs\nin each\nprotein\n(%)") +
+      #theme_minimal(base_size = 15)  +
+      theme_linedraw()+
+      theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+            panel.grid = element_line(color = "grey80"),  # Make grids more visible
+            legend.title = element_text(size = 10, face = "bold"),
+            legend.text = element_text(size = 9))
 
-      ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
-                      scale = 1, width = 12, height = 5, units = "in",
-                      dpi = 300, limitsize = TRUE, bg = "white")
-      dataspace[dataspace==0] <- NA
+    abund.plot
 
+    ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
+                    scale = 1, width = 12, height = 5, units = "in",
+                    dpi = 300, limitsize = TRUE, bg = "white")
     }
 
     dataspace$percentage <- NULL
     dataspace$mean <- NULL
     dataspace$log<- NULL
     dataspace$rank <- NULL
-    groups_for_test<-NULL
 
+    groups_list <- list("character")
     for (i in 1:groups_number) {
-      groups_for_test <- factor(c(as.character(groups_for_test), rep(group_names[i], times = case_number[i])))
+      groups_list[[i]] <- rep(group_names[i], times = case_number[i])
     }
 
-    mm <- model.matrix(~groups_for_test + 0)
+    groups_list_u <- unlist(groups_list)
+    groups_list_f <- factor(groups_list_u, levels = unique(groups_list_u))
+
+    mm <- model.matrix(~groups_list_f + 0)
     colnames(mm)<- group_names
+
     nndataspace<- dataspace[,-1:-2]
     nndataspace <- log2(nndataspace+1)
+
     fit <- limma::lmFit(nndataspace, mm)
     fit<- limma::eBayes(fit)
     if (groups_number>2){
-      anova_res <- data.frame()
       anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
       colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
       anova_res<- anova_res[,-c(1:groups_number)]}
-
     lima.res <- data.frame()
     message("ebayes.")
     for (i in 1:(ncol(mm)-1)) {
@@ -407,6 +408,7 @@ if (global_threshold == TRUE) {
     limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
     openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
     message("limma test was created")
+    #####
     ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
     if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
     ### 1 ### Specify file for statistical analysis
@@ -453,7 +455,6 @@ if (global_threshold == TRUE) {
     Ddataspace<-Ddataspace %>%
       dplyr::select(Accession, Description, Symbol, everything())
     Fdataspace<-Ddataspace
-
 
 
     #if (groups_number != 2){
@@ -508,19 +509,18 @@ if (global_threshold == TRUE) {
     openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
     message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
-    dataspace[is.na(dataspace)] <- 0
 
 
-    Group <- groups_for_test
+    Group <- groups_list_f
 
-    Group2<-unique(groups_for_test)
+    Group2<-unique(groups_list_f)
 
     log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
     # PCA of the entire data
-    dataspace[is.na(dataspace)] <- 0
 
     pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
+
     pca.data <- data.frame(Sample=rownames(pca$x),
                            X=pca$x[,1],
                            Y=pca$x[,2],
@@ -539,9 +539,7 @@ if (global_threshold == TRUE) {
       Group<-gsub("G1", g1.name, Group)
       Group<-gsub("G2", g2.name, Group)
     }
-
     pca.var<-pca$sdev^2
-
     pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
     pca.data$Group<-factor(pca.data$Group, levels=Group2)
@@ -568,34 +566,34 @@ if (global_threshold == TRUE) {
     message("PCA plot using all data was created as PCA_plot_alldata.pdf")
     # PCA of the significant data. If number of groups = 2, the script uses the
     # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
-    groups_for_test <- factor(groups_for_test, levels=c(unique(groups_for_test)))
 
     which.sig<-vector()
     if (groups_number != 2){
       which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
     } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
-    which(Ddataspace$MW_G2vsG1< 0.05)
 
+    which(Ddataspace$MW_G2vsG1< 0.05)
     if (length(which.sig) == 0){
       message("There are no significant proteins, to create a PCA plot with them and a heatmap")
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)
+
       qc_file_path <- file.path(path_res, "Quality_check.xlsx")
-      openxlsx::write.xlsx(qc, file = qc_file_path)
-    } else {
-      print(groups_for_test)
+      openxlsx::write.xlsx(qc, file = qc_file_path)    }
+    else {
       log.dataspace.sig <- log.dataspace[which.sig,]
+
+
       zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
       colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
-      zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_for_test)]
 
       mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-      heatmap_data<- ComplexHeatmap::Heatmap(log.dataspace.sig,
+      heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                              cluster_rows = TRUE,
                                              cluster_columns = TRUE ,
                                              show_row_names = FALSE,
                                              show_column_names = FALSE,
-                                             column_split = groups_for_test,
+                                             column_split = groups_list_f,
                                              top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
                                                                                                                  labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
                                              col = mycols, column_title = NULL,
@@ -609,22 +607,23 @@ if (global_threshold == TRUE) {
       dev.off()
 
 
+
       pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
+
       pca.data <- data.frame(Sample=rownames(pca$x),
                              X=pca$x[,1],
                              Y=pca$x[,2],
                              Group = Group)
-
       qc$PC1.score.Significant <- pca$x[,1]
       qc$PC2.score.Significant <-pca$x[,2]
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
-
       qc[,-1]<-round(qc[,-1],3)
       qc_file_path <- file.path(path_res, "Quality_check.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)
       pca.var<-pca$sdev^2
-
       pca.var.per<-round(pca.var/sum(pca.var)*100,1)
+
+      pca.data$Group<-factor(pca.data$Group, levels=Group2)
 
       pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
         geom_point(aes(color=Group), size = 2, alpha = 1)+
