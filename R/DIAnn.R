@@ -700,9 +700,9 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     id_numbers_matrix <- as.matrix(id_numbers)
 
     description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
-    pb <- utils::txtProgressBar(min = 0, max = nrow(id_numbers), style = 3)
+    pb <- utils::txtProgressBar(min = 0, max = nrow(dataspace), style = 3)
 
-    for (i in 1:nrow(id_numbers)) {
+    for (i in 1:nrow(dataspace)) {
       entry_id <- id_numbers_matrix[[i, 1]]
       url <- paste0("https://www.uniprot.org/uniprot/", entry_id, ".json")
       response <- httr::GET(url)
