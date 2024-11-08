@@ -36,10 +36,21 @@ Excel files with the proteomic values from all samples, processed with normaliza
 It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descriptions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
 }
 \examples{
-#' # Example of running the function with paths for two groups.
-#Do not add if (interactive()){} condition in your code
-if (interactive()){
-  user_inputs("C:/Users/User/Documents/itern/RforPD/Before","C:/Users/User/Documents/itern/RforPD/After",
-  MWtest = "Paired",imputation = TRUE, global_threshold = TRUE )}
+
+# Paths to example data folders within the package
+T1_path <- system.file("extdata", "PDexports(single_file)",
+ "T1_BLCA", package = "PACKAGE")
+T2_path <- system.file("extdata", "PDexports(single_file)",
+"T2_BLCA", package = "PACKAGE")
+T3_path <- system.file("extdata", "PDexports(single_file)",
+"T3_BLCA", package = "PACKAGE")
+
+# Run the function with these paths
+user_inputs(
+  T1_path, T2_path, T3_path,
+  normalization = "PPM", MWtest = "Paired",
+  imputation = "LOD", global_threshold = TRUE
+)
+
 
 }

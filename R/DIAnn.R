@@ -28,19 +28,19 @@
 #' @importFrom stringr str_trunc
 #'@importFrom missRanger missRanger
 #'
-#' @examples #' # Example of running the function with paths for two groups.
-#' #Do not add if (interactive()){} condition in your code
-#' if (interactive()){
-#'  dianno("C:/Users/User/Documents/itern/analysis/report.pg_matrix.xlsx",
-#'  group_names= c("MM","MGUS"),case_number= c(24,20),imputation = FALSE,
+#' @examples
+#'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
+#'  "report.pg_matrix.xlsx", package = "PACKAGE")
+#'  dianno(report.pg_matrix,
+#'  group_names= c("MM","MGUS","SM"), case_number= c(8,6,9),
 #'    global_threshold = TRUE, MWtest = "Independent",
-#'  threshold_value = 50)}
+#'  threshold_value = 50)
 #' @export
 
 dianno <- function(excel_file,
                       group_names,
                       case_number,
-                      imputation = TRUE,
+                      imputation = FALSE,
                       global_threshold = TRUE,
                       MWtest = "Independent",
                       threshold_value = 50)
@@ -56,6 +56,8 @@ groups_number <- length(group_names)
 
   dataspace <- openxlsx::read.xlsx(excel_file)
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.Ids),]
+
+
 
   path <- dirname(excel_file)
   path_res <- file.path(path , "MS_analysis_DIA-nn")
@@ -108,8 +110,6 @@ groups_number <- length(group_names)
     coln[[i]] <- (case_last - case_number[i] + 1):case_last
   }
 
-
-  setwd(path_res)
   Gdataspace<-dataspace
 
   Gdataspace<-Gdataspace %>%
@@ -134,20 +134,24 @@ groups_number <- length(group_names)
   dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
 
   if (global_threshold == TRUE) {
-    openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
+    bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
+    openxlsx::write.xlsx(dataspace, file = bt_file_path)
     dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-    openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")
+    at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+    openxlsx::write.xlsx(dataspace, file = at_file_path)
   }
 
   if (global_threshold == FALSE) {
-    openxlsx::write.xlsx(dataspace,file = "Dataset_before_threshold.xlsx")
+    bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
+    openxlsx::write.xlsx(dataspace, file = bt_file_path)
     keep_rows <- rep(FALSE, nrow(dataspace))
     for (j in 1:groups_number) {
       keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
     }
     dataspace <- dataspace[keep_rows, ]
-    openxlsx::write.xlsx(dataspace,file = "Dataset_threshold_applied.xlsx")}
-  message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+    at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+    openxlsx::write.xlsx(dataspace, file = at_file_path)
+    message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")}
   dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -167,25 +171,26 @@ groups_number <- length(group_names)
   if (imputation == "kNN") {
     dataspace[dataspace==0] <- NA
     dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
   if (imputation == "LOD"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
     dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation == "LOD/2"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
     dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if(imputation == "missRanger"){
     dataspace[dataspace==0] <- NA
     dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
-    openxlsx::write.xlsx(dataspace,file = "Dataset_Imputed.xlsx")
-  }
+    imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation %in% c("kNN","missRanger"))    {
     pre_dataspace1<-pre_dataspace[,-1:-2]
       dataspace1<-dataspace[,-1:-2]
@@ -316,7 +321,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   limma_dataspace<-limma_dataspace %>%
     dplyr::select(Protein.Ids, Protein.Names, dplyr::everything())
-  openxlsx::write.xlsx(limma_dataspace, file = "Dataset_limma.test.xlsx")
+  limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
+  openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
   message("limma test was created")
   ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
   if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
@@ -410,7 +416,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   Fdataspace <- Fdataspace %>%
     dplyr::select(1:3, start_col:ncol(Fdataspace), 4:(start_col - 1))
 
-  openxlsx::write.xlsx(Fdataspace, file = "Normalized_stats.xlsx")
+  stats_file_path <- file.path(path_res, "Normalized_stats.xlsx")
+  openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
   message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
   dataspace[is.na(dataspace)] <- 0
@@ -485,7 +492,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
     qc[,-1]<-round(qc[,-1],3)
-    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
+    qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+    openxlsx::write.xlsx(qc, file = qc_file_path)
     } else {
     print(groups_for_test)
     log.dataspace.sig <- log.dataspace[which.sig,]
@@ -494,7 +502,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
  zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_for_test)]
 
     mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-    heatmap_data<- ComplexHeatmap::Heatmap(log.dataspace.sig,
+    heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                            cluster_rows = TRUE,
                                            cluster_columns = TRUE ,
                                            show_row_names = FALSE,
@@ -507,7 +515,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                                              title = "Z-Score",
                                              color_bar = "continuous"
                                            ))
-    pdf("heatmap.pdf", width = 7.37, height = 6.09)
+    pdf_file_path <- file.path(path_res, "heatmap.pdf")
+    pdf(pdf_file_path, width = 7.37, height = 6.09)
     ComplexHeatmap::draw(heatmap_data)
     dev.off()
 
@@ -523,8 +532,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
 
         qc[,-1]<-round(qc[,-1],3)
-    openxlsx::write.xlsx(qc,file = "Quality_check.xlsx")
-
+        qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+        openxlsx::write.xlsx(qc, file = qc_file_path)
     pca.var<-pca$sdev^2
 
     pca.var.per<-round(pca.var/sum(pca.var)*100,1)

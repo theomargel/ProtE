@@ -55,7 +55,6 @@ max_quant <- function(excel_file,
   groups_number <- length(group_names)
   if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match 'groups_number'") }
-  #  if (groups_number>9){stop("You can add up to 9 groups")}
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
@@ -67,7 +66,6 @@ max_quant <- function(excel_file,
   path_res <- file.path(path , "MS_analysis_MQ")
   dir.create(path_res, showWarnings = FALSE)
 
-  #modify PD masterlist to exclude unwanted stats
   dataspace <- dataspace[,grep("Protein.IDs|Majority.protein.IDs|Intensity",colnames(dataspace))]
   dataspace$Protein.IDs <- ifelse(
     grepl("sp\\|\\w+\\|", dataspace$Protein.IDs),

@@ -522,7 +522,7 @@ zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
 colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
 
 mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-heatmap_data<- ComplexHeatmap::Heatmap(zlog.dataspace.sig,
+heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                        cluster_rows = TRUE,
                                        cluster_columns = TRUE ,
                                        show_row_names = FALSE,
