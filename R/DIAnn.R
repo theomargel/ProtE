@@ -30,8 +30,8 @@
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom stringr str_trunc
-#'@importFrom missRanger missRanger
-#' @importFrom httr GET content
+#' @importFrom missRanger missRanger
+#' @importFrom UniProt.ws mapUniProt
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #'
 #' @examples
@@ -52,7 +52,7 @@ dianno <- function(excel_file,
                       threshold_value = 50,
                    parametric= FALSE,
                    significancy = "pV",description = TRUE)
-{
+{message("the process starts")
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(case_number) != groups_number) {
@@ -697,47 +697,30 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   if (description == TRUE)
   { message("Patience:")
     id_numbers <- dataspace$Protein.Ids
+    for (j in 1:length(id_numbers)){id_numbers[j] <- str_extract(id_numbers[j], "^[^;]*")}
     id_numbers_matrix <- as.matrix(id_numbers)
 
     description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
-    pb <- utils::txtProgressBar(min = 0, max = nrow(dataspace), style = 3)
+    metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
 
-    for (i in 1:nrow(dataspace)) {
-      entry_id <- id_numbers_matrix[[i, 1]]
-      url <- paste0("https://www.uniprot.org/uniprot/", entry_id, ".json")
-      response <- httr::GET(url)
-      if (status_code(response)==200){
-        json_data<-httr::content(response,"parsed")
-        organism<-json_data$organism$scientificName
-        if (is.null(organism)==TRUE){
-          organism<-"NA"}
-        gene<-json_data$genes[[1]]$geneName$value
-        if (is.null(gene)==TRUE){
-          gene<-"NA"}
-        entry <- json_data$uniProtkbId
-        if (is.null(entry)) {
-          entry <- "NA"}
-        protein_name <- json_data[["proteinDescription"]][["recommendedName"]][["fullName"]][["value"]]
-        if (is.null(protein_name)) {
-          protein_name <- "NA"}
-        pe<- substr(json_data$proteinExistence,1,1)
-        if (is.null(pe)) {
-          pe <- "NA"}
-        sv <- json_data[["entryAudit"]][["sequenceVersion"]]
-        if (is.null(sv)) {
-          sv <- "NA"}
+    pb <- utils::txtProgressBar(min = 0, max = nrow(metadata), style = 3)
 
-        details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry,"]")
-
-
-        description <- rbind(description, data.frame(Description = details, stringsAsFactors = FALSE))
-
-
-      }else{
-        print(paste("ERROR",status_code(response)))
-      }
+    for (i in 1:nrow(metadata)){
+      organism<-obj$Organism[i]
+      gene<-str_extract(obj$Gene.Names[i], "^[^ ]*")
+      entry_name<-obj$Entry.Name[i]
+      protein_name<-obj$Protein.names[i]
+      sv<-obj$Sequence.version[i]
+      if (obj$Protein.existence[i]=="Evidence at protein level"){pe<-1}
+      if (obj$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
+      if (obj$Protein.existence[i]=="Inferred by homology"){pe<-3}
+      if (obj$Protein.existence[i]=="Predicted") {pe<-4}
+      if (obj$Protein.existence[i]=="Uncertain") {pe<-5}
+      details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
+      description <- rbind(description, data.frame(Description = details, stringsAsFactors = FALSE))
+    }
     utils::setTxtProgressBar(pb, i)
-      }
+
       annotated_dataspace<-cbind(dataspace[,1:2],description,dataspace[,3:ncol(dataspace)])
 
   close(bp)

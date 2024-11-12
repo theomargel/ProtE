@@ -17,7 +17,7 @@ Imports:
     tidyr,
     broom,
     utils,
-    httr,
+    UniProt.ws,
     reshape2,
     ggpubr,
     ggplot2, 
