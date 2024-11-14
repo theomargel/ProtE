@@ -364,9 +364,15 @@ data2 <- dataspace
 
 # Initialize Average, Standard Deviation, and p-values for all groups
 for (j in 1:groups_number) {
-  data2[[paste0("Average_G", j)]] <- rowMeans(data2[,coln[[j]]])
-  data2[[paste0("St_Dv_G", j)]] <- apply(data2[,coln[[j]]], 1, sd)
+  data2[[paste0("Average_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
+    if (all(is.na(row))) { 0 } else {
+      mean(row, na.rm = TRUE)
+    }
+  })
 
+  data2[[paste0("St_Dv_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
+    if (all(is.na(row))) { 0 } else {
+      sd(row, na.rm = TRUE) } })
   # Perform Mann-Whitney U test comparisons for pairs
   for (k in 1:j) {
     if (k < j) {

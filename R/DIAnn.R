@@ -11,7 +11,6 @@
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
-#' @param description TRUE/FALSE
 #'
 #'
 #' @return Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
@@ -51,7 +50,7 @@ dianno <- function(excel_file,
                       MWtest = "Independent",
                       threshold_value = 50,
                    parametric= FALSE,
-                   significancy = "pV",description = TRUE)
+                   significancy = "pV")
 {message("the process starts")
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
@@ -81,6 +80,33 @@ groups_number <- length(group_names)
 
   dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
+  id_numbers <- dataspace$Protein.Ids
+  for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
+  df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
+  metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
+  df_number_ids<-as.data.frame(id_numbers)
+  fixed_data<-dplyr::left_join(df_number_ids,metadata,by=c("id_numbers"="From"))
+
+  for (i in 1:nrow( fixed_data)){
+    organism<- fixed_data$Organism[i]
+    gene<-stringr::str_extract(fixed_data$Gene.Names[i], "^[^ ]*")
+    entry_name<- fixed_data$Entry.Name[i]
+    protein_name<- fixed_data$Protein.names[i]
+    sv<- fixed_data$Sequence.version[i]
+    if (fixed_data$Protein.existence[i]=="Evidence at protein level"){pe<-1}
+    if (fixed_data$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
+    if (fixed_data$Protein.existence[i]=="Inferred by homology"){pe<-3}
+    if (fixed_data$Protein.existence[i]=="Predicted") {pe<-4}
+    if (fixed_data$Protein.existence[i]=="Uncertain") {pe<-5}
+
+    details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
+    df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
+
+  }
+
+  dataspace<-cbind(dataspace[,1:2],df_description,dataspace[,3:ncol(dataspace)])
+  colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
+  dataspace <- dataspace[,-2]
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
@@ -342,19 +368,23 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   ### 1 ### Specify file for statistical analysis
   data2 <- dataspace
 
-  # Initialize Average, Standard Deviation, and p-values for all groups
   for (j in 1:groups_number) {
-    data2[[paste0("Average_G", j)]] <- rowMeans(data2[,coln[[j]]])
-    data2[[paste0("St_Dv_G", j)]] <- apply(data2[,coln[[j]]], 1, sd)
+    data2[[paste0("Average_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
+      if (all(is.na(row))) { 0 } else {
+        mean(row, na.rm = TRUE)
+      }
+    })
 
-    # Perform Mann-Whitney U test comparisons for pairs
+    data2[[paste0("St_Dv_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
+      if (all(is.na(row))) { 0 } else {
+        sd(row, na.rm = TRUE) } })
     for (k in 1:j) {
       if (k < j) {
         if (MWtest == "Independent") {
           for (i in 1:nrow(data2)) {
             test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
                                             as.numeric(data2[i,coln[[j]]]),
-                                            exact = FALSE, paired = FALSE)
+                                            exact = FALSE, paired = FALSE, na.rm =TRUE)
             data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
           }
         } else if (MWtest == "Paired") {
@@ -668,9 +698,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
-  }
-  else
-  {
+  }else{
     ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
@@ -692,41 +720,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
   message("The Boxplots for each sample have been created!!")
-  if (description == FALSE){ stop("Analysis is over.")}
-
-  if (description == TRUE)
-  { message("Patience:")
-    id_numbers <- dataspace$Protein.Ids
-    for (j in 1:length(id_numbers)){id_numbers[j] <- str_extract(id_numbers[j], "^[^;]*")}
-    id_numbers_matrix <- as.matrix(id_numbers)
-
-    description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
-    metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
-
-    pb <- utils::txtProgressBar(min = 0, max = nrow(metadata), style = 3)
-
-    for (i in 1:nrow(metadata)){
-      organism<-obj$Organism[i]
-      gene<-str_extract(obj$Gene.Names[i], "^[^ ]*")
-      entry_name<-obj$Entry.Name[i]
-      protein_name<-obj$Protein.names[i]
-      sv<-obj$Sequence.version[i]
-      if (obj$Protein.existence[i]=="Evidence at protein level"){pe<-1}
-      if (obj$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
-      if (obj$Protein.existence[i]=="Inferred by homology"){pe<-3}
-      if (obj$Protein.existence[i]=="Predicted") {pe<-4}
-      if (obj$Protein.existence[i]=="Uncertain") {pe<-5}
-      details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
-      description <- rbind(description, data.frame(Description = details, stringsAsFactors = FALSE))
-    }
-    utils::setTxtProgressBar(pb, i)
-
-      annotated_dataspace<-cbind(dataspace[,1:2],description,dataspace[,3:ncol(dataspace)])
-
-  close(bp)
-  des_file_path <- file.path(path_res, "Description_included.xlsx")
-  openxlsx::write.xlsx(qc, file = des_file_path)
-  }
 
 
-}
+
+ }
