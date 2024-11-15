@@ -1,20 +1,20 @@
-#' MaX quANT analysis
+#' MaxQuant proteomics data analysis
 #'
-#' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Accession IDs, Descriptions and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
+#' It takes as input the Proteomics Data (output of Max Quant) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
-#' @param excel_file The whole path to the excel .xlsx file, that will be analysed. Attention: Add '/' between the directories.
+#' @param excel_file The whole path to the excel *.xlsx file, that will be analysed. Attention: Add '/' between the directories.
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
 #' @param case_number The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
-#' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
-#' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
+#' @param global_threshold TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.
+#' @param imputation Imputation of the Missing Values. Options are "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that optimizes the distribution of the log2 itensities of the imputed data compared to the initial ones.
 #' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
-#' @param threshold_value The percentage of missing values per protein that will cause its deletion
-#' @param normalization PPM, TIC etc.
-#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
-#' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
+#' @param threshold_value The percentage of missing values per protein that will cause its omittion.
+#' @param normalization The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization and "PPM" for Parts per Million transformation of the data.
+#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). If TRUE the limma t.test (for 2 groups) or ANOVA (for > 2 groups) significancies will be considered and if FALSE the Mann Whitney (for 2 groups) and Kruskal Wallis (>2 groups)
+#' @param significancy "pV" or "adj.pV" Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
 #'
 #'
-#' @return Excel files with the proteomic values from all samples, processed with normalization and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
+#' @return Excel files with the proteomic values that are optionally processed, via normalization, imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom stringr str_trunc
@@ -35,7 +35,7 @@
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
-#' max_quant(
+#' maximum_quantum(
 #'"C:/Users/User/Documents/proteinGroups.xlsx",
 #' groups_number = 2,
 #' group_names = c("T0","T1"),
@@ -43,7 +43,7 @@
 #'
 #' @export
 
-max_quant <- function(excel_file,
+maximum_quantum <- function(excel_file,
                             group_names,
                             case_number,
                             imputation = TRUE,
@@ -92,6 +92,8 @@ max_quant <- function(excel_file,
   dataspace <- dataspace[!dataspace$Intensity == 0,]
   dataspace$Intensity <- NULL
   colnames(dataspace) <- gsub("Intensity.", "", colnames(dataspace))
+
+  if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
 
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))

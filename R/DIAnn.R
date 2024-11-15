@@ -1,6 +1,6 @@
-#' DIA NN  analysis
+#' DIA NN  proteomics data analysis
 #'
-#' It takes Proteomics Data from samples in different groups, in the format they are created by Proteome Discoverer (PD). It concatenates the Protein.Ids IDs, Protein.Namess and Areas from different PD export files into a master table and performs exploratory data analysis. The function outputs a normalized Parts Per Million protein dataset along with descriptive statistics and results of significance testing. The script also creates exploratory plots such as relative log espression boxplots and PCA plots.
+#' It takes as input the Proteomics Data (output of DIA-NN) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
 #' @param excel_file The whole path to the excel .xlsx file, that will be analysed. Attention: Add '/' between the directories.
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
@@ -13,7 +13,7 @@
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
 #'
 #'
-#' @return Excel files with the proteomic values from all samples, processed and imputation and substraction of samples with high number of missing values. PCA plots for all or for just the significant correlations, and boxplots for the proteins of each sample.
+#' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom dplyr select  group_by  do everything  %>%
@@ -107,6 +107,9 @@ groups_number <- length(group_names)
   dataspace<-cbind(dataspace[,1:2],df_description,dataspace[,3:ncol(dataspace)])
   colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
   dataspace <- dataspace[,-2]
+
+  if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
+
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
