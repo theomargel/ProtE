@@ -61,7 +61,7 @@ pd_single <- function(...,
                         parametric= FALSE,
                         significancy = "pV")
   {
-   Sample=group1=Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
+   Sample=group1= Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
 
 group_paths <- list(...)
 groups_number <- length(group_paths)

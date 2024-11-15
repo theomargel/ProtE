@@ -13,6 +13,21 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+Introduction: 
+The aim of the package is to get the proteomics data output from 3 different softwares of raw Mass Spectrometry analysis (Proteome Discoverer, DIA-NN, MaxQuant) in the form of a mastertable.
+The user of the function must have the samples that correspond to each group next to each other
+Then it proceeds to process these data and transform them by allowing the imputation of the missing Values, the filtering of the proteins based on the concentration of Missing Values and the normalization of the data. Excel files with the results of the statistical analysis when comparing between groups are included, as well as plots like PCA, boxplots,violin plots and a heatmap of the significant proteins.
+
+How to install: 
+To install the package use devtools::install.github(myname/packagw) .
+If the dependencies limma UniProt.ws missRanger are not downloaded successfull try biocManager::install(limma),
+biocManager::install(UniProt.ws),
+biocManager::install(missRanger)
+
+The package consists of 4 different functions : pd_single, pd_multi, maximum_quantum, dianno
+each function is made to analyze a different input of data. 
+
+The parameters are almost identical for each function:
 
 ```{r setup}
 library(PACKAGE)
