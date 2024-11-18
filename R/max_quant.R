@@ -87,6 +87,8 @@ maximum_quantum <- function(excel_file,
 
   dataspace$Description[dataspace$Accession==dataspace$Description] = "Not available"
 
+  colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
+  rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
 
   dataspace <- dataspace[!dataspace$Intensity == 0,]
@@ -272,8 +274,8 @@ maximum_quantum <- function(excel_file,
     ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
-
-    message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+}
+    message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
     if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
       dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -297,7 +299,7 @@ maximum_quantum <- function(excel_file,
       ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
-    }}
+    }
 
   if (imputation == FALSE){dataspace <- dataspace
 
@@ -658,7 +660,7 @@ maximum_quantum <- function(excel_file,
       truncated_label
     })
   }
-  melt.log.dataspace <- reshape2::melt(log.dataspace)
+  melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
   storeres <- list()

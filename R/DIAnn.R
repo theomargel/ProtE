@@ -79,6 +79,8 @@ groups_number <- length(group_names)
 
 
   colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
+  colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
+  rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
 
   if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
@@ -230,8 +232,8 @@ groups_number <- length(group_names)
       ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-
-      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+  }
+      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx ")
       if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -255,7 +257,7 @@ groups_number <- length(group_names)
         ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                         scale = 1, width = 12, height = 5, units = "in",
                         dpi = 300, limitsize = TRUE, bg = "white")
-      }}
+    }
 
   if (imputation == FALSE){
   dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -407,6 +409,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   colnames(dataspace3)<-dataspace[,1]
   dataspace4<-cbind(Group,dataspace3)
   dataspace4$Group<-as.factor(dataspace4$Group)
+  colnames(dataspace4) <- make.names(colnames(dataspace4), unique = TRUE)
+
 
   if (groups_number>2){
     #Do the Kruskal-Wallis test
@@ -534,7 +538,6 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     qc_file_path <- file.path(path_res, "Quality_check.xlsx")
     openxlsx::write.xlsx(qc, file = qc_file_path)
     } else {
-    print(groups_list_f)
     log.dataspace.sig <- log.dataspace[which.sig,]
  zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
@@ -614,7 +617,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       truncated_label
     })
   }
-  melt.log.dataspace <- reshape2::melt(log.dataspace)
+  melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
   storeres <- list()
@@ -652,7 +655,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   melt.log.dataspace.na <- melt.log.dataspace
   melt.log.dataspace.na$value[melt.log.dataspace.na$value == 0] <- NA
   melt.log.dataspace.na$Group <- factor(melt.log.dataspace.na$Group, levels = Group2)
-  is.factor(melt.log.dataspace.na$variable)
+
 
   qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
@@ -669,6 +672,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
+
+
   qc.boxplots.na
   if (imputation == FALSE) {
     ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
@@ -679,6 +684,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
+
   qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_violin(aes(color = Group),lwd=1)+
     xlab("Sample")+
@@ -700,3 +706,4 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
 
  }
+

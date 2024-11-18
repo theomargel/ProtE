@@ -118,6 +118,9 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
     zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
     IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
+    colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
+    rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
+
     if (normalization == FALSE ){
       dataspace <- dataspace
     }
@@ -308,8 +311,8 @@ if (global_threshold == TRUE) {
       ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-
-      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+}
+      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
       if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -333,7 +336,7 @@ if (global_threshold == TRUE) {
         ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                         scale = 1, width = 12, height = 5, units = "in",
                         dpi = 300, limitsize = TRUE, bg = "white")
-      }}
+      }
 
     if (imputation == FALSE){dataspace <- dataspace
 
@@ -406,7 +409,7 @@ if (global_threshold == TRUE) {
 
     if (groups_number>2){
       limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
-    else {limma_dataspace <- cbind(lima.res,dataspace)}
+else {limma_dataspace <- cbind(lima.res,dataspace)}
 
     limma_dataspace<-limma_dataspace %>%
       dplyr::select(Accession, Description, dplyr::everything())
@@ -611,8 +614,7 @@ if (global_threshold == TRUE) {
       qc[,-1]<-round(qc[,-1],3)
 
       qc_file_path <- file.path(path_res, "Quality_check.xlsx")
-      openxlsx::write.xlsx(qc, file = qc_file_path)    }
-    else {
+      openxlsx::write.xlsx(qc, file = qc_file_path)    }   else {
       log.dataspace.sig <- log.dataspace[which.sig,]
 
 
@@ -694,7 +696,7 @@ if (global_threshold == TRUE) {
         truncated_label
       })
     }
-    melt.log.dataspace <- reshape2::melt(log.dataspace)
+    melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
     repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
     storevec <- NULL
     storeres <- list()
@@ -754,8 +756,7 @@ if (global_threshold == TRUE) {
       ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
-    }
-    else
+    } else
     {
       ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",

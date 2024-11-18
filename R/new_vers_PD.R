@@ -74,6 +74,9 @@ dataspace <- dataspace[,grep("Accession|Description|Abundance:",colnames(dataspa
 colnames(dataspace) <- gsub("Abundance:.|:.Sample", "", colnames(dataspace))
 dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
+colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
+rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
+
 zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
 IDs <- colSums(!is.na(dataspace[,-1:-2]))
 if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
@@ -251,8 +254,8 @@ if (imputation %in% c("kNN","missRanger"))    {
   ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                   scale = 1, width = 5, height = 4, units = "in",
                   dpi = 300, limitsize = TRUE)
-
-  message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx and a histogram documentating these values")
+}
+  message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
   if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
@@ -276,7 +279,7 @@ if (imputation %in% c("kNN","missRanger"))    {
     ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
-  }}
+  }
 
 if (imputation == FALSE){dataspace <- dataspace
 
@@ -636,7 +639,7 @@ p<- function(x) {
     truncated_label
   })
 }
-melt.log.dataspace <- reshape2::melt(log.dataspace)
+melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
 repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
 storevec <- NULL
 storeres <- list()
