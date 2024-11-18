@@ -30,8 +30,6 @@
 #' @importFrom grid gpar
 #' @importFrom stringr str_trunc
 #' @importFrom missRanger missRanger
-#' @importFrom UniProt.ws mapUniProt
-#' @importFrom utils txtProgressBar setTxtProgressBar
 #'
 #' @examples
 #'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
@@ -65,7 +63,6 @@ groups_number <- length(group_names)
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.Ids),]
 
 
-
   path <- dirname(excel_file)
   path_res <- file.path(path , "MS_analysis_DIA-nn")
   dir.create(path_res, showWarnings = FALSE)
@@ -80,33 +77,9 @@ groups_number <- length(group_names)
 
   dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
-  id_numbers <- dataspace$Protein.Ids
-  for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
-  df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
-  metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
-  df_number_ids<-as.data.frame(id_numbers)
-  fixed_data<-dplyr::left_join(df_number_ids,metadata,by=c("id_numbers"="From"))
 
-  for (i in 1:nrow( fixed_data)){
-    organism<- fixed_data$Organism[i]
-    gene<-stringr::str_extract(fixed_data$Gene.Names[i], "^[^ ]*")
-    entry_name<- fixed_data$Entry.Name[i]
-    protein_name<- fixed_data$Protein.names[i]
-    sv<- fixed_data$Sequence.version[i]
-    if (fixed_data$Protein.existence[i]=="Evidence at protein level"){pe<-1}
-    if (fixed_data$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
-    if (fixed_data$Protein.existence[i]=="Inferred by homology"){pe<-3}
-    if (fixed_data$Protein.existence[i]=="Predicted") {pe<-4}
-    if (fixed_data$Protein.existence[i]=="Uncertain") {pe<-5}
-
-    details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
-    df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
-
-  }
-
-  dataspace<-cbind(dataspace[,1:2],df_description,dataspace[,3:ncol(dataspace)])
   colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
-  dataspace <- dataspace[,-2]
+
 
   if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
 

@@ -16,8 +16,6 @@ Imports:
     openxlsx,
     tidyr,
     broom,
-    utils,
-    UniProt.ws,
     reshape2,
     ggpubr,
     ggplot2, 
