@@ -11,7 +11,7 @@
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
-#'
+#' @param description If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
@@ -25,6 +25,7 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
+#' @importFrom UniProt.ws mapUniProt
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
@@ -48,7 +49,7 @@ dianno <- function(excel_file,
                       MWtest = "Independent",
                       threshold_value = 50,
                    parametric= FALSE,
-                   significancy = "pV")
+                   significancy = "pV", description = FALSE)
 {message("the process starts")
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
@@ -75,8 +76,34 @@ groups_number <- length(group_names)
   col_names[-1:-2] <- basename(col_names[-1:-2])
   colnames(dataspace) <- col_names
 
-  dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 
+  dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
+if (description == TRUE ) {
+  id_numbers <- dataspace$Protein.Ids
+  for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
+  df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
+  metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
+  df_number_ids<-as.data.frame(id_numbers)
+  fixed_data<-dplyr::left_join(df_number_ids,metadata,by=c("id_numbers"="From"))
+  for (i in 1:nrow( fixed_data)){
+    organism<- fixed_data$Organism[i]
+    gene<-stringr::str_extract(fixed_data$Gene.Names[i], "^[^ ]*")
+    entry_name<- fixed_data$Entry.Name[i]
+    protein_name<- fixed_data$Protein.names[i]
+    sv<- fixed_data$Sequence.version[i]
+    if (fixed_data$Protein.existence[i]=="Evidence at protein level"){pe<-1}
+    if (fixed_data$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
+    if (fixed_data$Protein.existence[i]=="Inferred by homology"){pe<-3}
+    if (fixed_data$Protein.existence[i]=="Predicted") {pe<-4}
+    if (fixed_data$Protein.existence[i]=="Uncertain") {pe<-5}
+    details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
+    df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
+  }
+
+  dataspace<-cbind(dataspace[,1:2],df_description,dataspace[,3:ncol(dataspace)])
+  colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
+  dataspace <- dataspace[,-2]
+}
 
   colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
   colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
@@ -531,6 +558,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
     }}
 
+
+
+
+
+
   if (length(which.sig) == 0){
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
@@ -618,6 +650,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     })
   }
   melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
+
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
   storevec <- NULL
   storeres <- list()
@@ -628,6 +661,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   }
 
   melt.log.dataspace$Group <- unlist(storeres)
+
   melt.log.dataspace$Group <- factor(melt.log.dataspace$Group, levels = Group2)
 
   if (imputation == FALSE) {
@@ -702,7 +736,6 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
   message("The Boxplots for each sample have been created!!")
-
 
 
  }

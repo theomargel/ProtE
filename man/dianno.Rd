@@ -13,7 +13,8 @@ dianno(
   MWtest = "Independent",
   threshold_value = 50,
   parametric = FALSE,
-  significancy = "pV"
+  significancy = "pV",
+  description = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ dianno(
 \item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)}
 
 \item{significancy}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.}
+
+\item{description}{If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism}
 }
 \value{
 Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
