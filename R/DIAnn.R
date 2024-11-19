@@ -7,7 +7,7 @@
 #' @param case_number The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
 #' @param global_threshold TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately
 #' @param imputation TRUE/FALSE Data imputation using kNN classification or assigning missing values as 0.
-#' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
+#' @param sample_relationship Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its deletion
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap)
 #' @param significancy pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
@@ -16,7 +16,7 @@
 #' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
-#' @importFrom dplyr select  group_by  do everything  %>%
+#' @importFrom dplyr select  group_by  do everything  %>% any_of
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
@@ -26,7 +26,7 @@
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix
 #' @importFrom forcats fct_inorder
 #' @importFrom UniProt.ws mapUniProt
-#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
+#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom stringr str_trunc
@@ -37,7 +37,7 @@
 #'  "report.pg_matrix.xlsx", package = "PACKAGE")
 #'  dianno(report.pg_matrix,
 #'  group_names= c("MM","MGUS","SM"), case_number= c(8,6,9),
-#'    global_threshold = TRUE, MWtest = "Independent",
+#'    global_threshold = TRUE, sample_relationship = "Independent",
 #'  threshold_value = 50)
 #' @export
 
@@ -46,7 +46,7 @@ dianno <- function(excel_file,
                       case_number,
                       imputation = FALSE,
                       global_threshold = TRUE,
-                      MWtest = "Independent",
+                      sample_relationship = "Independent",
                       threshold_value = 50,
                    parametric= FALSE,
                    significancy = "pV", description = FALSE)
@@ -247,7 +247,7 @@ if (description == TRUE ) {
       his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
 
       imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
-        labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
+        labs( x = expression(Log[2]~"Protein Abundance"), y = "Count") +
         scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
         scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
         geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
@@ -261,7 +261,7 @@ if (description == TRUE ) {
                       dpi = 300, limitsize = TRUE)
   }
       message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx ")
-      if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
+      if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
         dataspace$percentage <- dataspace_0s$percentage
@@ -271,7 +271,7 @@ if (description == TRUE ) {
 
         abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
           geom_point(size = 3, alpha = 0.8) +
-          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Protein Abundance")) +
           scale_color_gradient(low = "darkblue", high = "yellow",
                                name = "Imputations\nin each\nprotein\n(%)") +
           theme_linedraw()+
@@ -296,7 +296,7 @@ if (description == TRUE ) {
 
   abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
     geom_point(size = 3, alpha = 0.8) +
-    labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+    labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
     scale_color_gradient(low = "darkblue", high = "yellow",
                          name = "MVs\nin each\nprotein\n(%)") +
     #theme_minimal(base_size = 15)  +
@@ -334,7 +334,12 @@ if (description == TRUE ) {
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
   nndataspace <- log2(nndataspace+1)
-  fit <- limma::lmFit(nndataspace, mm)
+  if (sample_relationship == "Paired"){
+    corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
+    fit <- limma::lmFit(nndataspace, mm, block = pairing, correlation = corfit$consensus.correlation)
+  }
+  if (sample_relationship == "Independent"){
+  fit <- limma::lmFit(nndataspace, mm)}
 fit<- limma::eBayes(fit)
   if (groups_number>2){
     anova_res <- data.frame()
@@ -369,7 +374,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
   message("limma test was created")
   ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
-  if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
+  if (sample_relationship != "Paired" && sample_relationship != "Independent"){stop("Error. You need to assign sample_relationship = 'Paired' or 'Indepedent'")}
   ### 1 ### Specify file for statistical analysis
   data2 <- dataspace
 
@@ -385,14 +390,14 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         sd(row, na.rm = TRUE) } })
     for (k in 1:j) {
       if (k < j) {
-        if (MWtest == "Independent") {
+        if (sample_relationship == "Independent") {
           for (i in 1:nrow(data2)) {
             test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
                                             as.numeric(data2[i,coln[[j]]]),
                                             exact = FALSE, paired = FALSE, na.rm =TRUE)
             data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
           }
-        } else if (MWtest == "Paired") {
+        } else if (sample_relationship == "Paired") {
           for (i in 1:nrow(data2)) {
             test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
                                             as.numeric(data2[i,coln[[j]]]),
@@ -413,9 +418,13 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
 
   Ddataspace<-data2
-  Ddataspace<-Ddataspace %>%
-    dplyr::select(Protein.Ids, Protein.Names, everything())
-  Fdataspace<-Ddataspace
+  Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
+  Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
+  Fdataspace <- Ddataspace %>%
+    dplyr::select(Accession,
+                  dplyr::any_of(c("Description", "Protein.Names")),
+                  Symbol,
+                  everything())
 
 
   #if (groups_number != 2){
@@ -451,8 +460,13 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
     #Create gene symbols and write the data
     Fdataspace<-data3
+    Fdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Fdataspace$Description)
+    Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
     Fdataspace<-Fdataspace %>%
-      dplyr::select(Protein.Ids, Protein.Names, everything())
+      dplyr::select(Accession,
+                    dplyr::any_of(c("Description", "Protein.Names")),
+                    Symbol,
+                    everything())
 
   }
   for (i in 1:groups_number){
@@ -466,9 +480,6 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   Fdataspace <- Fdataspace %>%
     dplyr::select(1:3, start_col:ncol(Fdataspace), 4:(start_col - 1))
 
-  stats_file_path <- file.path(path_res, "Normalized_stats.xlsx")
-  openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-  message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
 
   dataspace[is.na(dataspace)] <- 0
 
@@ -482,7 +493,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   # PCA of the entire data
   dataspace[is.na(dataspace)] <- 0
 
-  pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
+  pca<-prcomp(t(log.dataspace), scale=TRUE, center=TRUE)
   pca.data <- data.frame(Sample=rownames(pca$x),
                          X=pca$x[,1],
                          Y=pca$x[,2],
@@ -595,7 +606,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     dev.off()
 
 
-    pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
+    pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
     pca.data <- data.frame(Sample=rownames(pca$x),
                            X=pca$x[,1],
                            Y=pca$x[,2],

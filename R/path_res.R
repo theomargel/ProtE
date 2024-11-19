@@ -5,7 +5,7 @@
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Ensure paths use '/' as a directory separator.
 #' @param global_threshold TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.
 #' @param imputation Imputation of the Missing Values. Options are "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that optimizes the distribution of the log2 itensities of the imputed data compared to the initial ones.
-#' @param MWtest Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
+#' @param sample_relationship Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its omittion.
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
 #' @param normalization The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization and "PPM" for Parts per Million transformation of the data.
@@ -27,7 +27,7 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix heatmap median
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles
+#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom missRanger missRanger
 #'
@@ -44,7 +44,7 @@
 #' # Run the function with these paths
 #' pd_single(
 #'   T1_path, T2_path, Ta_path,
-#'   normalization = "PPM", MWtest = "Paired",
+#'   normalization = "PPM", sample_relationship = "Paired",
 #'   imputation = "LOD", global_threshold = TRUE
 #' )
 #'
@@ -54,7 +54,7 @@
 pd_single <- function(...,
                         imputation = TRUE,
                         global_threshold = TRUE,
-                        MWtest = "Independent",
+                        sample_relationship = "Independent",
                         threshold_value = 50,
                         bugs = 0,
                         normalization = FALSE,
@@ -129,22 +129,64 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
       sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
       ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
-    })}
+    })
+
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_res, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx")}
 
     if (normalization == "Quantile"){
       dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
       dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
-    }
+      Gdataspace<-dataspace
+      Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+      Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+      Gdataspace<-Gdataspace %>%
+        dplyr::select(Accession, Description, Symbol, everything())
+      colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+      message("Applying the selected normalization, saved as Normalized.xlsx") }
     if (normalization == "log2"){
       dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
-    }
+      Gdataspace<-dataspace
+      Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+      Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+      Gdataspace<-Gdataspace %>%
+        dplyr::select(Accession, Description, Symbol, everything())
+      colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+      message("Applying the selected normalization, saved as Normalized.xlsx") }
     if (normalization == "Total_Ion_Current") {
       dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
-    }
+      Gdataspace<-dataspace
+      Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+      Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+      Gdataspace<-Gdataspace %>%
+        dplyr::select(Accession, Description, Symbol, everything())
+      colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+      message("Applying the selected normalization, saved as Normalized.xlsx")}
     if (normalization == "median") {
       sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
       dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
-    }
+      Gdataspace<-dataspace
+      Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+      Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+      Gdataspace<-Gdataspace %>%
+        dplyr::select(Accession, Description, Symbol, everything())
+      colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+      message("Applying the selected normalization, saved as Normalized.xlsx")}
 
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
@@ -197,15 +239,7 @@ if (global_threshold == TRUE) {
  }
       dataspace <- data.frame(dat.dataspace[,c(1:2)],rep.df)
 }
-     Gdataspace<-dataspace
-    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
-    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
-    Gdataspace<-Gdataspace %>%
-      dplyr::select(Accession, Description, Symbol, everything())
-    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-    norm_file_path <- file.path(path_res, "Normalized.xlsx")
-    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
-    message("Applying the selected normalization, saved as Normalized.xlsx")
+
 
     dataspace[is.na(dataspace)] <- 0
 
@@ -299,7 +333,7 @@ if (global_threshold == TRUE) {
       his_long_filtered$Group <- factor(his_long_filtered$Group, levels = c("Final", "Initial", "Imputed"))
 
       imp_hist<- ggplot(his_long_filtered, aes(x = value, fill = Group, colour = Group)) +
-        labs( x = expression(Log[2]~"Parts per Million"), y = "Count") +
+        labs( x = expression(Log[2]~"Proteins Abundance"), y = "Count") +
         scale_fill_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
         scale_color_manual(values = c("Final" = "#FF99FF", "Initial" = "#990000", "Imputed" = "#000033")) +
         geom_histogram(alpha = 0.5, binwidth = 0.3, position = "identity") +
@@ -313,7 +347,7 @@ if (global_threshold == TRUE) {
                       dpi = 300, limitsize = TRUE)
 }
       message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
-      if (imputation %in% c("LOD/2","LOD","kNN")){    #create histogramm for imputed values
+      if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
         dataspace$percentage <- dataspace_0s$percentage
@@ -323,7 +357,7 @@ if (global_threshold == TRUE) {
 
         abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
           geom_point(size = 3, alpha = 0.8) +
-          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
           scale_color_gradient(low = "darkblue", high = "yellow",
                                name = "Imputations\nin each\nprotein\n(%)") +
           theme_linedraw()+
@@ -348,7 +382,7 @@ if (global_threshold == TRUE) {
 
     abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
       geom_point(size = 3, alpha = 0.8) +
-      labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Parts per Million")) +
+      labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
                            name = "MVs\nin each\nprotein\n(%)") +
       #theme_minimal(base_size = 15)  +
@@ -384,7 +418,12 @@ if (global_threshold == TRUE) {
     nndataspace<- dataspace[,-1:-2]
     nndataspace <- log2(nndataspace+1)
 
-    fit <- limma::lmFit(nndataspace, mm)
+    if (sample_relationship == "Paired"){
+      corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
+      fit <- limma::lmFit(nndataspace, mm, block = pairing, correlation = corfit$consensus.correlation)
+    }
+    if (sample_relationship == "Independent"){
+      fit <- limma::lmFit(nndataspace, mm)}
     fit<- limma::eBayes(fit)
     if (groups_number>2){
       anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
@@ -418,7 +457,7 @@ else {limma_dataspace <- cbind(lima.res,dataspace)}
     message("limma test was created")
     #####
     ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
-    if (MWtest != "Paired" && MWtest != "Independent"){stop("Error. You need to assign MWtest = 'Paired' or 'Indepedent'")}
+    if (sample_relationship != "Paired" && sample_relationship != "Independent"){stop("Error. You need to assign sample_relationship = 'Paired' or 'Indepedent'")}
     ### 1 ### Specify file for statistical analysis
     data2 <- dataspace
 
@@ -437,14 +476,14 @@ else {limma_dataspace <- cbind(lima.res,dataspace)}
       # Perform Mann-Whitney U test comparisons for pairs
       for (k in 1:j) {
         if (k < j) {
-          if (MWtest == "Independent") {
+          if (sample_relationship == "Independent") {
             for (i in 1:nrow(data2)) {
               test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
                                               as.numeric(data2[i,coln[[j]]]),
                                               exact = FALSE, paired = FALSE)
               data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
             }
-          } else if (MWtest == "Paired") {
+          } else if (sample_relationship == "Paired") {
             for (i in 1:nrow(data2)) {
               test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
                                               as.numeric(data2[i,coln[[j]]]),
@@ -534,7 +573,7 @@ else {limma_dataspace <- cbind(lima.res,dataspace)}
 
     # PCA of the entire data
 
-    pca<-prcomp(t(log.dataspace), scale=TRUE, center=FALSE)
+    pca<-prcomp(t(log.dataspace), scale=TRUE, center=TRUE)
 
     pca.data <- data.frame(Sample=rownames(pca$x),
                            X=pca$x[,1],
@@ -642,7 +681,7 @@ else {limma_dataspace <- cbind(lima.res,dataspace)}
 
 
 
-      pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=FALSE)
+      pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
 
       pca.data <- data.frame(Sample=rownames(pca$x),
                              X=pca$x[,1],
