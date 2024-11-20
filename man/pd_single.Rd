@@ -8,7 +8,7 @@ pd_single(
   ...,
   imputation = TRUE,
   global_threshold = TRUE,
-  MWtest = "Independent",
+  sample_relationship = "Independent",
   threshold_value = 50,
   bugs = 0,
   normalization = FALSE,
@@ -23,7 +23,7 @@ pd_single(
 
 \item{global_threshold}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.}
 
-\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
+\item{sample_relationship}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its omittion.}
 
@@ -54,7 +54,7 @@ Ta_path <- system.file("extdata", "PDexports(single_file)",
 # Run the function with these paths
 pd_single(
   T1_path, T2_path, Ta_path,
-  normalization = "PPM", MWtest = "Paired",
+  normalization = "PPM", sample_relationship = "Paired",
   imputation = "LOD", global_threshold = TRUE
 )
 

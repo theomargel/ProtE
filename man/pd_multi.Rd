@@ -10,7 +10,7 @@ pd_multi(
   case_number,
   imputation = TRUE,
   global_threshold = TRUE,
-  MWtest = "Independent",
+  sample_relationship = "Independent",
   threshold_value = 50,
   normalization = FALSE,
   parametric = FALSE,
@@ -28,7 +28,7 @@ pd_multi(
 
 \item{global_threshold}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.}
 
-\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
+\item{sample_relationship}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its omittion.}
 

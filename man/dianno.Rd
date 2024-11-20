@@ -10,7 +10,7 @@ dianno(
   case_number,
   imputation = FALSE,
   global_threshold = TRUE,
-  MWtest = "Independent",
+  sample_relationship = "Independent",
   threshold_value = 50,
   parametric = FALSE,
   significancy = "pV",
@@ -28,7 +28,7 @@ dianno(
 
 \item{global_threshold}{TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group seperately}
 
-\item{MWtest}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
+\item{sample_relationship}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its deletion}
 
@@ -49,6 +49,6 @@ report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
  "report.pg_matrix.xlsx", package = "PACKAGE")
  dianno(report.pg_matrix,
  group_names= c("MM","MGUS","SM"), case_number= c(8,6,9),
-   global_threshold = TRUE, MWtest = "Independent",
+   global_threshold = TRUE, sample_relationship = "Independent",
  threshold_value = 50)
 }

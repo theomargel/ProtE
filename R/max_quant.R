@@ -25,7 +25,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix median
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
@@ -388,6 +388,12 @@ maximum_quantum <- function(excel_file,
   nndataspace <- log2(nndataspace+1)
 
   if (sample_relationship == "Paired"){
+  if (length(unique(case_number)) != 1){
+    message("Error: Paired comparison did not happen correctly because you have input different number of samples in some groups")
+  }
+    n = sum(case_number)/groups_number
+    pairing <- rep(1:n, each = groups_number)
+
     corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
     fit <- limma::lmFit(nndataspace, mm, block = pairing, correlation = corfit$consensus.correlation)
   }
@@ -418,9 +424,10 @@ maximum_quantum <- function(excel_file,
   if (groups_number>2){
     limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
   else {limma_dataspace <- cbind(lima.res,dataspace)}
-
+  ncollimma <- ncol(limma_dataspace) - ncol(dataspace) + 2
   limma_dataspace<-limma_dataspace %>%
-    dplyr::select(Accession, Description, dplyr::everything())
+    dplyr::select(Accession, any_of(c("Protein.Names","Description")), dplyr::everything())
+  limma_dataspace <- limma_dataspace[,1:ncollimma]
   limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
   message("limma test was created")
@@ -433,40 +440,69 @@ maximum_quantum <- function(excel_file,
   # Initialize Average, Standard Deviation, and p-values for all groups
   for (j in 1:groups_number) {
     data2[[paste0("Average_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
-      if (all(is.na(row))) { 0 } else {
+      if (all(is.na(row))) {
+        0
+      } else {
         mean(row, na.rm = TRUE)
       }
     })
 
     data2[[paste0("St_Dv_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
-      if (all(is.na(row))) { 0 } else {
-        sd(row, na.rm = TRUE) } })
+      if (sum(!is.na(row)) < 2) {
+        0
+      } else {
+        sd(row, na.rm = TRUE)
+      }
+    })
 
-    # Perform Mann-Whitney U test comparisons for pairs
     for (k in 1:j) {
       if (k < j) {
-        if (sample_relationship == "Independent") {
-          for (i in 1:nrow(data2)) {
-            test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
-                                            as.numeric(data2[i,coln[[j]]]),
-                                            exact = FALSE, paired = FALSE)
-            data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
-          }
-        } else if (sample_relationship == "Paired") {
-          for (i in 1:nrow(data2)) {
-            test_list <- stats::wilcox.test(as.numeric(data2[i,coln[[k]]]),
-                                            as.numeric(data2[i,coln[[j]]]),
-                                            exact = FALSE, paired = TRUE)
-            data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
+        for (i in 1:nrow(data2)) {
+          # Select columns dynamically for the Wilcoxon test
+          values_k <- as.numeric(data2[i, coln[[k]]])
+          values_j <- as.numeric(data2[i, coln[[j]]])
+
+          if (sample_relationship == "Independent") {
+            # Perform Wilcoxon test if there are valid observations
+            if (sum(!is.na(values_k)) > 0 & sum(!is.na(values_j)) > 0) {
+              test_list <- stats::wilcox.test(
+                values_k, values_j,
+                exact = FALSE, paired = FALSE, na.rm = TRUE
+              )
+              data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
+            } else {
+              data2[i, paste0("MW_G", j, "vsG", k)] <- NA
+            }
+          } else if (sample_relationship == "Paired") {
+            # Ensure there are pairs of observations
+            paired_values <- na.omit(cbind(values_k, values_j))
+            if (nrow(paired_values) > 0) {
+              test_list <- stats::wilcox.test(
+                paired_values[, 1], paired_values[, 2],
+                exact = FALSE, paired = TRUE
+              )
+              data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
+            } else {
+              data2[i, paste0("MW_G", j, "vsG", k)] <- NA
+            }
           }
         }
 
-        # Adjust the p-values
-        data2[[paste0("BH_p_G", j, "vsG", k)]] <- p.adjust(data2[[paste0("MW_G", j, "vsG", k)]], method = "BH")
+        # Adjust p-values
+        data2[[paste0("BH_p_G", j, "vsG", k)]] <- p.adjust(
+          data2[[paste0("MW_G", j, "vsG", k)]],
+          method = "BH"
+        )
 
-        # Calculate the ratio and log2 ratio
-        data2[[paste0("Ratio_G", j, "vsG", k)]] <- data2[[paste0("Average_G", j)]] / data2[[paste0("Average_G", k)]]
-        data2[[paste0("Log2_Ratio.G", j, "vsG", k)]] <- log2(data2[[paste0("Ratio_G", j, "vsG", k)]])
+        # Calculate the ratio and log2 ratio dynamically
+        avg_j <- data2[[paste0("Average_G", j)]]
+        avg_k <- data2[[paste0("Average_G", k)]]
+        data2[[paste0("Ratio_G", j, "vsG", k)]] <- ifelse(
+          avg_k == 0, NA, avg_j / avg_k
+        )
+        data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
+          data2[[paste0("Ratio_G", j, "vsG", k)]]+1
+        )
       }
     }
   }
@@ -524,9 +560,9 @@ maximum_quantum <- function(excel_file,
   }
 
   colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
-  start_col <- 4 + as.numeric(sum(case_number))
-  Fdataspace <- Fdataspace %>%
-    dplyr::select(1:3, start_col:ncol(Fdataspace), 4:(start_col - 1))
+  start_col <- 3 + as.numeric(sum(case_number))
+  Fdataspace <- Fdataspace[,-c(4:start_col)]
+
 
   stats_file_path <- file.path(path_res, "Normalized_stats.xlsx")
   openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
