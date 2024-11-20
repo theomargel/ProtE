@@ -51,7 +51,7 @@ dianno <- function(excel_file,
                    parametric= FALSE,
                    significancy = "pV", description = FALSE)
 {message("the process starts")
- Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key =value =g1.name=g2.name= NULL
+ Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key=Accession =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match 'groups_number'") }
