@@ -1,8 +1,8 @@
 ---
-title: "informations"
+title: "Introduction to the Package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{informations}
+  %\VignetteIndexEntry{Introduction to the Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,22 +13,45 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-Introduction: 
-The aim of the package is to get the proteomics data output from 3 different softwares of raw Mass Spectrometry analysis (Proteome Discoverer, DIA-NN, MaxQuant) in the form of a mastertable.
-The user of the function must have the samples that correspond to each group next to each other
-Then it proceeds to process these data and transform them by allowing the imputation of the missing Values, the filtering of the proteins based on the concentration of Missing Values and the normalization of the data. Excel files with the results of the statistical analysis when comparing between groups are included, as well as plots like PCA, boxplots,violin plots and a heatmap of the significant proteins.
 
-How to install: 
-To install the package use devtools::install.github(myname/packagw) .
-If the dependencies limma UniProt.ws missRanger are not downloaded successfull try biocManager::install(limma),
-biocManager::install(UniProt.ws),
-biocManager::install(missRanger)
+The purpose of this package is to process and statistically analyze proteomics data generated from three different software platforms for raw Mass Spectrometry analysis: Proteome Discoverer, DIA-NN, and MaxQuant.  The package is designed to be user-friendly, enabling users to perform an instant, comprehensive analysis, with minimal input. The package includes four main functions that correspond to the different software specific output formats. With just one function run they complete the analysis. 
 
-The package consists of 4 different functions : pd_single, pd_multi, maximum_quantum, dianno
-each function is made to analyze a different input of data. 
+The data processing workflow includes options for:
 
-The parameters are almost identical for each function:
+1.	Normalization of proteomic intensity values.
+
+2.	Filtering based on the percentage of missing values.
+
+3.	Imputation of missing data to ensure robust downstream analysis.
+
+Once the processing is complete, the package performs statistical analysis to identify significant differences between experimental groups. The results are automatically exported as Excel files, and a range of visualizations is generated to facilitate interpretation. These include:
+
+•	Principal Component Analysis (PCA) plots for dimensionality reduction and group comparison.
+
+•	Heatmap highlighting significant proteins.
+
+•	Protein rank-abundance scatterplots.
+
+•	Boxplots and violin plots to display data distribution and variability across groups.
+
+The package streamlines the analysis of proteomics data, providing both detailed results and high-quality visualizations in a quick and reproducible manner.
+
+# How to install: 
+
+Because some package-dependencies (limma, UniProt.ws, missRanger) are inside the BioConductor repository, if they have not already been installed in your environment, use the reporting code to install the package:
+```{r, eval=FALSE}
+install.packages("BiocManager")
+options(repos = BiocManager::repositories())
+devtools::install_github("theomargel/PACKAGE")
+```
+
+Then load its library with:
 
 ```{r setup}
 library(PACKAGE)
 ```
+
+## Output Directory
+
+The results from each function are saved in a folder named **MS_Analysis**, which is created inside the last directory of the provided Excel file(s).
+
