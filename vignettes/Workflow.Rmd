@@ -1,0 +1,152 @@
+---
+title: "Package Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Package Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+The Package consists of 4 functions:
+- `pd_multi`
+- `pd_single`
+- `maximum_quantum`
+- `dianno`
+
+
+`pd_multi`
+
+`pd_multi` is tailored for older versions of **Proteome Discoverer**, which do not consolidate proteomics results into a single data frame. Instead, these versions generate separate files for each sample. It is the only function that can take as user input folders with Excel files for each sample, and the paths to these folders should be written at the beginning of the function.
+
+To use the `pd_multi` function, these folders should contain only the Excel files with the proteomics data for each sample. Every folder will correspond to a group of data that will be compared.
+
+ `pd_single`
+
+The other three functions—`pd_single`, `maximum_quantum`, and `dianno`—take as user input one Excel file that includes the proteomics data from all the samples of the analysis as a data frame. This file is the initial output of the software and has information for each gene in its rows and the samples in its columns.
+
+To enable statistical analysis, samples belonging to the same group must be arranged next to each other in the Excel file. Regarding the parameters `group_names` and `case_number`, the user must provide these parameters inside a vector, in the order they appear inside the Excel matrix:
+
+- `group_names`: names of the different groups.
+- `case_number`: a vector with the number of samples inside each group.
+
+ `maximum_quantum`
+
+The `maximum_quantum` function is created to analyze the Excel file *ProteinGroups* that comes as output from the MaxQuant software. It removes the proteins that are results of reverse peptide identification and captures the quantification data via the `Intensity` columns.
+
+ `dianno`
+
+The `dianno` function is created to analyze the .pg_matrix Excel file that comes as the output of the DIA-NN software.
+
+If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access.
+
+
+
+
+
+
+# Workflow
+
+
+
+
+The workflow of all these functions is the same, except for the aforementioned changes, and is as follows:
+
+## Normalization
+
+Firstly, the data can be processed via normalization, excluding the DIA-NN output, where MaxLFQ normalization has already been implemented. The different methods of normalization available as a parameter of the function include:
+
+- Parts Per Million (PPM)
+- Total Ion Current (TIC)
+- Log2 transformation
+- Quantile normalization
+- Median normalization
+
+The output is saved as `Normalized.xlsx` in the **MS_Analysis** folder.
+
+## Filtering Missing Values
+
+The data can be filtered based on the percentage of missing values per protein. Specifically:
+
+- The parameter `threshold_value` refers to the percentage of missing values per protein allowed to remain in the filtered dataset.
+- The parameter `global_threshold` determines if filtering is based on missing values across all groups (`TRUE`) or separately by groups (`FALSE`).
+
+## Imputation
+
+Imputation of missing values is provided via the `Imputation` parameter. Options include:
+
+- **kNN**
+- **MissRanger**
+- **Limit of Detection (LOD)**
+- **LOD/2**
+
+When using algorithm-induced imputation (e.g., kNN, MissRanger), an additional histogram showcasing the distribution of the imputed values is created (`imputed.pdf`):
+
+
+
+```{r, echo=FALSE, fig.cap="An example of the histogram of imputed values showing their distribution."}
+knitr::include_graphics(system.file("extdata", "imputation_histogram.jpeg", package = "PACKAGE"))
+```
+
+Additionally, a protein log2 abundance rank plot is created to provide information about the missing values for each protein:
+
+```{r, echo=FALSE, fig.cap="An example of the Protein Abundance Rank plot that will be created"}
+knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "PACKAGE"))
+```
+
+
+## Statistical Analysis
+
+
+Statistical analyses will then be performed, including pairwise comparisons between the groups. The parameter `sample_relationship` allows users to specify whether the group variables should be analyzed as independent or paired. By default, it is set to Independent, and to run as Paired, the user must provide groups with the same number of samples, with the order of the samples across them remaining the same.
+
+
+The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2.
+
+
+Another Excel file, `limma_statistics.xlsx`, contains results from the parametric `limma` statistical test. This includes the ANOVA F-value, p-value, and adjusted p-value, as well as the B-statistic, unadjusted p-value, and Benjamini–Hochberg adjusted p-value for pairwise t-test comparisons between groups, as well as the ANOVA F-value, p-value, and adjusted p-value when the number of groups is greater than 2.
+
+## Data visualization 
+
+To visualize the distribution of data for each sample, a boxplot and violin plot are generated using the ggplot2 package. All protein abundance values are transformed via log2 transformation to ensure normality and comparability across samples. Sample names are displayed on the plots; however, if the names are too lengthy, only their last 25 characters will appear. To improve readability, it is recommended to use shorter sample names when possible. Additionally, the samples are colored according to their respective groups.
+
+
+```{r, echo=FALSE, fig.cap="                                    An example of the Boxplot that will be created with the protein abundance values for each sample."}
+knitr::include_graphics(system.file("extdata", "Boxplot.jpeg", package = "PACKAGE"))
+```
+
+
+
+```{r, echo=FALSE, fig.cap="                                   An example of the Violin plot that will be created with the protein abundance values for each sample."}
+knitr::include_graphics(system.file("extdata", "ViolinPlot.jpeg", package = "PACKAGE"))
+```
+
+
+Principal Component Analysis (PCA) is also performed on the log2-transformed protein abundance data for each sample. The data are scaled and centered prior to the analysis. A PCA plot is created, displaying the samples in a two-dimensional space where the axes represent the first two principal components.
+
+
+
+```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created with the 1st and 2nd Principal Components in each axis."}
+knitr::include_graphics(system.file("extdata", "pcaplotall.jpeg", package = "PACKAGE"))
+```
+
+
+An additional PCA plot is created using only the significant proteins identified during the statistical analysis. For pairwise comparisons between two groups, significant proteins are selected based on their statistical results from the comparison. When analyzing more than two groups, significant proteins are identified using analysis of variance (ANOVA) across all groups.
+
+Users can select the statistical method for determining significance by setting the `parametric` parameter. Setting `parametric = TRUE` uses results from the limma t-test or ANOVA, while `parametric = FALSE` uses results from the Mann-Whitney U test or Kruskal-Wallis test. The user can further specify the significance threshold with the `significance` parameter: setting `significance = "pV"` uses a raw p-value threshold of 0.05, and `significance = "adj.pV"` uses the Benjamini-Hochberg adjusted p-value threshold.
+
+A PCA plot is then generated based on the significant proteins:
+
+```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created taking into account the significant proteins."}
+knitr::include_graphics(system.file("extdata", "pcaplotsig.jpeg", package = "PACKAGE"))
+```
+
+Additionally, a heatmap of the significant proteins is generated using the ComplexHeatmap package. Proteins are clustered based on similarity in abundance patterns across groups, and the heatmap provides an overview of group-specific differences.
+
+```{r, echo=FALSE, fig.cap="An example of the heatmap that will be created taking into account the significant proteins."}
+knitr::include_graphics(system.file("extdata", "heatmap.jpeg", package = "PACKAGE"))
+```
+
+Lastly, an excel file names Quality_check.xlsx provides information about the percentage of missing values  before and after filtering, along with the scores of the first 2 principal components for each sample. 
+

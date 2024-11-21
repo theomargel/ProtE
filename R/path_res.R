@@ -255,6 +255,7 @@ if (global_threshold == TRUE) {
       }
     }
     dataspace$Number_0_all_groups <- rowSums(dataspace[,paste0("Number_0_group", 1:groups_number)])
+
     #omiting empty rows
     dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
 
@@ -275,8 +276,8 @@ if (global_threshold == TRUE) {
       }
       dataspace <- dataspace[keep_rows, ]
       at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
-      openxlsx::write.xlsx(dataspace, file = at_file_path)
-      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")}
+      openxlsx::write.xlsx(dataspace, file = at_file_path)}
+      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
     dataspace_0s<- dataspace
     dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
     dataspace$Number_0_all_groups <- NULL
@@ -705,7 +706,7 @@ else {limma_dataspace <- cbind(lima.res,dataspace)}
                                              show_column_names = FALSE,
                                              column_split = groups_list_f,
                                              top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
-                                                                                                                 labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
+                                                                                                                 labels = group_names, labels_gp = gpar(col = "black", fontsize = 10))),
                                              col = mycols, column_title = NULL,
                                              heatmap_legend_param = list(
                                                title = "Z-Score",
