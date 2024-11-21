@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The purpose of this package is to process and statistically analyze proteomics data generated from three different software platforms for raw Mass Spectrometry analysis: Proteome Discoverer, DIA-NN, and MaxQuant.  The package is designed to be user-friendly, enabling users to perform an instant, comprehensive analysis, with minimal input. The package includes four main functions that correspond to the different software specific output formats. With just one function run they complete the analysis. 
+One function to analyze them all! The Proteomics Eye (ProtE) establishes a user-friendly approach for analyzing label-free proteomics data generated from three different software platforms: MaxQuant, DIA-NN and Proteome Discoverer. By compiling all neccessary processing and structure preparation into one function, ProtEIt enables users to perform an instant, comprehensive analysis, with minimal input. The package includes four main functions that correspond to the different software specific output formats. With just one function run they complete the analysis. 
 
 The data processing workflow includes options for:
 
