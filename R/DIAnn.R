@@ -261,8 +261,8 @@ if (description == TRUE ) {
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
   }
-      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx ")
       if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
+      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx ")
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
         dataspace$percentage <- dataspace_0s$percentage
@@ -312,7 +312,6 @@ if (description == TRUE ) {
   ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
-  dataspace[dataspace==0] <- NA
 
    }
 
@@ -331,9 +330,11 @@ if (description == TRUE ) {
   groups_list_f <- factor(groups_list_u, levels = unique(groups_list_u))
 
 
+
   mm <- model.matrix(~groups_list_f + 0)
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
+  nndataspace[nndataspace < 0] <- 0
   nndataspace <- log2(nndataspace+1)
   if (sample_relationship == "Paired"){
     if (length(unique(case_number)) != 1){
@@ -372,8 +373,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     }}
 
   if (groups_number>2){
-    limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
-  else {limma_dataspace <- cbind(lima.res,dataspace)}
+    limma_dataspace <- cbind(anova_res,lima.res,dataspace)} else {limma_dataspace <- cbind(lima.res,dataspace)}
    ncollimma <- ncol(limma_dataspace) - ncol(dataspace) + 2
   limma_dataspace<-limma_dataspace %>%
     dplyr::select(Accession, any_of(c("Protein.Names","Description")), dplyr::everything())

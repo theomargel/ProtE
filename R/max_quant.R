@@ -315,8 +315,8 @@ maximum_quantum <- function(excel_file,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
 }
-    message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
     if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
+    message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
       dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
       dataspace$percentage <- dataspace_0s$percentage

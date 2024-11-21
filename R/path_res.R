@@ -63,24 +63,6 @@ pd_single <- function(...,
   {
    Sample=group1= Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
 
-
-message("⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⢠⡆⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠈⣷⣄⠀⠀⠀⠀⣾⣷⠀⠀⠀⠀⣠⣾⠃⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢿⠿⠃⠀⠀⠀⠉⠉⠁⠀⠀⠐⠿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣤⣶⣶⣶⣤⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢀⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⣄⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⣠⣶⣿⣿⡿⣿⣿⣿⡿⠋⠉⠀⠀⠉⠙⢿⣿⣿⡿⣿⣿⣷⣦⡀⠀⠀⠀
-⠀⢀⣼⣿⣿⠟⠁⢠⣿⣿⠏⠀⠀⢠⣤⣤⡀⠀⠀⢻⣿⣿⡀⠙⢿⣿⣿⣦⠀⠀
-⣰⣿⣿⡟⠁⠀⠀⢸⣿⣿⠀⠀⠀⢿⣿⣿⡟⠀⠀⠈⣿⣿⡇⠀⠀⠙⣿⣿⣷⡄
-⠈⠻⣿⣿⣦⣄⠀⠸⣿⣿⣆⠀⠀⠀⠉⠉⠀⠀⠀⣸⣿⣿⠃⢀⣤⣾⣿⣿⠟⠁
-⠀⠀⠈⠻⣿⣿⣿⣶⣿⣿⣿⣦⣄⠀⠀⠀⢀⣠⣾⣿⣿⣿⣾⣿⣿⡿⠋⠁⠀⠀
-⠀⠀⠀⠀⠀⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠁⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠿⠿⠿⠿⠿⠿⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢰⣷⡦⠀⠀⠀⢀⣀⣀⠀⠀⠀⢴⣾⡇⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣸⠟⠁⠀⠀⠀⠘⣿⡇⠀⠀⠀⠀⠙⢷⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠻⠀⠀⠀⠀⠀⠀⠈⠀")
-
-  
 group_paths <- list(...)
 groups_number <- length(group_paths)
 
@@ -365,8 +347,8 @@ if (global_threshold == TRUE) {
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
 }
-      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
       if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
+      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
         dataspace$percentage <- dataspace_0s$percentage
@@ -472,8 +454,7 @@ if (global_threshold == TRUE) {
       }}
 
     if (groups_number>2){
-      limma_dataspace <- cbind(anova_res,lima.res,dataspace)}
-else {limma_dataspace <- cbind(lima.res,dataspace)}
+      limma_dataspace <- cbind(anova_res,lima.res,dataspace)} else {limma_dataspace <- cbind(lima.res,dataspace)}
 
     ncollimma <- ncol(limma_dataspace) - ncol(dataspace) + 2
     limma_dataspace<-limma_dataspace %>%

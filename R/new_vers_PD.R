@@ -74,7 +74,7 @@ message("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀�
 ⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣿⣦⣄⡀⠘⢿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⠟⠀⣀⣤⣾⣿⠟⠋⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢿⣿⣶⣽⣿⣿⣶⣤⣀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣾⣿⣿⣵⣾⣿⠿⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠛⠻⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
-  
+
   groups_number <- length(group_names)
   if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match the length of 'groups_number'") }
@@ -310,8 +310,8 @@ if (imputation %in% c("kNN","missRanger"))    {
                   scale = 1, width = 5, height = 4, units = "in",
                   dpi = 300, limitsize = TRUE)
 }
-  message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
   if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
+  message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
     dataspace$percentage <- dataspace_0s$percentage
