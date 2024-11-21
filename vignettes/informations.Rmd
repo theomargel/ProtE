@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-One function to analyze them all! The Proteomics Eye (ProtE) establishes univariate analysis of label-free proteomics data generated from three different software platforms: MaxQuant, DIA-NN and Proteome Discoverer. By compiling all necessary data wrangling and procesing steps into one function, ProtE enables comprehensive evaluation of every pairwise  , comprehensive analysis of every pairwise statistical comparison. The package includes four main functions that correspond to the different software specific output formats. 
+One function to analyze them all! The Proteomics Eye (ProtE) establishes univariate analysis of label-free proteomics data generated from three different software platforms: MaxQuant, DIA-NN and Proteome Discoverer. By automating data wrangling and processing steps into the same function, ProtE performs all pairwise statistical comparisons for a given categorical variable, returning to the user  metrics for evaluating the proteomics output
 
 The data processing workflow includes options for:
 
