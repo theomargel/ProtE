@@ -29,7 +29,7 @@ pd_single(
 
 \item{bugs}{Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.}
 
-\item{normalization}{The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization and "PPM" for Parts per Million transformation of the data.}
+\item{normalization}{The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 
 \item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). If TRUE the limma t.test (for 2 groups) or ANOVA (for > 2 groups) significancies will be considered and if FALSE the Mann Whitney (for 2 groups) and Kruskal Wallis (>2 groups)}
 

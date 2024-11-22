@@ -31,6 +31,8 @@
 #' @importFrom grid gpar
 #' @importFrom stringr str_trunc
 #' @importFrom missRanger missRanger
+#' @importFrom car leveneTest
+#' @importFrom vsn meanSdPlot
 #'
 #' @examples
 #'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
@@ -132,6 +134,13 @@ if (description == TRUE ) {
 
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
+
+
+    sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+    pdf(sdrankplot_path)
+    suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+    dev.off()
+    message("Mean-SD plot of the data saved as meanSdPlot.pdf in the specified path.")
 
 
   name_dataspace <-  dataspace[, -1:-2]
@@ -471,6 +480,27 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         )
       }
     }
+  }
+
+  for(i in 1:nrow(data2)){
+    group_values <- list()
+    for (j in 1:groups_number) {
+      group_values[[j]]<- as.numeric(data2[i, coln[[j]]])
+    }
+    valid_groups <- group_values[sapply(group_values, function(x) sum(!is.na(x)) > 1)]
+    if (length(valid_groups) >= 2) {
+      bartlett_result <- bartlett.test(valid_groups)
+      data2[i, "Bartlett_p"] <- bartlett_result$p.value
+      leve_data <- data.frame(
+        Value = unlist(valid_groups),
+        Group = rep(seq_along(valid_groups), sapply(valid_groups, length))  )
+
+      levene_result <- car::leveneTest(Value ~ as.factor(Group), data = leve_data, center = median)
+      data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]      } else {
+        data2[i, "Bartlett_p"] <- NA
+        data2[i, "Levene_p"] <- NA
+      }
+
   }
 
   Ddataspace<-data2

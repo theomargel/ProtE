@@ -25,11 +25,13 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix heatmap median na.omit
+#' @importFrom stats kruskal.test p.adjust bartlett.test  prcomp sd wilcox.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
+#' @importFrom limma topTable eBayes contrasts.fit  normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom missRanger missRanger
+#' @importFrom car leveneTest
+#' @importFrom vsn meanSdPlot
 #'
 #' @examples
 #'
@@ -121,9 +123,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
     colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
     rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
-    if (normalization == FALSE ){
-      dataspace <- dataspace
-    }
+
     if (normalization == "PPM"){
     #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
@@ -176,7 +176,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
      if ( normalization == "VSN") {
-       dataspace[, -1:-2] <- limma::normalizeVSN(dataspace[, -1:-2])
+       dataspace[, -1:-2] <- suppressMessages(limma::normalizeVSN(dataspace[, -1:-2]))
        Gdataspace<-dataspace
        Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
        Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
@@ -185,7 +185,8 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
        colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
        norm_file_path <- file.path(path_res, "Normalized.xlsx")
        openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
-       message("Applying the selected normalization, saved as Normalized.xlsx")}
+       message("Applying the selected normalization, saved as Normalized.xlsx")
+            }
      if (normalization == "median") {
       sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
       dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
@@ -198,6 +199,21 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       norm_file_path <- file.path(path_res, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+    if (normalization == FALSE ){
+      dataspace <- dataspace
+      sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+      pdf(sdrankplot_path)
+      suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+      dev.off()
+      message("Mean-SD plot of the data saved as meanSdPlot.pdf in the specified path.")
+    } else {
+      sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+      pdf(sdrankplot_path)
+      suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+      dev.off()
+      message("Mean-SD plot of the normalized data saved as meanSdPlot.pdf in the specified path.")
+    }
 
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
@@ -220,7 +236,6 @@ if (global_threshold == TRUE) {
         for (i in 1:groups_number) {
           threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
 }
-
 
     if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
@@ -550,6 +565,28 @@ if (global_threshold == TRUE) {
         }
       }
     }
+
+    for(i in 1:nrow(data2)){
+      group_values <- list()
+     for (j in 1:groups_number) {
+        group_values[[j]]<- as.numeric(data2[i, coln[[j]]])
+      }
+      valid_groups <- group_values[sapply(group_values, function(x) sum(!is.na(x)) > 1)]
+      if (length(valid_groups) >= 2) {
+        bartlett_result <- bartlett.test(valid_groups)
+        data2[i, "Bartlett_p"] <- bartlett_result$p.value
+        leve_data <- data.frame(
+          Value = unlist(valid_groups),
+          Group = rep(seq_along(valid_groups), sapply(valid_groups, length))  )
+
+        levene_result <- car::leveneTest(Value ~ as.factor(Group), data = leve_data, center = median)
+        data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]      } else {
+        data2[i, "Bartlett_p"] <- NA
+        data2[i, "Levene_p"] <- NA
+      }
+
+    }
+
 
 
     Ddataspace<-data2

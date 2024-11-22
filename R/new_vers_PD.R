@@ -31,6 +31,8 @@
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom missRanger missRanger
+#' @importFrom car leveneTest
+#' @importFrom vsn meanSdPlot
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' #Do not add if (interactive()){} condition in your code
@@ -101,9 +103,7 @@ rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
 IDs <- colSums(!is.na(dataspace[,-1:-2]))
 if (sum(case_number) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
-if (normalization == FALSE ){
-  dataspace <- dataspace
-}
+
 if ( normalization == "VSN") {
   dataspace[, -1:-2] <- limma::normalizeVSN(dataspace[, -1:-2])
   Gdataspace<-dataspace
@@ -178,6 +178,21 @@ if (normalization == "median") {
   norm_file_path <- file.path(path_res, "Normalized.xlsx")
   openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
   message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+if (normalization == FALSE ){
+  dataspace <- dataspace
+  sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+  pdf(sdrankplot_path)
+  suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+  dev.off()
+  message("Mean-SD plot of the data saved as meanSdPlot.pdf in the specified path.")
+} else {
+  sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+  pdf(sdrankplot_path)
+  suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+  dev.off()
+  message("Mean-SD plot of the normalized data saved as meanSdPlot.pdf in the specified path.")
+}
 
 name_dataspace <-  dataspace[, -1:-2]
 dat.dataspace<-dataspace
@@ -514,7 +529,26 @@ for (j in 1:groups_number) {
     }
   }
 }
+for(i in 1:nrow(data2)){
+  group_values <- list()
+  for (j in 1:groups_number) {
+    group_values[[j]]<- as.numeric(data2[i, coln[[j]]])
+  }
+  valid_groups <- group_values[sapply(group_values, function(x) sum(!is.na(x)) > 1)]
+  if (length(valid_groups) >= 2) {
+    bartlett_result <- bartlett.test(valid_groups)
+    data2[i, "Bartlett_p"] <- bartlett_result$p.value
+    leve_data <- data.frame(
+      Value = unlist(valid_groups),
+      Group = rep(seq_along(valid_groups), sapply(valid_groups, length))  )
 
+    levene_result <- car::leveneTest(Value ~ as.factor(Group), data = leve_data, center = median)
+    data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]      } else {
+      data2[i, "Bartlett_p"] <- NA
+      data2[i, "Levene_p"] <- NA
+    }
+
+}
 Ddataspace<-data2
 Ddataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Ddataspace$Description)
 Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"

@@ -14,6 +14,8 @@ Imports:
     UniProt.ws,
     stringr,
     missRanger,
+    vsn,
+    car,
     openxlsx,
     tidyr,
     broom,
