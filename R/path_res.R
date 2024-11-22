@@ -8,7 +8,7 @@
 #' @param sample_relationship Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its omittion.
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples.
-#' @param normalization The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization and "PPM" for Parts per Million transformation of the data.
+#' @param normalization The specific method for normalizing the data. Options are "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). If TRUE the limma t.test (for 2 groups) or ANOVA (for > 2 groups) significancies will be considered and if FALSE the Mann Whitney (for 2 groups) and Kruskal Wallis (>2 groups)
 #' @param significancy "pV" or "adj.pV" Choose if the significant values for the PCA plots and the heatmap will derive from the pValue or the adjusted pValue of the comparison.
 #'
@@ -175,7 +175,18 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       norm_file_path <- file.path(path_res, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
-    if (normalization == "median") {
+     if ( normalization == "VSN") {
+       dataspace[, -1:-2] <- limma::normalizeVSN(dataspace[, -1:-2])
+       Gdataspace<-dataspace
+       Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+       Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+       Gdataspace<-Gdataspace %>%
+         dplyr::select(Accession, Description, Symbol, everything())
+       colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+       norm_file_path <- file.path(path_res, "Normalized.xlsx")
+       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+       message("Applying the selected normalization, saved as Normalized.xlsx")}
+     if (normalization == "median") {
       sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
       dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
       Gdataspace<-dataspace
