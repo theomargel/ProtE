@@ -34,11 +34,11 @@
 #'
 #' @examples
 #'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
-#'  "report.pg_matrix.xlsx", package = "PACKAGE")
+#'  "jittered.pg_matrix.xlsx", package = "PACKAGE")
 #'  dianno(report.pg_matrix,
-#'  group_names= c("MM","MGUS","SM"), case_number= c(8,6,9),
+#'  group_names= c("Healthy","Patients"), case_number= c(9,9),
 #'    global_threshold = TRUE, sample_relationship = "Independent",
-#'  threshold_value = 50)
+#'  threshold_value = 50, description = FALSE, imputation = FALSE)
 #' @export
 
 dianno <- function(excel_file,
@@ -52,50 +52,23 @@ dianno <- function(excel_file,
                    significancy = "pV", description = FALSE)
 {message("the process starts")
  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= variable =.=key=Accession =value =g1.name=g2.name= NULL
-
-message("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠱⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡄⢹⠀⠀⡀⠀⠀⠀⠀⠀⠀⣇⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⠴⣶⣶⣺⣿⣼⣄⠀⣟⣇⠀⢠⠀⠀⠀⣿⠀⠀⠀⡿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠀⢀⣤⡿⠚⣹⣧⣶⠟⣏⢛⢹⣿⣿⢉⠉⡏⡿⣿⢻⠶⣤⣰⣷⡇⠠⣰⣿⣇⢀⠆⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠇⠀⣸⡟⡋⢸⡆⢰⣿⣷⣄⣸⣏⣏⣹⣿⣿⡄⣸⣷⣿⣇⡟⢀⣴⣿⡟⡿⢶⣿⡟⣿⣮⣀⣠⣞⠁⠀⠀⠀⢀⣰⠃⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⣿⣠⣞⣽⣿⡿⢿⣷⣄⣿⣟⣧⣽⣿⣟⣿⣿⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿⣻⣿⠟⣼⣿⣿⣷⡟⠿⢧⣄⡀⠀⢠⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢀⠀⢱⡄⠀⣄⣿⣿⡉⠁⢻⣿⣥⡽⢿⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣯⣿⣿⣯⣿⣿⣿⡿⡻⠿⣶⡾⠋⢉⣶⡿⠥⠄⣠⠞⠀⣀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢠⠸⣆⠀⢹⣭⣿⣅⠘⣿⣾⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣻⡯⣪⣥⡶⠛⣻⣶⣿⢏⠀⣠⣟⡁⢠⠀⢈⡀⠀⢀⠀
-⠀⠀⠀⠀⠀⠀⣼⠀⠘⣶⣾⠏⣿⣿⢿⣿⣿⣿⣿⡿⠟⢉⣽⣿⣿⣿⠿⠛⠉⠉⠁⠀⠀⠈⠉⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣷⣟⣩⣏⣹⠿⠁⣰⠃⢀⡜⠀
-⠀⠀⠀⠀⠀⠀⢻⣥⡴⢋⣹⣿⣿⣽⣿⣿⣿⡿⠏⠀⣠⣿⣿⡿⠋⠀⠀⠀⠀⣀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣟⣿⣶⡾⣷⣶⣾⡟⢉⣾⡇⠀
-⠀⠀⠀⠀⠰⠂⣠⡿⣷⣾⣿⣷⣿⣿⣿⣿⠃⠀⠀⢰⣿⣿⠋⠀⠀⠀⢀⣶⣿⣿⣿⠿⠿⣿⣿⣿⣷⣄⠀⠀⠀⠈⢿⣿⣿⣻⢿⣿⣿⣿⣿⣤⣤⣾⣟⣻⣿⣿⣏⣴⡿⢋⣴⠛
-⠀⠀⠀⠀⠀⣺⣏⣾⠟⣻⣿⣿⠇⣿⣿⡇⠀⠀⢀⣿⣿⡏⠀⠀⠀⢰⣿⣿⠟⠉⠀⠀⠀⠀⠉⠻⣿⣿⣷⡀⠀⠀⠀⢻⣿⣿⢣⡙⢿⣿⣿⣿⣿⣯⣿⣶⣾⡿⣟⣭⣶⡾⠋⠀
-⠀⠠⢤⡆⣴⣳⣿⢿⣿⡿⠟⠁⠀⣿⣿⠁⠀⠀⠸⣿⣿⡇⠀⠀⠀⢸⣿⣿⣤⣤⣴⣶⣦⡀⠀⠀⠈⢿⣿⣷⠀⠀⠀⠘⣿⣿⡆⢻⠠⠟⠿⣿⣿⣿⣿⣟⡛⣻⣿⠟⠋⣀⢀⠀
-⠀⠀⠀⣙⣿⣿⣿⣿⠋⣴⡄⠀⠀⣿⣿⡆⠀⠀⠀⢻⣿⣷⡀⠀⠀⠈⠻⠿⠿⠟⠛⣿⣿⣧⠀⠀⠀⢸⣿⣿⡄⠀⠀⠀⣿⣿⣇⡟⠀⠀⠀⢲⣿⣿⣿⣿⣿⣿⣶⣶⣾⡿⠟⠀
-⠀⣀⣠⣿⣟⣷⡿⢁⡾⢸⡁⠀⠀⢻⣿⣷⡀⠀⠀⠈⢿⣿⣿⣤⣀⠀⠀⠀⠀⢀⣰⣿⣿⡏⠀⠀⠀⢸⣿⣿⠁⠀⠀⢠⣿⣿⡟⠀⠀⠀⢠⣿⢿⣢⡻⢿⠙⢿⣛⣏⠁⠀⠀⠀
-⢠⣾⣿⠟⣽⡟⡇⠙⢿⢄⣇⠀⠀⠀⢿⣿⣷⡄⠀⠀⠀⠙⠿⣿⣿⣿⣷⣶⣿⣿⣿⡿⠋⠀⠀⠀⣠⣿⣿⡟⠀⠀⠀⣾⣿⠋⠀⠀⢀⢀⣿⡿⢷⣾⣿⣯⣄⣹⡿⠋⠀⠀⠀⠀
-⠀⠉⠁⢰⣿⠁⣳⡅⠈⣦⡝⣤⡀⠀⠈⠻⣿⣿⣦⡀⠀⠀⠀⠈⠉⠛⠛⠛⠛⠋⠁⠀⠀⠀⢀⣴⣿⣿⠟⠀⠀⢀⣾⠟⠁⠀⠀⢠⣬⣿⣿⣿⣞⠇⢳⡌⢿⣿⠁⠀⠀⠀⠀⠀
-⠀⠀⠀⡿⢧⡀⠉⣩⣤⣧⣈⠙⠺⠶⣤⣄⡈⠻⣿⣿⣷⣦⣤⣀⡀⠀⠀⠀⠀⠀⣀⣠⣴⣾⣿⣿⠟⠁⠀⢀⣴⠟⠁⠀⢀⣤⣾⣿⣿⠿⣾⠷⣿⣆⡼⠓⣾⡇⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠹⢦⣉⣉⣀⠤⡜⠉⠛⢶⣤⣄⣀⣉⡉⠛⠻⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠋⠁⣠⠴⠞⣉⣀⣀⣤⣶⢶⣻⣿⡵⣘⠢⠈⣦⠘⢿⠇⢰⡿⠁⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠙⠛⠛⠛⢧⣤⡴⠋⠀⠈⢻⡿⠾⢿⣷⣶⣤⣴⣆⣌⣭⣉⣩⣭⣉⠀⣄⡤⣄⢠⣤⣄⣠⣴⠾⣿⡿⣏⠘⠻⣧⡘⣿⡜⠶⠄⠈⢤⠞⢠⣿⠃⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⣯⣭⣽⣳⢦⣉⠲⢤⣠⠏⠀⠀⡼⣱⠋⢹⣿⢻⠟⠛⡟⣿⠟⢻⠟⣟⢿⠻⣟⠛⢯⢻⣯⣆⠘⣿⡌⢳⣄⢻⣷⠈⠀⠀⢀⡤⠋⢠⡾⠃⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠘⠿⠉⠉⠻⢷⣌⠙⠲⣽⡃⠀⠀⢷⠇⠀⠸⠁⡞⠀⡀⠙⡟⠂⠀⡟⢿⣼⠀⠹⡇⠈⢧⣎⢿⣇⠸⠿⠀⠉⢮⠏⠃⢀⡴⠊⠀⣠⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢦⡀⠉⠓⢦⣞⠀⠀⠀⠀⠁⠀⠀⠀⡇⠈⠳⡷⠀⡿⠴⠀⠘⠀⠸⠋⠻⣿⠀⠀⠁⠈⢈⡧⠞⠁⠀⠀⠜⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⠀⠉⠓⠦⣄⣀⠀⠀⠀⠁⠀⠀⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⠀⠀⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠓⠲⠤⢤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀")
- 
 groups_number <- length(group_names)
  if (length(case_number) != groups_number) {
     stop("The length of 'case_number' must match 'groups_number'") }
-  #  if (groups_number>9){stop("You can add up to 9 groups")}
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
 
   dataspace <- openxlsx::read.xlsx(excel_file)
-  dataspace <- dataspace[!grepl("^;",dataspace$Protein.Ids),]
 
 
   path <- dirname(excel_file)
   path_res <- file.path(path , "MS_analysis_DIA-nn")
   dir.create(path_res, showWarnings = FALSE)
 
-  #modify PD masterlist to exclude unwanted stats
+  if("Protein.Ids" %in% colnames(dataspace)) {
+  dataspace <- dataspace[!grepl("^;",dataspace$Protein.Ids),]
+
   dataspace <- dataspace[,-c(1,4:5)]
   dataspace[, -c(1,2)] <- lapply(dataspace[, -c(1,2)], as.numeric)
   col_names <- colnames(dataspace)
@@ -134,6 +107,23 @@ if (description == TRUE ) {
 }
 
   colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
+
+  } else {
+
+    dataspace <- dataspace[!grepl("^;",dataspace$Genes),]
+    dataspace[, -1] <- lapply(dataspace[,-1], as.numeric)
+    col_names <- colnames(dataspace)
+    col_names[-1] <- gsub("\\\\", "/", col_names[-1])
+    col_names[-1] <- basename(col_names[-1])
+    colnames(dataspace) <- col_names
+    dataspace <- dataspace[rowSums(!is.na(dataspace[,-1])) > 0, ]
+
+      dataspace$Description = "Not Available"
+    dataspace<-dataspace %>%
+      dplyr::select(Genes,any_of(c("Protein.Names","Description")) , everything())
+
+
+  }
   colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
   rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
@@ -180,7 +170,7 @@ if (description == TRUE ) {
   Gdataspace<-dataspace
 
   Gdataspace<-Gdataspace %>%
-    dplyr::select(Accession,any_of(c("Protein.Names","Description")) , everything())
+    dplyr::select(any_of(c("Accession","Genes")),any_of(c("Protein.Names","Description")) , everything())
   colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
 
   dataspace[is.na(dataspace)] <- 0
@@ -403,7 +393,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     limma_dataspace <- cbind(anova_res,lima.res,dataspace)} else {limma_dataspace <- cbind(lima.res,dataspace)}
    ncollimma <- ncol(limma_dataspace) - ncol(dataspace) + 2
   limma_dataspace<-limma_dataspace %>%
-    dplyr::select(Accession, any_of(c("Protein.Names","Description")), dplyr::everything())
+    dplyr::select(any_of(c("Accession","Genes")),any_of(c("Protein.Names","Description")) , everything())
   limma_dataspace <- limma_dataspace[,1:ncollimma]
   limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
@@ -489,7 +479,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   Ddataspace$Symbol[Ddataspace$Symbol==Ddataspace$Description] = "Not available"
   }else {Ddataspace$Symbol = "Not available"}
   Fdataspace <- Ddataspace %>%
-    dplyr::select(Accession,
+    dplyr::select(any_of(c("Accession","Genes")),
                   dplyr::any_of(c("Description", "Protein.Names")),
                   Symbol,
                   everything())
@@ -533,7 +523,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
     }else {Fdataspace$Symbol = "Not available"}
     Fdataspace<-Fdataspace %>%
-      dplyr::select(Accession,
+      dplyr::select(any_of(c("Accession","Genes")),
                     dplyr::any_of(c("Description", "Protein.Names")),
                     Symbol,
                     everything())
@@ -559,7 +549,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   Group <- groups_list_f
 
   Group2<-unique(groups_list_f)
-
+  dataspace[dataspace < 0] <- 0
   log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
   # PCA of the entire data

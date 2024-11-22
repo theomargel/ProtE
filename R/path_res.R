@@ -417,6 +417,7 @@ if (global_threshold == TRUE) {
     colnames(mm)<- group_names
 
     nndataspace<- dataspace[,-1:-2]
+    nndataspace[is.na(nndataspace)] <- 0
     nndataspace <- log2(nndataspace+1)
 
     if (sample_relationship == "Paired"){

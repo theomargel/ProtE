@@ -380,6 +380,7 @@ mm <- model.matrix(~groups_list_f + 0)
 colnames(mm)<- group_names
 
 nndataspace<- dataspace[,-1:-2]
+nndataspace[is.na(nndataspace)] <- 0
 nndataspace <- log2(nndataspace+1)
 
 if (sample_relationship == "Paired"){
