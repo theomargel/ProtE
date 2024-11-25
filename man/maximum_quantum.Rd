@@ -7,9 +7,9 @@
 maximum_quantum(
   excel_file,
   group_names,
-  case_number,
+  samples_per_group,
   imputation = TRUE,
-  global_threshold = TRUE,
+  global_filtering = TRUE,
   sample_relationship = "Independent",
   threshold_value = 50,
   normalization = FALSE,
@@ -22,11 +22,11 @@ maximum_quantum(
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
 
-\item{case_number}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.}
+\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.}
 
 \item{imputation}{Imputation of the Missing Values. Options are "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that optimizes the distribution of the log2 itensities of the imputed data compared to the initial ones.}
 
-\item{global_threshold}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.}
+\item{global_filtering}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.}
 
 \item{sample_relationship}{Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.}
 
@@ -42,7 +42,7 @@ maximum_quantum(
 Excel files with the proteomic values that are optionally processed, via normalization, imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is optimized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 }
 \description{
-It takes as input the Proteomics Data (output of Max Quant) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
+It takes as input the Proteomics Data (output of Max Quant) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups , while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 }
 \examples{
 #' # Example of running the function with paths for two groups.
@@ -52,6 +52,6 @@ maximum_quantum(
 "C:/Users/User/Documents/proteinGroups.xlsx",
 groups_number = 2,
 group_names = c("T0","T1"),
-case_number = c(3,3), threshold_value = 100)}
+samples_per_group = c(3,3), threshold_value = 100)}
 
 }

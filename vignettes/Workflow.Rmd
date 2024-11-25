@@ -26,10 +26,10 @@ To use the `pd_multi` function, these folders should contain only the Excel file
 
 The other three functions—`pd_single`, `maximum_quantum`, and `dianno`—take as user input one Excel file that includes the proteomics data from all the samples of the analysis as a data frame. This file is the initial output of the software and has information for each gene in its rows and the samples in its columns.
 
-To enable statistical analysis, samples belonging to the same group must be arranged next to each other in the Excel file. Regarding the parameters `group_names` and `case_number`, the user must provide these parameters inside a vector, in the order they appear inside the Excel matrix:
+To enable statistical analysis, samples belonging to the same group must be arranged next to each other in the Excel file. Regarding the parameters `group_names` and `samples_per_group`, the user must provide these parameters inside a vector, in the order they appear inside the Excel matrix:
 
 - `group_names`: names of the different groups.
-- `case_number`: a vector with the number of samples inside each group.
+- `samples_per_group`: a vector with the number of samples inside each group.
 
  `maximum_quantum`
 
@@ -78,7 +78,7 @@ knitr::include_graphics(system.file("extdata", "sdmeanplot.jpeg", package = "PAC
 The data can be filtered based on the percentage of missing values per protein. Specifically:
 
 - The parameter `threshold_value` refers to the percentage of missing values per protein allowed to remain in the filtered dataset.
-- The parameter `global_threshold` determines if filtering is based on missing values across all groups (`TRUE`) or separately by groups (`FALSE`).
+- The parameter `global_filtering` determines if filtering is based on missing values across all groups (`TRUE`) or separately by groups (`FALSE`).
 
 ## Imputation
 

@@ -1,9 +1,9 @@
-#' Proteome Discoverer (PD) single-files' proteomic analysis
+#' Proteome Discoverer (PD) multiple-files' proteomic analysis
 #'
 #' It takes as input the  Proteomics Data (output of PD) in the format of a single file per sample. After concatenating the Accession_ID, Description and Area or Abundance from the PD export files of each sample, into a master table, it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Ensure paths use '/' as a directory separator.
-#' @param global_threshold TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.
+#' @param global_filtering TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group seperately.
 #' @param imputation Imputation of the Missing Values. Options are "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that optimizes the distribution of the log2 itensities of the imputed data compared to the initial ones.
 #' @param sample_relationship Either "Paired" for a Wilcoxon Signed-rank test or "Independent" for a Mann-Whitney U test.
 #' @param threshold_value The percentage of missing values per protein that will cause its omittion.
@@ -36,26 +36,26 @@
 #' @examples
 #'
 #' # Paths to example data folders within the package
-#' T1_path <- system.file("extdata", "PDexports(single_file)",
+#' T1_path <- system.file("extdata", "PDexports(multiple_files)",
 #'  "T1_BLCA", package = "PACKAGE")
-#' T2_path <- system.file("extdata", "PDexports(single_file)",
+#' T2_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "T2_BLCA", package = "PACKAGE")
-#' Ta_path <- system.file("extdata", "PDexports(single_file)",
+#' Ta_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "Ta_BLCA", package = "PACKAGE")
 #'
 #' # Run the function with these paths
-#' pd_single(
+#' pd_multi(
 #'   T1_path, T2_path, Ta_path,
 #'   normalization = "PPM", sample_relationship = "Paired",
-#'   imputation = "LOD", global_threshold = TRUE
+#'   imputation = "LOD", global_filtering = TRUE
 #' )
 #'
 #'
 #' @export
 
-pd_single <- function(...,
+pd_multi <- function(...,
                         imputation = TRUE,
-                        global_threshold = TRUE,
+                        global_filtering = TRUE,
                         sample_relationship = "Independent",
                         threshold_value = 50,
                         bugs = 0,
@@ -64,26 +64,24 @@ pd_single <- function(...,
                         significancy = "pV")
   {
    Sample=group1= Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
-
+message("The ProtE proccess starts now!")
 group_paths <- list(...)
 groups_number <- length(group_paths)
 
 group_paths<- gsub( "\\\\", "/", group_paths)
 for (i in 1:groups_number) {
-  assign(paste0("group",i),group_paths[[i]])
-}
+  assign(paste0("group",i),group_paths[[i]])}
 group_names <- basename(group_paths)
 for (i in 1:groups_number) {
 assign(paste0("g",i,".name"),group_names[[i]])}
 
-#create the dataspace for all the data
 dataspace <- data.frame()
 
-#assign An excel files to a list
-case_number <- numeric(groups_number)
-for (i in seq_along(group_paths)) {  # Start from group 1
+samples_per_group <- numeric(groups_number)
+
+for (i in seq_along(group_paths)) {
   file_names <- list.files(path = group_paths[[i]], pattern = "*.xlsx")
-  case_number[i] <- length(file_names)
+  samples_per_group[i] <- length(file_names)
   for (j in seq_along(file_names)) {
     file_case <- openxlsx::read.xlsx(file.path(group_paths[[i]], file_names[j]), sheet = 1)
     dataspace <- rbind(dataspace, file_case[,grep("Accession|Description",colnames(file_case))])
@@ -93,8 +91,6 @@ dataspace <- dataspace[!is.na(dataspace$Accession),]
 dupl <- duplicated(dataspace[,1])
 dataspace_no_dupl <- dataspace[!dupl,]
 dataspace_no_dupl <- droplevels(dataspace_no_dupl)
-ML <- data.frame(dataspace_no_dupl, stringsAsFactors = FALSE)
-### Merge all areas from the files
 dataspace <- dataspace_no_dupl
 
 for (i in 1:groups_number) {
@@ -105,7 +101,9 @@ for (i in 1:groups_number) {
   colnames(dataspace)[length(colnames(dataspace))] <- file_names[j]
 }
 }
+
 dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
+message("Removing whichever proteins have only missing values in their abundances.")
 
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
@@ -113,9 +111,10 @@ path_g1 <- dirname(group1)
 path_res <- file.path(path_g1, "MS_analysis")
 dir.create(path_res, showWarnings = FALSE)
 
+(message("All files created will be stored in the folder MS_analysis, that is located on the last directory of the first group that you input."))
 mt_file_path <- file.path(path_res, "Masterlist.xlsx")
 openxlsx::write.xlsx(dataspace, file = mt_file_path)
-    message("Concatenating all data files to a matrix, saved as Masterlist.xlsx")
+    message("Concatenated all data files to a single matrix, saved as Masterlist.xlsx")
 
     zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
     IDs <- colSums(!is.na(dataspace[,-1:-2]))
@@ -125,10 +124,9 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
 
 
     if (normalization == "PPM"){
-    #normalize PPm
     dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
-      sum_x <- sum(x, na.rm = TRUE)  # Sum of the column, ignoring NAs
-      ifelse(is.na(x), NA, (x / sum_x) * 10^6)  # NA=0 , normalize the rest
+      sum_x <- sum(x, na.rm = TRUE)
+      ifelse(is.na(x), NA, (x / sum_x) * 10^6)
     })
 
     Gdataspace<-dataspace
@@ -206,13 +204,13 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
       dev.off()
-      message("Mean-SD plot of the data saved as meanSdPlot.pdf in the specified path.")
+      message("Mean-SD plot of the data saved as meanSdPlot.pdf has been created.")
     } else {
       sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
       dev.off()
-      message("Mean-SD plot of the normalized data saved as meanSdPlot.pdf in the specified path.")
+      message("Mean-SD plot of the normalized data saved as meanSdPlot.pdf has been created.")
     }
 
 name_dataspace <-  dataspace[, -1:-2]
@@ -221,34 +219,30 @@ name_dataspace <-  dataspace[, -1:-2]
 
 if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
-if (global_threshold == TRUE) {
+if (global_filtering == TRUE) {
 
     threshold_value <- 100- as.numeric(threshold_value)
-    # Iterate over each group and calculate the new threshold
 
-      threshold <-  ceiling(sum(case_number)-(sum(case_number)*(as.numeric(threshold_value)/100))+0.00000000001)
+      threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(threshold_value)/100))+0.00000000001)
   }
 
- if (global_threshold == FALSE) {
+ if (global_filtering == FALSE) {
       threshold<-numeric(groups_number)
         threshold_value <- 100- as.numeric(threshold_value)
-        # Iterate over each group and calculate the new threshold
         for (i in 1:groups_number) {
-          threshold[i] <-  ceiling(case_number[i]-(case_number[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+          threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
 }
 
     if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
-    # Create identifier variables for the threshold and statistics
     coln <- list()
     case_last <- 2
 
     for (i in 1:groups_number) {
-      case_last <- case_last + case_number[i]
-      coln[[i]] <- (case_last - case_number[i] + 1):case_last
+      case_last <- case_last + samples_per_group[i]
+      coln[[i]] <- (case_last - samples_per_group[i] + 1):case_last
     }
 
-    # assign average of group to discoverer bugs!
     if (bugs== "average"){
       dat.dataspace[dat.dataspace==0] <- 1
       dat.dataspace[is.na(dat.dataspace)] <- 0
@@ -282,18 +276,17 @@ if (global_threshold == TRUE) {
     }
     dataspace$Number_0_all_groups <- rowSums(dataspace[,paste0("Number_0_group", 1:groups_number)])
 
-    #omiting empty rows
-    dataspace <- dataspace[dataspace$Number_0_all_groups < sum(case_number),]
+    dataspace <- dataspace[dataspace$Number_0_all_groups < sum(samples_per_group),]
 
-    if (global_threshold == TRUE) {
+    if (global_filtering == TRUE) {
       bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
       openxlsx::write.xlsx(dataspace, file = bt_file_path)
       dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-      at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+      at_file_path <- file.path(path_res, "Dataset_filtering_applied.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)
     }
 
-    if (global_threshold == FALSE) {
+    if (global_filtering == FALSE) {
       bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
       openxlsx::write.xlsx(dataspace, file = bt_file_path)
       keep_rows <- rep(FALSE, nrow(dataspace))
@@ -301,9 +294,9 @@ if (global_threshold == TRUE) {
         keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
       }
       dataspace <- dataspace[keep_rows, ]
-      at_file_path <- file.path(path_res, "Dataset_threshold_applied.xlsx")
+      at_file_path <- file.path(path_res, "Dataset_filtering_applied.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)}
-      message("An excel file with the proteins that have % of missing values below the threshold was created as Dataset_threshold_applied.xlsx")
+      message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_filtering_applied.xlsx")
     dataspace_0s<- dataspace
     dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
     dataspace$Number_0_all_groups <- NULL
@@ -319,7 +312,6 @@ if (global_threshold == TRUE) {
 
     pre_dataspace <- dataspace
 
-    ##imputation KNN
     if (imputation == "kNN") {
       dataspace[dataspace==0] <- NA
       dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
@@ -351,7 +343,6 @@ if (global_threshold == TRUE) {
       his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
       loghis_dataspace<-log2(his_dataspace+1)
 
-      #his_long <- reshape2::melt(loghis_dataspace)
 
       his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
       nrows<-nrow(his_long)
@@ -372,13 +363,14 @@ if (global_threshold == TRUE) {
       ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-}
-      if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){    #create histogramm for imputed values
+      message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
+      }
+      if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){
       message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
-        dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+        dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
         dataspace$percentage <- dataspace_0s$percentage
-        dataspace$mean <- rowMeans(dataspace[,3:(2+sum(case_number))])
+        dataspace$mean <- rowMeans(dataspace[,3:(2+sum(samples_per_group))])
         dataspace$log<-log2(dataspace$mean)
         dataspace$rank <- rank(-dataspace$mean)
 
@@ -401,9 +393,9 @@ if (global_threshold == TRUE) {
 
     if (imputation == FALSE){dataspace <- dataspace
 
-    dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(case_number)
+    dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
-    dataspace$mean <- apply(dataspace[, 3:(2+sum(case_number))], 1, function(x) mean(x[x != 0]))
+    dataspace$mean <- apply(dataspace[, 3:(2+sum(samples_per_group))], 1, function(x) mean(x[x != 0]))
     dataspace$log<-log2(dataspace$mean)
     dataspace$rank <- rank(-dataspace$mean)
 
@@ -412,10 +404,9 @@ if (global_threshold == TRUE) {
       labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
                            name = "MVs\nin each\nprotein\n(%)") +
-      #theme_minimal(base_size = 15)  +
       theme_linedraw()+
       theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-            panel.grid = element_line(color = "grey80"),  # Make grids more visible
+            panel.grid = element_line(color = "grey80"),
             legend.title = element_text(size = 10, face = "bold"),
             legend.text = element_text(size = 9))
 
@@ -425,7 +416,7 @@ if (global_threshold == TRUE) {
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     }
-
+  message("The plot named Proteins_abundance_rank.pdf, which depicts the proteins abundance rank and their percentage of missing values was created.")
     dataspace$percentage <- NULL
     dataspace$mean <- NULL
     dataspace$log<- NULL
@@ -433,7 +424,7 @@ if (global_threshold == TRUE) {
 
     groups_list <- list("character")
     for (i in 1:groups_number) {
-      groups_list[[i]] <- rep(group_names[i], times = case_number[i])
+      groups_list[[i]] <- rep(group_names[i], times = samples_per_group[i])
     }
 
     groups_list_u <- unlist(groups_list)
@@ -447,10 +438,10 @@ if (global_threshold == TRUE) {
     nndataspace <- log2(nndataspace+1)
 
     if (sample_relationship == "Paired"){
-      if (length(unique(case_number)) != 1){
+      if (length(unique(samples_per_group)) != 1){
         message("Error: Paired comparison did not happen correctly because you have input different number of samples in some groups")
       }
-      n = sum(case_number)/groups_number
+      n = sum(samples_per_group)/groups_number
       pairing <- rep(1:n, each = groups_number)
 
       corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
@@ -464,7 +455,6 @@ if (global_threshold == TRUE) {
       colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
       anova_res<- anova_res[,-c(1:groups_number)]}
     lima.res <- data.frame()
-    message("ebayes.")
     for (i in 1:(ncol(mm)-1)) {
       for (j in (i+1):ncol(mm)) {
         comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
@@ -489,14 +479,11 @@ if (global_threshold == TRUE) {
     limma_dataspace <- limma_dataspace[,1:ncollimma]
     limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
     openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
-    message("limma test was created")
-    #####
-    ###- Mann-Whitney and Kruskal-Wallis starts here! - ###
+    message("The statistics from the limma parametric tests are showcased in the created Dataset_limma.test.xlsx file.")
+
     if (sample_relationship != "Paired" && sample_relationship != "Independent"){stop("Error. You need to assign sample_relationship = 'Paired' or 'Indepedent'")}
-    ### 1 ### Specify file for statistical analysis
     data2 <- dataspace
 
-    # Initialize Average, Standard Deviation, and p-values for all groups
     for (j in 1:groups_number) {
       data2[[paste0("Average_G", j)]] <- apply(data2[, coln[[j]]], 1, function(row) {
         if (all(is.na(row))) {
@@ -517,12 +504,10 @@ if (global_threshold == TRUE) {
       for (k in 1:j) {
         if (k < j) {
           for (i in 1:nrow(data2)) {
-            # Select columns dynamically for the Wilcoxon test
             values_k <- as.numeric(data2[i, coln[[k]]])
             values_j <- as.numeric(data2[i, coln[[j]]])
 
             if (sample_relationship == "Independent") {
-              # Perform Wilcoxon test if there are valid observations
               if (sum(!is.na(values_k)) > 0 & sum(!is.na(values_j)) > 0) {
                 test_list <- stats::wilcox.test(
                   values_k, values_j,
@@ -533,7 +518,6 @@ if (global_threshold == TRUE) {
                 data2[i, paste0("MW_G", j, "vsG", k)] <- NA
               }
             } else if (sample_relationship == "Paired") {
-              # Ensure there are pairs of observations
               paired_values <- na.omit(cbind(values_k, values_j))
               if (nrow(paired_values) > 0) {
                 test_list <- stats::wilcox.test(
@@ -547,13 +531,11 @@ if (global_threshold == TRUE) {
             }
           }
 
-          # Adjust p-values
           data2[[paste0("BH_p_G", j, "vsG", k)]] <- p.adjust(
             data2[[paste0("MW_G", j, "vsG", k)]],
             method = "BH"
           )
 
-          # Calculate the ratio and log2 ratio dynamically
           avg_j <- data2[[paste0("Average_G", j)]]
           avg_k <- data2[[paste0("Average_G", k)]]
           data2[[paste0("Ratio_G", j, "vsG", k)]] <- ifelse(
@@ -597,14 +579,10 @@ if (global_threshold == TRUE) {
     Fdataspace<-Ddataspace
 
 
-    #if (groups_number != 2){
-    # Create grouping variable for the Kruskal test
-
-
     Group<-list()
     times<-vector()
     for (i in (1:groups_number)){
-      times<-case_number[i]
+      times<-samples_per_group[i]
       Group[[i]] <- rep(paste0("G",i), times)
       times<-NULL}
 
@@ -617,7 +595,7 @@ if (global_threshold == TRUE) {
     dataspace4$Group<-as.factor(dataspace4$Group)
 
     if (groups_number>2){
-      #Do the Kruskal-Wallis test
+      message("Mann-Whitney, Levene, Bartlett tests done, now calculating the Kruskal-Wallis test's results:")
       df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
       df4 <- df3 %>% dplyr::group_by(key)
       df4$value<-as.numeric(df4$value)
@@ -626,7 +604,6 @@ if (global_threshold == TRUE) {
       data3<-cbind(Ddataspace,Kruskal_Wallis.pvalue)
       data3$Kruskal_Wallis.pvalue_BH.adjusted<- p.adjust(data3$Kruskal_Wallis.pvalue, method = "BH")
 
-      #Create gene symbols and write the data
       Fdataspace<-data3
       Fdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Fdataspace$Description)
       Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
@@ -641,13 +618,13 @@ if (global_threshold == TRUE) {
     }
 
     colnames(Fdataspace) <- gsub(".xlsx", "", colnames(Fdataspace))
-    start_col <- 3 + as.numeric(sum(case_number))
+    start_col <- 3 + as.numeric(sum(samples_per_group))
     Fdataspace <- Fdataspace[,-c(4:start_col)]
 
 
-    stats_file_path <- file.path(path_res, "Normalized_stats.xlsx")
+    stats_file_path <- file.path(path_res, "Statistical_analysis.xlsx")
     openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-    message("An excel with the statistical tests for the normalized data was created as Normalized_stats.xlsx")
+    message("An excel with the statistical tests for the normalized data was created as Statistical_analysis.xlsx")
 
 
 
@@ -657,7 +634,6 @@ if (global_threshold == TRUE) {
 
     log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 
-    # PCA of the entire data
 
     pca<-prcomp(t(log.dataspace), scale=TRUE, center=TRUE)
 
@@ -670,8 +646,8 @@ if (global_threshold == TRUE) {
     if (groups_number == 2){
       Group<-list()
       times<-vector()
-      for (i in (1:length(case_number))){
-        times<-case_number[i]
+      for (i in (1:length(samples_per_group))){
+        times<-samples_per_group[i]
         Group[[i]] <- rep(paste0("G",i), times)
         times<-NULL
       }
@@ -686,10 +662,8 @@ if (global_threshold == TRUE) {
 
     pca.ent<-ggplot2::ggplot(data=pca.data, ggplot2::aes(x=X, y=Y, label=Sample))+
       geom_point(aes(color=Group), size = 2, alpha = 1)+
-      #scale_colour_manual(values=cbbPalette)+
       xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
       ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
-      #ylim(-60,60)+
       ggtitle("Complete set of proteins")+
       theme_bw()+
       theme(plot.title = element_text(hjust=0.5))+
@@ -704,8 +678,7 @@ if (global_threshold == TRUE) {
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
     message("PCA plot using all data was created as PCA_plot_alldata.pdf")
-    # PCA of the significant data. If number of groups = 2, the script uses the
-    # unadjusted Mann-Whitney test; else, it uses the unadjusted Kruskal-Wallis test.
+
 
     which.sig<-vector()
     if (parametric == TRUE) {
@@ -765,6 +738,7 @@ if (global_threshold == TRUE) {
       ComplexHeatmap::draw(heatmap_data)
       dev.off()
 
+      message("A heatmap with the significantly differentially expressed proteins was created as heatmap.pdf")
 
 
       pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
@@ -779,6 +753,8 @@ if (global_threshold == TRUE) {
       qc[,-1]<-round(qc[,-1],3)
       qc_file_path <- file.path(path_res, "Quality_check.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)
+
+      message("An excel file named Quality_check.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
       pca.var<-pca$sdev^2
       pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
@@ -786,10 +762,8 @@ if (global_threshold == TRUE) {
 
       pca.sig<-ggplot2::ggplot(data=pca.data, aes(x=X, y=Y, label=Sample))+
         geom_point(aes(color=Group), size = 2, alpha = 1)+
-        #scale_colour_manual(values=cbbPalette)+
         xlab(paste("PC1 - ", pca.var.per[1], "%", sep=""))+
         ylab(paste("PC2 - ", pca.var.per[2], "%", sep=""))+
-        #ylim(-60,60)+
         ggtitle("Statistically significant proteins")+
         theme_bw()+
         theme(plot.title = element_text(hjust=0.5))+
@@ -804,7 +778,6 @@ if (global_threshold == TRUE) {
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
       message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
-
       a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
                            common.legend = TRUE, legend = "bottom")
 
@@ -813,10 +786,8 @@ if (global_threshold == TRUE) {
                       dpi = 300, limitsize = TRUE)
       message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
     }
-    # Quality check - boxplots of data distribution
     p<- function(x) {
       sapply(x, function(label) {
-        # Get the last 25 characters from each label
         truncated_label <- substr(label, nchar(label) - 24, nchar(label))
         truncated_label
       })
@@ -837,7 +808,6 @@ if (global_threshold == TRUE) {
     if (imputation == FALSE) {
       qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
         geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
-        #scale_colour_manual(values=colors)+
         xlab("Sample")+
         ylab(expression(Log[2]~"Protein Abundance"))+
         theme_classic()+
@@ -851,7 +821,7 @@ if (global_threshold == TRUE) {
 
       qc.boxplots
 
-      ggplot2::ggsave("QC_dataDistribution_withZeros.pdf", plot = qc.boxplots,  path = path_res,
+      ggplot2::ggsave("Boxplot_withZeros.pdf", plot = qc.boxplots,  path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
 
@@ -863,7 +833,6 @@ if (global_threshold == TRUE) {
 
     qc.boxplots.na<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
       geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
-      #scale_colour_manual(values=colors)+
       xlab("Sample")+
       ylab(expression(Log[2]~"Protein Abundance"))+
       theme_classic()+
@@ -873,20 +842,21 @@ if (global_threshold == TRUE) {
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
       scale_x_discrete(labels = p) +
-      #geom_dotplot(aes(color = Group), binaxis='y', stackdir='center', dotsize=0.1, stackgroups = FALSE)+
       geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
     qc.boxplots.na
     if (imputation == FALSE) {
-      ggplot2::ggsave("QC_dataDistribution_NoZeros.pdf", plot = qc.boxplots.na, path = path_res,
+      ggplot2::ggsave("Boxplot_withoutZeros.pdf", plot = qc.boxplots.na, path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     } else
     {
-      ggplot2::ggsave("QC_dataDistribution.pdf", plot = qc.boxplots.na, path = path_res,
+      ggplot2::ggsave("Boxplot.pdf", plot = qc.boxplots.na, path = path_res,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     }
+    message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Boxplot.pdf" )
+
     qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
       geom_violin(aes(color = Group),lwd=1)+
       xlab("Sample")+
@@ -903,6 +873,7 @@ if (global_threshold == TRUE) {
     ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
-    message("The Boxplots for each sample have been created!!")
+    message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
+    message("The analysis was created. The results are saved inside the MS_analysis folder. Thanks for your patience!")
 
 }

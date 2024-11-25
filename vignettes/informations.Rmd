@@ -1,4 +1,4 @@
----
+ ---
 title: "Introduction to the Package"
 output: rmarkdown::html_vignette
 vignette: >
