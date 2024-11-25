@@ -37,10 +37,9 @@ The `maximum_quantum` function is created to analyze the Excel file *ProteinGrou
 
  `dianno`
 
-The `dianno` function is created to analyze the .pg_matrix Excel file that comes as the output of the DIA-NN software.
+The `dianno` function is created to analyze the .pg_matrix and unique_genes_matrix Excel files that come as the output of the DIA-NN software.
 
-If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access.
-
+If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access and will be available only when the input is the .pg_matrix. 
 
 
 
@@ -48,8 +47,8 @@ If the parameter `description` is set to `TRUE`, a new column named `description
 
 # Workflow
 
-
-
+ 
+ 
 
 The workflow of all these functions is the same, except for the aforementioned changes, and is as follows:
 
@@ -62,8 +61,17 @@ Firstly, the data can be processed via normalization, excluding the DIA-NN outpu
 - Log2 transformation
 - Quantile normalization
 - Median normalization
+- VSN normalization
 
-The output is saved as `Normalized.xlsx` in the **MS_Analysis** folder.
+The Normalized proteomics data are saved as `Normalized.xlsx` in the **MS_Analysis** folder, and they will be used in the downstream analysis.
+
+Utilizing the package's "vsn" function `meanSdPlot` a plot with the standard deviation for each protein in the Y axis and their rank based on mean abundance in the X axis will be created.
+
+
+```{r, echo=FALSE, fig.cap="An example of the Standard deviation- Rank based on mean abundance plot that will be created."}
+knitr::include_graphics(system.file("extdata", "sdmeanplot.jpeg", package = "PACKAGE"))
+```
+
 
 ## Filtering Missing Values
 
@@ -102,7 +110,7 @@ knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "PACKAG
 Statistical analyses will then be performed, including pairwise comparisons between the groups. The parameter `sample_relationship` allows users to specify whether the group variables should be analyzed as independent or paired. By default, it is set to Independent, and to run as Paired, the user must provide groups with the same number of samples, with the order of the samples across them remaining the same.
 
 
-The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2.
+The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2. Last but not least, the file contains in the columns "Bartlett_p" and "Levene_p" the p_values for the reported statistical tests, that examine the homoscedasticity of each proteins' abundances. 
 
 
 Another Excel file, `limma_statistics.xlsx`, contains results from the parametric `limma` statistical test. This includes the ANOVA F-value, p-value, and adjusted p-value, as well as the B-statistic, unadjusted p-value, and Benjamini–Hochberg adjusted p-value for pairwise t-test comparisons between groups, as well as the ANOVA F-value, p-value, and adjusted p-value when the number of groups is greater than 2.
