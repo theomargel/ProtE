@@ -1,8 +1,8 @@
- ---
-title: "Introduction to the Package"
+---
+title: "Introduction to ProtE"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to the Package}
+  %\VignetteIndexEntry{Introduction to ProtE}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -51,13 +51,13 @@ Because some package-dependencies (limma, UniProt.ws, missRanger) are inside the
 ```{r, eval=FALSE}
 install.packages("BiocManager")
 options(repos = BiocManager::repositories())
-devtools::install_github("theomargel/PACKAGE")
+devtools::install_github("theomargel/ProtE")
 ```
 
 Then load its library with:
 
 ```{r setup}
-library(PACKAGE)
+library(ProtE)
 ```
 
 ## Output Directory
