@@ -1,15 +1,15 @@
 ---
-title: "Package Guide"
+title: "ProtE Guide"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Package Guide}
+  %\VignetteIndexEntry{ProtE Guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 
 
-The Package consists of 4 functions:
+The Package ProtE consists of 4 functions:
 - `pd_multi`
 - `pd_single`
 - `maximum_quantum`
@@ -69,7 +69,7 @@ Utilizing the package's "vsn" function `meanSdPlot` a plot with the standard dev
 
 
 ```{r, echo=FALSE, fig.cap="An example of the Standard deviation- Rank based on mean abundance plot that will be created."}
-knitr::include_graphics(system.file("extdata", "sdmeanplot.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "sdmeanplot.jpeg", package = "ProtE"))
 ```
 
 
@@ -94,13 +94,13 @@ When using algorithm-induced imputation (e.g., kNN, MissRanger), an additional h
 
 
 ```{r, echo=FALSE, fig.cap="An example of the histogram of imputed values showing their distribution."}
-knitr::include_graphics(system.file("extdata", "imputation_histogram.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "imputation_histogram.jpeg", package = "ProtE"))
 ```
 
 Additionally, a protein log2 abundance rank plot is created to provide information about the missing values for each protein:
 
 ```{r, echo=FALSE, fig.cap="An example of the Protein Abundance Rank plot that will be created"}
-knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "ProtE"))
 ```
 
 
@@ -121,13 +121,13 @@ To visualize the distribution of data for each sample, a boxplot and violin plot
 
 
 ```{r, echo=FALSE, fig.cap="                                    An example of the Boxplot that will be created with the protein abundance values for each sample."}
-knitr::include_graphics(system.file("extdata", "Boxplot.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "Boxplot.jpeg", package = "ProtE"))
 ```
 
 
 
 ```{r, echo=FALSE, fig.cap="                                   An example of the Violin plot that will be created with the protein abundance values for each sample."}
-knitr::include_graphics(system.file("extdata", "ViolinPlot.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "ViolinPlot.jpeg", package = "ProtE"))
 ```
 
 
@@ -136,7 +136,7 @@ Principal Component Analysis (PCA) is also performed on the log2-transformed pro
 
 
 ```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created with the 1st and 2nd Principal Components in each axis."}
-knitr::include_graphics(system.file("extdata", "pcaplotall.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "pcaplotall.jpeg", package = "ProtE"))
 ```
 
 
@@ -147,13 +147,13 @@ Users can select the statistical method for determining significance by setting 
 A PCA plot is then generated based on the significant proteins:
 
 ```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created taking into account the significant proteins."}
-knitr::include_graphics(system.file("extdata", "pcaplotsig.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "pcaplotsig.jpeg", package = "ProtE"))
 ```
 
 Additionally, a heatmap of the significant proteins is generated using the ComplexHeatmap package. Proteins are clustered based on similarity in abundance patterns across groups, and the heatmap provides an overview of group-specific differences.
 
 ```{r, echo=FALSE, fig.cap="An example of the heatmap that will be created taking into account the significant proteins."}
-knitr::include_graphics(system.file("extdata", "heatmap.jpeg", package = "PACKAGE"))
+knitr::include_graphics(system.file("extdata", "heatmap.jpeg", package = "ProtE"))
 ```
 
 Lastly, an excel file names Quality_check.xlsx provides information about the percentage of missing values  before and after filtering, along with the scores of the first 2 principal components for each sample. 

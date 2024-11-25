@@ -1,3 +1,3 @@
-# PACKAGE 0.1.0
+# ProtE 0.1.0
 
 * Initial CRAN submission.
