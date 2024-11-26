@@ -40,8 +40,12 @@ ProtE features 4 functions, each one tailored for a specific use case.
 3.  ```pd_single()``` accepts as input the Proteome Discoverer output file that contains all sample protein intensities/abundances in one table
 4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity files (Ask Mirka for the naming of the PD settings that determine this)
 
+All 4 functions expect the input file(s) to be parsed in the parameter ```excel_file```. 
+
 # How to use functions 1-3
-Functions 1-3 contain the same parameters, but differ in the column names of the input data they expect to read. The input file is parsed in the parameter.
+Functions 1-3 expect the input samples (columns) to be sorted consecutively based on the categorical variable that are going to be analyzed for. Example of an experiment with a 3-groups categorical variable: first columns = Group 1, middle columns = Group 2, last columns = Group 3.
+
+# Seting up the pointer to the file path:
 Assuming a MaxQuant quantification has been performed, the file protein_pg.xlsx can be fed to ProtE with the following function:
 ```{r, eval=FALSE}
 maximum_quantum <- (excel_file,
@@ -55,13 +59,54 @@ maximum_quantum <- (excel_file,
                     parametric= FALSE,
                     significance = "pV")
 ```
- using the file path.
+Insert the file path of the protein_pg.xlsx in the ```excel_file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click to paste the path. It should look like similar to this:
+```{r, eval=FALSE}
+maximum_quantum <- (excel_file = "C:\Bioprojects\BreastCancer\Proteomics\MaxQuant\protein_pg.xlsx",
+                    group_names,
+                    samples_per_group,
+                    imputation = FALSE,
+                    global_filtering = TRUE,
+                    sample_relationship = "Independent",
+                    threshold_value = 50,
+                    normalization = FALSE,
+                    parametric= FALSE,
+                    significance = "pV")
+```
+Now add a second ```\```:
 
-Insert the file path of the protein_pg.xlsx in the ```excel_file``` parameter. To copy paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V to paste the path to the file
+```{r, eval=FALSE}
+maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
+                    group_names,
+                    samples_per_group,
+                    imputation = FALSE,
+                    global_filtering = TRUE,
+                    sample_relationship = "Independent",
+                    threshold_value = 50,
+                    normalization = FALSE,
+                    parametric= FALSE,
+                    significance = "pV")
+```
 
-Functions 1-3 expect the input samples (columns) to be sorted consecutively based on the categorical variable that are going to be analyzed for (example of an experiment with a categorical variable having 3 groups: first columns = Group 1, middle columns = Group 2, last columns = Group 3). The user then has to specify the number of samples for each group in the paramater:  
+# Seting up group names and number of samples per group
+
+Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) appear in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```.
+
+maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
+                    group_names = c("Control", "Treatment", "Compound"),
+                    samples_per_group = c(10, 12, 9),
+                    imputation = FALSE,
+                    global_filtering = TRUE,
+                    sample_relationship = "Independent",
+                    threshold_value = 50,
+                    normalization = FALSE,
+                    parametric= FALSE,
+                    significance = "pV")
+```
+In the pairwise comparisons, nominators and denominators for the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
+In our example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
 
 
+# How to use function 4
 
 
 
