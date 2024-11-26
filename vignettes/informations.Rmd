@@ -89,8 +89,8 @@ maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\Max
 
 # Seting up group names and number of samples per group
 
-Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) appear consequtively in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```.
-
+Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) appear consequtively in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```:
+```
 maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
                     group_names = c("Control", "Treatment", "Compound"),
                     samples_per_group = c(10, 12, 9),
