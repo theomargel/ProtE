@@ -43,9 +43,9 @@ ProtE features 4 functions, each one tailored for a specific use case.
 All 4 functions expect the input file(s) to be parsed in the parameter ```excel_file```. 
 
 # How to use functions 1-3
-Functions 1-3 expect the samples (columns) to be sorted consecutively (from the left to the right) in the input file, based on the categorical variable that are going to be analyzed for. Example of an experiment with a 3-groups categorical variable: first 10 columns = Control , middle columns = Treatment, last columns = Compound.
+Functions 1-3 require the samples (columns) in the input file to be sorted consecutively (from left to right) based on the categorical variable that are going to be analyzed for. Example of an experiment with a 3-groups categorical variable: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
 
-# Seting up the pointer to the file path:
+# Seting up the pointer to the input file path:
 Assuming a MaxQuant quantification has been performed, the file protein_pg.xlsx can be fed to ProtE with the following function:
 ```{r, eval=FALSE}
 maximum_quantum <- (excel_file,
