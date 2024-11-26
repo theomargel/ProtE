@@ -102,7 +102,7 @@ maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\Max
                     parametric= FALSE,
                     significance = "pV")
 ```
-In the pairwise comparisons, nominators and denominators for the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
+In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
 In our example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
 
 
