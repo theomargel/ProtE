@@ -37,11 +37,11 @@
 #'
 #' # Paths to example data folders within the package
 #' T1_path <- system.file("extdata", "PDexports(multiple_files)",
-#'  "T1_BLCA", package = "PACKAGE")
+#'  "T1_BLCA", package = "ProtE")
 #' T2_path <- system.file("extdata", "PDexports(multiple_files)",
-#' "T2_BLCA", package = "PACKAGE")
+#' "T2_BLCA", package = "ProtE")
 #' Ta_path <- system.file("extdata", "PDexports(multiple_files)",
-#' "Ta_BLCA", package = "PACKAGE")
+#' "Ta_BLCA", package = "ProtE")
 #'
 #' # Run the function with these paths
 #' pd_multi(
@@ -110,14 +110,23 @@ colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 path_g1 <- dirname(group1)
 path_res <- file.path(path_g1, "MS_analysis")
 dir.create(path_res, showWarnings = FALSE)
+path_restat <- file.path(path_res, "Statistical_Analysis")
+path_resman <- file.path(path_res, "Data_processing")
+path_resplot <- file.path(path_res, "Plots")
+
+dir.create(path_restat, showWarnings = FALSE)
+dir.create(path_resman, showWarnings = FALSE)
+dir.create(path_resplot, showWarnings = FALSE)
+
 
 (message("All files created will be stored in the folder MS_analysis, that is located on the last directory of the first group that you input."))
-mt_file_path <- file.path(path_res, "Masterlist.xlsx")
+mt_file_path <- file.path(path_resman, "Masterlist.xlsx")
 openxlsx::write.xlsx(dataspace, file = mt_file_path)
     message("Concatenated all data files to a single matrix, saved as Masterlist.xlsx")
 
     zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
     IDs <- colSums(!is.na(dataspace[,-1:-2]))
+
 
     colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
     rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
@@ -135,7 +144,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
     Gdataspace<-Gdataspace %>%
       dplyr::select(Accession, Description, Symbol, everything())
     colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-    norm_file_path <- file.path(path_res, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
     openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
     message("Applying the selected normalization, saved as Normalized.xlsx")}
 
@@ -148,7 +157,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       Gdataspace<-Gdataspace %>%
         dplyr::select(Accession, Description, Symbol, everything())
       colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      norm_file_path <- file.path(path_resman, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx") }
     if (normalization == "log2"){
@@ -159,7 +168,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       Gdataspace<-Gdataspace %>%
         dplyr::select(Accession, Description, Symbol, everything())
       colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      norm_file_path <- file.path(path_resman, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx") }
     if (normalization == "Total_Ion_Current") {
@@ -170,7 +179,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       Gdataspace<-Gdataspace %>%
         dplyr::select(Accession, Description, Symbol, everything())
       colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      norm_file_path <- file.path(path_resman, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
      if ( normalization == "VSN") {
@@ -181,7 +190,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
        Gdataspace<-Gdataspace %>%
          dplyr::select(Accession, Description, Symbol, everything())
        colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-       norm_file_path <- file.path(path_res, "Normalized.xlsx")
+       norm_file_path <- file.path(path_resman, "Normalized.xlsx")
        openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
        message("Applying the selected normalization, saved as Normalized.xlsx")
             }
@@ -194,19 +203,19 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       Gdataspace<-Gdataspace %>%
         dplyr::select(Accession, Description, Symbol, everything())
       colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
-      norm_file_path <- file.path(path_res, "Normalized.xlsx")
+      norm_file_path <- file.path(path_resman, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
 
     if (normalization == FALSE ){
       dataspace <- dataspace
-      sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+      sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
       dev.off()
       message("Mean-SD plot of the data saved as meanSdPlot.pdf has been created.")
     } else {
-      sdrankplot_path <- file.path(path_res, "meanSdPlot.pdf")
+      sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
       dev.off()
@@ -279,22 +288,18 @@ if (global_filtering == TRUE) {
     dataspace <- dataspace[dataspace$Number_0_all_groups < sum(samples_per_group),]
 
     if (global_filtering == TRUE) {
-      bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
-      openxlsx::write.xlsx(dataspace, file = bt_file_path)
       dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-      at_file_path <- file.path(path_res, "Dataset_filtering_applied.xlsx")
+      at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)
     }
 
     if (global_filtering == FALSE) {
-      bt_file_path <- file.path(path_res, "Dataset_before_threshold.xlsx")
-      openxlsx::write.xlsx(dataspace, file = bt_file_path)
       keep_rows <- rep(FALSE, nrow(dataspace))
       for (j in 1:groups_number) {
         keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
       }
       dataspace <- dataspace[keep_rows, ]
-      at_file_path <- file.path(path_res, "Dataset_filtering_applied.xlsx")
+      at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)}
       message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_filtering_applied.xlsx")
     dataspace_0s<- dataspace
@@ -315,25 +320,25 @@ if (global_filtering == TRUE) {
     if (imputation == "kNN") {
       dataspace[dataspace==0] <- NA
       dataspace[, -c(1, 2)] <- VIM::kNN(dataspace[, -c(1, 2)], imp_var = FALSE, k= 5)
-      imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+      imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path)
     }
     if (imputation == "LOD"){
       dataspace[dataspace==0] <- NA
       impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
       dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-      imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+      imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
     if (imputation == "LOD/2"){
       dataspace[dataspace==0] <- NA
       impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)/2
       dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
-      imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+      imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
     if(imputation == "missRanger"){
       dataspace[dataspace==0] <- NA
       dataspace[,-c(1,2)] <- missRanger::missRanger(dataspace[,-c(1,2)])
-      imp_file_path <- file.path(path_res, "Dataset_Imputed.xlsx")
+      imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
     if (imputation %in% c("kNN","missRanger"))    {
       pre_dataspace1<-pre_dataspace[,-1:-2]
@@ -360,7 +365,7 @@ if (global_filtering == TRUE) {
 
       imp_hist
 
-      ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_res,
+      ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
       message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
@@ -386,7 +391,7 @@ if (global_filtering == TRUE) {
                 legend.text = element_text(size = 9))
         abund.plot
 
-        ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
+        ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_resplot,
                         scale = 1, width = 12, height = 5, units = "in",
                         dpi = 300, limitsize = TRUE, bg = "white")
       }
@@ -412,7 +417,7 @@ if (global_filtering == TRUE) {
 
     abund.plot
 
-    ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_res,
+    ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_resplot,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     }
@@ -477,7 +482,7 @@ if (global_filtering == TRUE) {
     limma_dataspace<-limma_dataspace %>%
       dplyr::select(Accession, any_of(c("Protein.Names","Description")), dplyr::everything())
     limma_dataspace <- limma_dataspace[,1:ncollimma]
-    limma_file_path <- file.path(path_res, "Dataset_limma.test.xlsx")
+    limma_file_path <- file.path(path_restat, "Dataset_limma.test.xlsx")
     openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
     message("The statistics from the limma parametric tests are showcased in the created Dataset_limma.test.xlsx file.")
 
@@ -622,9 +627,9 @@ if (global_filtering == TRUE) {
     Fdataspace <- Fdataspace[,-c(4:start_col)]
 
 
-    stats_file_path <- file.path(path_res, "Statistical_analysis.xlsx")
+    stats_file_path <- file.path(path_restat, "Statistics.xlsx")
     openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-    message("An excel with the statistical tests for the normalized data was created as Statistical_analysis.xlsx")
+    message("An excel with the statistical tests (Mann Whitney, Bartlett, Leven, Kruskal Wallis tests) was created as Statistical_analysis.xlsx")
 
 
 
@@ -674,7 +679,7 @@ if (global_filtering == TRUE) {
 
     pca.ent
 
-    ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_res,
+    ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
     message("PCA plot using all data was created as PCA_plot_alldata.pdf")
@@ -711,7 +716,7 @@ if (global_filtering == TRUE) {
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)
 
-      qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+      qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)    }   else {
       log.dataspace.sig <- log.dataspace[which.sig,]
 
@@ -733,7 +738,7 @@ if (global_filtering == TRUE) {
                                                title = "Z-Score",
                                                color_bar = "continuous"
                                              ))
-      pdf_file_path <- file.path(path_res, "heatmap.pdf")
+      pdf_file_path <- file.path(path_resplot, "heatmap.pdf")
       pdf(pdf_file_path, width = 7.37, height = 6.09)
       ComplexHeatmap::draw(heatmap_data)
       dev.off()
@@ -751,7 +756,7 @@ if (global_filtering == TRUE) {
       qc$PC2.score.Significant <-pca$x[,2]
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)
-      qc_file_path <- file.path(path_res, "Quality_check.xlsx")
+      qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)
 
       message("An excel file named Quality_check.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
@@ -774,14 +779,14 @@ if (global_filtering == TRUE) {
 
       pca.sig
 
-      ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_res,
+      ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
       message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
       a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
                            common.legend = TRUE, legend = "bottom")
 
-      ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_res,
+      ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_resplot,
                       scale = 1, width = 8, height = 4.5, units = "in",
                       dpi = 300, limitsize = TRUE)
       message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
@@ -821,7 +826,7 @@ if (global_filtering == TRUE) {
 
       qc.boxplots
 
-      ggplot2::ggsave("Boxplot_withZeros.pdf", plot = qc.boxplots,  path = path_res,
+      ggplot2::ggsave("Boxplot_withZeros.pdf", plot = qc.boxplots,  path = path_resplot,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
 
@@ -846,12 +851,12 @@ if (global_filtering == TRUE) {
 
     qc.boxplots.na
     if (imputation == FALSE) {
-      ggplot2::ggsave("Boxplot_withoutZeros.pdf", plot = qc.boxplots.na, path = path_res,
+      ggplot2::ggsave("Boxplot_withoutZeros.pdf", plot = qc.boxplots.na, path = path_resplot,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     } else
     {
-      ggplot2::ggsave("Boxplot.pdf", plot = qc.boxplots.na, path = path_res,
+      ggplot2::ggsave("Boxplot.pdf", plot = qc.boxplots.na, path = path_resplot,
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     }
@@ -870,7 +875,7 @@ if (global_filtering == TRUE) {
       scale_x_discrete(labels = p) +
       geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
-    ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_res,
+    ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_resplot,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )

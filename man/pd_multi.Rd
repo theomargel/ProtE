@@ -45,11 +45,11 @@ It takes as input the  Proteomics Data (output of PD) in the format of a single 
 
 # Paths to example data folders within the package
 T1_path <- system.file("extdata", "PDexports(multiple_files)",
- "T1_BLCA", package = "PACKAGE")
+ "T1_BLCA", package = "ProtE")
 T2_path <- system.file("extdata", "PDexports(multiple_files)",
-"T2_BLCA", package = "PACKAGE")
+"T2_BLCA", package = "ProtE")
 Ta_path <- system.file("extdata", "PDexports(multiple_files)",
-"Ta_BLCA", package = "PACKAGE")
+"Ta_BLCA", package = "ProtE")
 
 # Run the function with these paths
 pd_multi(

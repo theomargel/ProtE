@@ -46,7 +46,7 @@ It takes as input the Proteomics Data (output of DIA-NN) in the format of an exc
 }
 \examples{
 report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
- "jittered.pg_matrix.xlsx", package = "PACKAGE")
+ "jittered.pg_matrix.xlsx", package = "ProtE")
  dianno(report.pg_matrix,
  group_names= c("Healthy","Patients"), samples_per_group= c(9,9),
    global_filtering = TRUE, sample_relationship = "Independent",
