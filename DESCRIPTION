@@ -1,6 +1,6 @@
 Package: ProtE
 Type: Package
-Title: Proccessing the proteomics output data, then statistically analyzing and visualize them
+Title:Proccessing the Proteomics Output Data, then Statistically Analyzing and Visualize It
 Version: 0.1.0
 Author: Theodoros Margelos , Rafael Strogyllos
 Maintainer: Theodoros Margelos <ted.margelos02@gmail.com>

@@ -45,7 +45,7 @@ Excel files with the proteomic values that are optionally processed, via imputat
 It takes as input the Proteomics Data (output of DIA-NN) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 }
 \examples{
-report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
+report.pg_matrix <- system.file("extdata",
  "jittered.pg_matrix.xlsx", package = "ProtE")
  dianno(report.pg_matrix,
  group_names= c("Healthy","Patients"), samples_per_group= c(5,5),

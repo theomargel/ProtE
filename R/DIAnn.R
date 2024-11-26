@@ -35,7 +35,7 @@
 #' @importFrom vsn meanSdPlot
 #'
 #' @examples
-#'report.pg_matrix <- system.file("extdata/DIA-NNorFragPipeExports.pg.matrix",
+#'report.pg_matrix <- system.file("extdata",
 #'  "jittered.pg_matrix.xlsx", package = "ProtE")
 #'  dianno(report.pg_matrix,
 #'  group_names= c("Healthy","Patients"), samples_per_group= c(5,5),
