@@ -14,29 +14,29 @@ pd_single(
   threshold_value = 50,
   normalization = FALSE,
   parametric = FALSE,
-  significancy = "pV"
+  significance = "pV"
 )
 }
 \arguments{
-\item{excel_file}{The whole path to the excel *.xlsx file, that will be analysed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{excel_file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
 
 \item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.}
 
-\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 itensities of the imputed data compared to the initial ones.}
+\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 
 \item{global_filtering}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.}
 
 \item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other}
 
-\item{threshold_value}{The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50%)}
+\item{threshold_value}{The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)}
 
 \item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 
 \item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). By default it is set to FALSE (non Parametric)}
 
-\item{significancy}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)}
+\item{significance}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)}
 }
 \value{
 Excel files with the proteomic values that are optionally processed, via normalization , imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
