@@ -18,11 +18,11 @@ maximum_quantum(
 )
 }
 \arguments{
-\item{file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the ProteinGroups.txt file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
-\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
+\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted ProteinGroups.txt file.}
 
-\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.}
+\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted ProteinGroups.txt file.}
 
 \item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 

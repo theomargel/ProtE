@@ -2,7 +2,7 @@
 #'
 #' It takes as input the Proteomics Data (output of DIA-NN) in the format of a tsv file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
-#' @param tsv_file The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
+#' @param file The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted tsv file.
 #' @param samples_per_group The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted tsv file.
 #' @param global_filtering TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group separately
@@ -44,7 +44,7 @@
 #'  threshold_value = 50, description = FALSE, imputation = FALSE)
 #' @export
 
-dianno <- function(tsv_file,
+dianno <- function(file,
                       group_names,
                       samples_per_group,
                       imputation = FALSE,
@@ -63,10 +63,10 @@ groups_number <- length(group_names)
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
 
-  dataspace <- utils::read.delim2(tsv_file, header = TRUE, sep = "\t")
+  dataspace <- utils::read.delim2(file, header = TRUE, sep = "\t")
 
 
-  path <- dirname(tsv_file)
+  path <- dirname(file)
   path_res <- file.path(path , "MS_analysis")
   dir.create(path_res, showWarnings = FALSE)
 

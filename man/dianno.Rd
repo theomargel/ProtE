@@ -5,7 +5,7 @@
 \title{DIA NN  proteomics data analysis}
 \usage{
 dianno(
-  tsv_file,
+  file,
   group_names,
   samples_per_group,
   imputation = FALSE,
@@ -18,7 +18,7 @@ dianno(
 )
 }
 \arguments{
-\item{tsv_file}{The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted tsv file.}
 

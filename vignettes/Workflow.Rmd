@@ -9,10 +9,10 @@ vignette: >
 
 ProtE features 4 functions, each one tailored for a specific use case.
 
-1.  ```maximum_quantum()``` accepts as input the MaxQuant generated file protein_pg.xlsx
-2.  ```dianno()``` accepts as input the DIA-NN (or the FragPipe - DIANN) output file protein_pg.xlsx
-3.  ```pd_single()``` accepts as input the Proteome Discoverer output file that contains all sample protein intensities/abundances in one table
-4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity files (Ask Mirka for the naming of the PD settings that determine this)
+1.  ```maximum_quantum()``` accepts as input the MaxQuant generated file ProteinGroups.txt
+2.  ```dianno()``` accepts as input the DIA-NN (or the FragPipe - DIANN) output files .pg_matrix.tsv or unique_genes_matrix.tsv 
+3.  ```pd_single()``` accepts as input the Proteome Discoverer output excel file that contains all sample protein intensities/abundances in one table
+4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity excel files 
 
 All 4 functions expect the input file(s) to be parsed in the parameter ```excel_file```. 
 
