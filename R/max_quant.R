@@ -39,7 +39,7 @@
 #' #Do not add if (interactive()){} condition in your code
 #' if (interactive()){
 #' maximum_quantum(
-#'"C:/Users/User/Documents/proteinGroups.xlsx",
+#'"C:/Users/User/Documents/ProteinGroups.txt",
 #' groups_number = 2,
 #' group_names = c("T0","T1"),
 #' samples_per_group = c(3,3), threshold_value = 100)}

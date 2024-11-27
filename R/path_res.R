@@ -34,6 +34,9 @@
 #' @importFrom vsn meanSdPlot
 #'
 #' @examples
+#'Example of running the function with paths for two groups.
+#' #Do not add if (interactive()){} condition in your code
+#' if (interactive()){
 #'
 #' # Paths to example data folders within the package
 #' T1_path <- system.file("extdata", "PDexports(multiple_files)",
@@ -48,7 +51,7 @@
 #'   T1_path, T2_path, Ta_path,
 #'   normalization = "PPM", sample_relationship = "Paired",
 #'   imputation = "LOD", global_filtering = TRUE
-#' )
+#' )}
 #'
 #'
 #' @export

@@ -42,6 +42,9 @@ Excel files with the proteomic values that are optionally processed, via normali
 It takes as input the  Proteomics Data (output of PD) in the format of a single file per sample. After concatenating the Accession_ID, Description and Area or Abundance from the PD export files of each sample, into a master table, it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 }
 \examples{
+Example of running the function with paths for two groups.
+#Do not add if (interactive()){} condition in your code
+if (interactive()){
 
 # Paths to example data folders within the package
 T1_path <- system.file("extdata", "PDexports(multiple_files)",
@@ -56,7 +59,7 @@ pd_multi(
   T1_path, T2_path, Ta_path,
   normalization = "PPM", sample_relationship = "Paired",
   imputation = "LOD", global_filtering = TRUE
-)
+)}
 
 
 }
