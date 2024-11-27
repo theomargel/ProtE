@@ -35,9 +35,10 @@
 #' @importFrom missRanger missRanger
 #' @importFrom utils read.delim
 #'
-#' @examples #' # Example of running the function with paths for two groups.
-#' #Do not add if (interactive()){} condition in your code
-#' if (interactive()){
+#' @examples
+#' #Example of running the function with paths for two groups.
+#' # The file path is a placeholder, replace it with an actual file.
+#' \dontrun{
 #' maximum_quantum(
 #'"C:/Users/User/Documents/ProteinGroups.txt",
 #' groups_number = 2,

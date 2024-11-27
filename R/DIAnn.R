@@ -35,13 +35,15 @@
 #' @importFrom vsn meanSdPlot
 #' @importFrom utils read.delim2
 #'
-#' @examples# Example of running the function with paths for two groups.
-#' #Do not add if (interactive()){} condition in your code
-#' if (interactive()){
+#' @examples
+#' #Example of running the function with paths for two groups.
+#' \donttest{
+#' report.pg_matrix <- system.file("extdata", "report.pg_matrix.tsv", package = "ProtE")
 #'  dianno(file = report.pg_matrix,
 #'  group_names= c("Healthy","Patients"), samples_per_group= c(5,5),
 #'    global_filtering = TRUE, sample_relationship = "Independent",
 #'  threshold_value = 50, description = FALSE, imputation = FALSE)}
+#'
 #' @export
 
 dianno <- function(file,
