@@ -5,7 +5,7 @@
 \title{Proteome Discoverer proteomic data analysis}
 \usage{
 pd_single(
-  excel_file,
+  file,
   group_names,
   samples_per_group,
   imputation = FALSE,
@@ -18,7 +18,7 @@ pd_single(
 )
 }
 \arguments{
-\item{excel_file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
 
@@ -47,7 +47,7 @@ It takes as input the Proteomics Data (output of PD) in the format of an excel f
 \examples{
 #' # Example of running the function with paths for two groups.
 if (interactive()){
-pd_single(excel_file = "C:/Users/User/Documents/new_version_PD.xlsx",
+pd_single(file = "C:/Users/User/Documents/new_version_PD.xlsx",
 groups_number = 2,group_names = c("exp_2020","exp_2024"),
  samples_per_group = c(18,8), imputation = FALSE, threshold_value = 100)}
 

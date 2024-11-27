@@ -29,8 +29,8 @@ Imports:
     ComplexHeatmap,
 Suggests: 
     BiocManager,
-    knitr,
-    rmarkdown
+    rmarkdown,
+    knitr
 URL: https://github.com/theomargel/ProtE
 BugReports: https://github.com/theomargel/ProtE/issues
 RoxygenNote: 7.3.2

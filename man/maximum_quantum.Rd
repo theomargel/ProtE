@@ -5,7 +5,7 @@
 \title{MaxQuant proteomics data analysis}
 \usage{
 maximum_quantum(
-  excel_file,
+  file,
   group_names,
   samples_per_group,
   imputation = FALSE,
@@ -18,7 +18,7 @@ maximum_quantum(
 )
 }
 \arguments{
-\item{excel_file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
 \item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
 

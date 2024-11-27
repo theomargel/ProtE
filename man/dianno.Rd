@@ -5,7 +5,7 @@
 \title{DIA NN  proteomics data analysis}
 \usage{
 dianno(
-  excel_file,
+  tsv_file,
   group_names,
   samples_per_group,
   imputation = FALSE,
@@ -18,11 +18,11 @@ dianno(
 )
 }
 \arguments{
-\item{excel_file}{The whole path to the excel .xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{tsv_file}{The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
-\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.}
+\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted tsv file.}
 
-\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.}
+\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted tsv file.}
 
 \item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 
@@ -36,13 +36,13 @@ dianno(
 
 \item{significance}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)}
 
-\item{description}{If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism. These option is applicable only when a pg.matrix (protein groups) excel is provided and requires internet access. By default it is set to FALSE (No description fetching)}
+\item{description}{If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism. These option is applicable only when a pg.matrix (protein groups) tsv is provided and requires internet access. By default it is set to FALSE (No description fetching)}
 }
 \value{
 Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 }
 \description{
-It takes as input the Proteomics Data (output of DIA-NN) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
+It takes as input the Proteomics Data (output of DIA-NN) in the format of a tsv file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 }
 \examples{
 report.pg_matrix <- system.file("extdata",

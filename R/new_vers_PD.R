@@ -2,7 +2,7 @@
 #'
 #' It takes as input the Proteomics Data (output of PD) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include different methods of normalization, and filtering based on the missing values per protein. Additionally, imputation of  the missing values can be performed, and a quality check with their percentage across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
-#' @param excel_file The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
+#' @param file The whole path to the excel *.xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
 #' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
 #' @param samples_per_group The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
 #' @param global_filtering TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.
@@ -36,13 +36,13 @@
 #'
 #' @examples #' # Example of running the function with paths for two groups.
 #' if (interactive()){
-#' pd_single(excel_file = "C:/Users/User/Documents/new_version_PD.xlsx",
+#' pd_single(file = "C:/Users/User/Documents/new_version_PD.xlsx",
 #' groups_number = 2,group_names = c("exp_2020","exp_2024"),
 #'  samples_per_group = c(18,8), imputation = FALSE, threshold_value = 100)}
 #'
 #' @export
 
-pd_single <- function(excel_file,
+pd_single <- function(file,
                             group_names,
                             samples_per_group,
                         imputation = FALSE,
@@ -64,9 +64,9 @@ message("The ProtE process starts now")
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
 
- dataspace <- openxlsx::read.xlsx(excel_file)
+ dataspace <- openxlsx::read.xlsx(file)
 
-   path <- dirname(excel_file)
+   path <- dirname(file)
   path_res <- file.path(path , "MS_analysis")
   dir.create(path_res, showWarnings = FALSE)
 

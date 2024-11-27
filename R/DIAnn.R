@@ -33,6 +33,7 @@
 #' @importFrom missRanger missRanger
 #' @importFrom car leveneTest
 #' @importFrom vsn meanSdPlot
+#' @importFrom utils read.delim2
 #'
 #' @examples
 #'report.pg_matrix <- system.file("extdata",
