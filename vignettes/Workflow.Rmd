@@ -37,7 +37,7 @@ The `maximum_quantum` function is created to analyze the Excel file *ProteinGrou
 
  `dianno`
 
-The `dianno` function is created to analyze the .pg_matrix and unique_genes_matrix Excel files that come as the output of the DIA-NN software.
+The `dianno` function is created to analyze the .pg_matrix and unique_genes_matrix tsv files that come as the output of the DIA-NN software.
 
 If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access and will be available only when the input is the .pg_matrix. 
 

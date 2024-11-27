@@ -1,17 +1,17 @@
 #' DIA NN  proteomics data analysis
 #'
-#' It takes as input the Proteomics Data (output of DIA-NN) in the format of an excel file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
+#' It takes as input the Proteomics Data (output of DIA-NN) in the format of a tsv file that contains the information for each sample. Then it performs exploratory data analysis. The options for the data manipulation include filtering based on the missing values per protein, fetching their description information from UniProt and their imputation, as well as a quality check with the percentage of MVs across every protein is provided. It then proceeds to perform statistical analysis using the Mann Whitney and the limma t-test for pairwise comparisons and  also Kruskal-Wallis and limma-ANOVA statistical tests,when there are more than 2 groups, while the pValues from the Levene and Bartlett statistical tests are also shown. The function also creates exploratory plots such as relative log espression boxplots and violin plots, heatmaps of the significant differentially expressed proteins and PCA plots.
 #'
-#' @param excel_file The whole path to the excel .xlsx file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
-#' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted excel file.
-#' @param samples_per_group The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted excel file.
+#' @param tsv_file The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
+#' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted tsv file.
+#' @param samples_per_group The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted tsv file.
 #' @param global_filtering TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group separately
 #' @param imputation Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other
 #' @param threshold_value The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)
 #' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). By default it is set to FALSE (non Parametric)
 #' @param significance  pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)
-#' @param description If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism. These option is applicable only when a pg.matrix (protein groups) excel is provided and requires internet access. By default it is set to FALSE (No description fetching)
+#' @param description If TRUE protein information about the first protein inside the protein group like protein name, SV, OS, organism. These option is applicable only when a pg.matrix (protein groups) tsv is provided and requires internet access. By default it is set to FALSE (No description fetching)
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
@@ -43,7 +43,7 @@
 #'  threshold_value = 50, description = FALSE, imputation = FALSE)
 #' @export
 
-dianno <- function(excel_file,
+dianno <- function(tsv_file,
                       group_names,
                       samples_per_group,
                       imputation = FALSE,
@@ -62,10 +62,10 @@ groups_number <- length(group_names)
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
 
-  dataspace <- openxlsx::read.xlsx(excel_file)
+  dataspace <- utils::read.delim2(tsv_file, header = TRUE, sep = "\t")
 
 
-  path <- dirname(excel_file)
+  path <- dirname(tsv_file)
   path_res <- file.path(path , "MS_analysis")
   dir.create(path_res, showWarnings = FALSE)
 
