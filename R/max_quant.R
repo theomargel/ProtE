@@ -316,8 +316,9 @@ message("The ProtE process starts now!")
     imp.values<- dataspace1 - pre_dataspace1
 
     his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
-    loghis_dataspace<-log2(his_dataspace+1)
 
+    if   (normalization %in% c("log2", "Quantile")){loghis_dataspace = his_dataspace
+    }else{loghis_dataspace<-log2(his_dataspace+1)}
 
     his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
     nrows<-nrow(his_long)
@@ -346,7 +347,9 @@ message("The ProtE process starts now!")
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
     dataspace$mean <- rowMeans(dataspace[,3:(2+sum(samples_per_group))])
-    dataspace$log<-log2(dataspace$mean)
+    if (normalization %in% c("log2", "Quantile")){dataspace$log = dataspace$mean}
+    else {
+    dataspace$log<-log2(dataspace$mean)}
     dataspace$rank <- rank(-dataspace$mean)
 
     abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
@@ -371,7 +374,9 @@ message("The ProtE process starts now!")
   dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
   dataspace$percentage <- dataspace_0s$percentage
   dataspace$mean <- apply(dataspace[, 3:(2+sum(samples_per_group))], 1, function(x) mean(x[x != 0]))
-  dataspace$log<-log2(dataspace$mean)
+  if (normalization %in% c("log2", "Quantile")){dataspace$log = dataspace$mean}
+  else {
+    dataspace$log<-log2(dataspace$mean)}
   dataspace$rank <- rank(-dataspace$mean)
 
   abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
@@ -410,7 +415,8 @@ message("The ProtE process starts now!")
 
   nndataspace<- dataspace[,-1:-2]
   nndataspace[is.na(nndataspace)] <- 0
-  nndataspace <- log2(nndataspace+1)
+  if   (normalization %in% c("log2", "Quantile")){nndataspace = nndataspace
+  }else{nndataspace <- log2(nndataspace+1)}
 
   if (sample_relationship == "Paired"){
     if (length(unique(samples_per_group)) != 1){
@@ -608,7 +614,9 @@ message("The ProtE process starts now!")
 
   Group2<-unique(groups_list_f)
 
-  log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
+  if   (normalization %in% c("log2", "Quantile")){log.dataspace = dataspace[,-c(1:2)]
+  }else{
+  log.dataspace <- log(dataspace[,-c(1:2)]+1,2)}
 
 
   pca<-prcomp(t(log.dataspace), scale=TRUE, center=TRUE)
