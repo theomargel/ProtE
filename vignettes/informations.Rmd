@@ -43,9 +43,9 @@ ProtE features 4 functions, each one tailored for a specific use case.
 All 4 functions expect the input file(s) to be parsed in the parameter ```file```. 
 
 # How to use functions 1-3
-Functions 1-3 require the samples (columns) in the input file to be sorted consecutively (from left to right) based on the categorical variable that are going to be analyzed for. Example of an experiment with a 3-groups categorical variable: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
+To enable statistical analysis, in the input .tsv or .xlsx file, samples (columns) belonging to the same group must be sorted next to each other. For example, samples from an experiment with a 3-groups categorical variable (control, treatment, compound) could be arranged such that: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
 
-# Seting up the pointer to the input file path:
+## Seting up the input file path:
 Assuming a MaxQuant quantification has been performed, the file protein_pg.xlsx can be fed to ProtE with the following function:
 ```{r, eval=FALSE}
 maximum_quantum <- (file,
@@ -59,20 +59,10 @@ maximum_quantum <- (file,
                     parametric= FALSE,
                     significance = "pV")
 ```
+
 Insert the file path of the protein_pg.xlsx in the ```file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click to paste the path. It should look like similar to this:
-```{r, eval=FALSE}
-maximum_quantum <- (file = "C:\Bioprojects\BreastCancer\Proteomics\MaxQuant\protein_pg.xlsx",
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-Now add a second ```\```:
+
+Now add a second ```\``` to the file path:
 
 ```{r, eval=FALSE}
 maximum_quantum <- (file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
@@ -87,10 +77,11 @@ maximum_quantum <- (file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\
                     significance = "pV")
 ```
 
-# Seting up group names and number of samples per group
+## Seting up group names and number of samples per group
+Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) have been arranged in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```:
 
-Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) appear consequtively in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```:
-```
+```{r, eval=FALSE}
+
 maximum_quantum <- (file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
                     group_names = c("Control", "Treatment", "Compound"),
                     samples_per_group = c(10, 12, 9),
@@ -102,6 +93,7 @@ maximum_quantum <- (file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\
                     parametric= FALSE,
                     significance = "pV")
 ```
+
 In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
 In our example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
 
