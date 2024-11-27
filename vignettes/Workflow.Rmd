@@ -7,102 +7,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-ProtE features 4 functions, each one tailored for a specific use case.
-
-1.  ```maximum_quantum()``` accepts as input the MaxQuant generated file ProteinGroups.txt
-2.  ```dianno()``` accepts as input the DIA-NN (or the FragPipe - DIANN) output files .pg_matrix.tsv or unique_genes_matrix.tsv 
-3.  ```pd_single()``` accepts as input the Proteome Discoverer output excel file that contains all sample protein intensities/abundances in one table
-4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity excel files 
-
-All 4 functions expect the input file(s) to be parsed in the parameter ```excel_file```. 
-
-# How to use functions 1-3
-To enable statistical analysis, in the input .tsv or .xlsx file, samples (columns) belonging to the same group must be sorted next to each other. For example, samples from an experiment with a 3-groups categorical variable (control, treatment, compound) could be arranged such that: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
-
-## Seting up the pointer to the input file path:
-Assuming a MaxQuant quantification has been performed, the file protein_pg.xlsx can be fed to ProtE with the following function:
-```{r, eval=FALSE}
-maximum_quantum <- (excel_file,
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-Insert the file path of the protein_pg.xlsx in the ```excel_file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click and paste the path. It should look like similar to this:
-```{r, eval=FALSE}
-maximum_quantum <- (excel_file = "C:\Bioprojects\BreastCancer\Proteomics\MaxQuant\protein_pg.xlsx",
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-Now add a second ```\``` to the file path:
-
-```{r, eval=FALSE}
-maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-
-## Seting up group names and number of samples per group
-Group names are defined in the parameter ```group_names``` as a vector. The order of the group names inside the vector has to follow the order of the groups by which the samples (columns) have been arranged in the input proteomics file (from the left to the right). Same goes for the number of samples of each group, which is defined again as a vector in the parameter ```samples_per_group```:
-```
-maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
-                    group_names = c("Control", "Treatment", "Compound"),
-                    samples_per_group = c(10, 12, 9),
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
-In our example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
-
-
-# How to use function `pd_multi`
-
-`pd_multi` is tailored for the analysis of multiple **Proteome Discoverer** (PD) exports, each one corresponding to a single sample. To be able to use it, the user must save the PD exports to different folders corresponding to the different groups of the variable that is going to be analyzed. The paths to these folders are specified in the parameter ...:
-
-```
-pd_multi (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
-                       "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Treatment",
-                       "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound",
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
-In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group folders written in .... Again, the general notion based on which FoldChange is determined in this case is: NextGroup/PreviousGroup. In our example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
-
-
-
-If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access and will be available only when the input is the .pg_matrix. 
-
-
-
 
 
 # Workflow
@@ -110,7 +14,7 @@ If the parameter `description` is set to `TRUE`, a new column named `description
  
  
 
-The workflow of all these functions is the same, except for the aforementioned changes, and is as follows:
+The workflow of all these functions is the same, except for the mentioned changes, and is as follows:
 
 ## Normalization
 
@@ -123,7 +27,7 @@ Firstly, the data can be processed via normalization, excluding the DIA-NN outpu
 - Median normalization
 - VSN normalization
 
-The Normalized proteomics data are saved as `Normalized.xlsx` in the **MS_Analysis** folder, and they will be used in the downstream analysis.
+The Normalized proteomics data are saved as `Normalized.xlsx` and they will be used in the downstream analysis.
 
 Utilizing the package's "vsn" function `meanSdPlot` a plot with the standard deviation for each protein in the Y axis and their rank based on mean abundance in the X axis will be created.
 
@@ -139,6 +43,11 @@ The data can be filtered based on the percentage of missing values per protein. 
 
 - The parameter `threshold_value` refers to the percentage of missing values per protein allowed to remain in the filtered dataset.
 - The parameter `global_filtering` determines if filtering for missing values will be performed across all groups (`TRUE`), or separately inside each group (`FALSE`). If set to FALSE, proteins passing the frequency threshold in only 1 of the groups, will remain in the data (maximum coverage).
+
+## Description fetching
+Because the output of DIA NN does not include any description of the proteins found, when using the function `dianno` the parameter `description` will be available. 
+If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access and will be utilized only when the input is the .pg_matrix.tsv and not unique_genes_matrix.tsv
+
 
 ## Imputation
 
