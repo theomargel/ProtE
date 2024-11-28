@@ -153,9 +153,14 @@ Once the data processing is complete, the package performs statistical analysis 
 The results from each function are saved in a folder named **ProtE_Analysis**, which is created inside the last directory of the provided file(s).
 
 ProtE creates 3 sub-folders:
-• Data_processing, with the files of the resulting data processing
-• Statistical_Analysis, with the  results of the statistical tests
-• Plots, with all the plots saved in pdf. format
+• Data_processing, with the files of the resulting data processing.
+• Statistical_Analysis, with the  results of the statistical tests.
+• Plots, with all the plots saved in pdf. format.
+
+## How to cite ProtE
+ProtE was compiled out of R scripts utilized for routine processing, analysis and visualization of label-free MS data. These scripts were built and maintained over the course of many years in the Proteomics lab of Dr Antonia Vlahou, in the BRFAA institute (Greece). To continue enriching and expanding the functionality of ProtE we kindly request feedback from the users via..
+
+In order to cite ProtE the following reference can be used:
 
 
 
