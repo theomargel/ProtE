@@ -14,16 +14,19 @@ and Proteome Discoverer.
 
 ## How to install:
 
-Because some package-dependencies (limma, UniProt.ws, missRanger) are
-inside the BioConductor repository, if they have not already been
-installed in your environment, use the reporting code to install the
-package:
+Install the released ProtE version from
+[CRAN](https://cran.r-project.org/):
 
 ``` r
-install.packages("devtools")
-install.packages("BiocManager")
-options(repos = BiocManager::repositories())
-devtools::install_github("theomargel/ProtE")
+install.packages("ProtE")
+```
+
+Install the development version of ProtE from
+[GitHub](https://github.com/):
+
+``` r
+install.packages("pak")
+pak::pak("theomargel/ProtE")
 ```
 
 Then load its library with:
@@ -91,8 +94,7 @@ groups (Control,Treatment,Compound) with the Control group consisting of
 
 ``` r
 
-maximum_quantum(
-                    file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",
+maximum_quantum(    file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",
                     group_names = c("Control", "Treatment", "Compound"),
                     samples_per_group = c(10, 12, 9),
                     imputation = FALSE,
