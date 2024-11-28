@@ -1,8 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ProtE
-
 One function to analyze them all! The Proteomics Eye (ProtE) establishes
 an intuitive framework for the univariate analysis of label-free
 proteomics data. By compiling all necessary data wrangling and
@@ -34,94 +32,98 @@ Then load its library with:
 library(ProtE)
 ```
 
+## Function inputs
+
 ProtE features 4 functions, each one tailored for a specific use case.
 
 1.  `maximum_quantum()` accepts as input the MaxQuant generated file
-    protein_pg.xlsx
-2.  `dianno()` accepts as input the DIA-NN (or the FragPipe - DIANN)
-    output file protein_pg.xlsx
+    ProteinGroups.txt
+2.  `dianno()` accepts as input either of the two DIA-NN (or the
+    FragPipe - DIANN) output files pg_matrix.tsv or
+    unique_genes_matrix.tsv
 3.  `pd_single()` accepts as input the Proteome Discoverer output file
     that contains all sample protein intensities/abundances in one table
 4.  `pd_multi()` accepts as input separate Proteome Discoverer protein
-    intensity files (Ask Mirka for the naming of the PD settings that
-    determine this)
+    intensity files
 
-All 4 functions expect the input file(s) to be parsed in the parameter
-`excel_file`.
+## How to use functions `maximum_quantum()`,`dianno()`,`pd_multi()`
 
-# How to use functions 1-3
+All 3 functions expect the input file to be parsed in the parameter
+`file`. To enable statistical analysis, in the input file, samples
+(columns) belonging to the same group must be sorted next to each other.
+For example, samples from an experiment with a 3-groups categorical
+variable (control, treatment, compound) could be arranged such that:
+first columns = Control samples, middle columns = Treatment samples,
+last columns = Compound samples.
 
-Functions 1-3 require the samples (columns) in the input file to be
-sorted consecutively (from left to right) based on the categorical
-variable that are going to be analyzed for. Example of an experiment
-with a 3-groups categorical variable: first columns = Control samples,
-middle columns = Treatment samples, last columns = Compound samples.
-
-## Seting up the pointer to the input file path:
+## Seting up the input file path:
 
 Assuming a MaxQuant quantification has been performed, the file
-protein_pg.xlsx can be fed to ProtE with the following function:
+ProteinGroups.txt can be fed to ProtE with the function
+`maximum_quantum`.
 
-``` r
-maximum_quantum <- (excel_file,
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
+Insert the file path of the ProteinGroups.txt in the `file` parameter.
+To copy-paste the file path in Windows, firstly locate the desired file
+inside your folders. Hold Shift and right-click the file, then select
+“Copy as Path” from the context menu. Go to RStudio and click Ctrl+V or
+right-click to paste the path.
 
-Insert the file path of the protein_pg.xlsx in the `excel_file`
-parameter. To copy-paste the file path in Windows, firstly locate the
-desired file inside your folders. Hold Shift and right-click the file,
-then select “Copy as Path” from the context menu. Go to RStudio and
-click Ctrl+V or right-click to paste the path. It should look like
-similar to this:
+Because usually the directories will be separated with a single
+backlash, ensure to use forward slashes (/) for specifying paths or
+adding a second backlash e.g:
 
-``` r
-maximum_quantum <- (excel_file = "C:\Bioprojects\BreastCancer\Proteomics\MaxQuant\protein_pg.xlsx",
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
+    maximum_quantum(file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt")
 
-Now add a second `\`:
+or
 
-``` r
-maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
-                    group_names,
-                    samples_per_group,
-                    imputation = FALSE,
-                    global_filtering = TRUE,
-                    sample_relationship = "Independent",
-                    threshold_value = 50,
-                    normalization = FALSE,
-                    parametric= FALSE,
-                    significance = "pV")
-```
+    maximum_quantum(file = "C:/Bioprojects/BreastCancer/Proteomics/MaxQuant/ProteinGroups.txt")
 
-## Seting up group names and number of samples per group
+## Setting up `group_names` and number of `samples_per_group`
 
 Group names are defined in the parameter `group_names` as a vector. The
-order of the group names inside the vector has to follow the order of
-the groups by which the samples (columns) appear consequtively in the
-input proteomics file (from the left to the right). Same goes for the
-number of samples of each group, which is defined again as a vector in
-the parameter `samples_per_group`:
+order of the group names inside the vector must follow the order of the
+groups by which the samples (columns) have been arranged in the input
+proteomics file (from the left to the right). Same goes for the number
+of samples of each group, which is defined again as a vector in the
+parameter `samples_per_group`. In the following example there are 3
+groups (Control,Treatment,Compound) with the Control group consisting of
+10 samples the Treatment group of 12 samples and the Compound with 9:
 
-    maximum_quantum <- (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\protein_pg.xlsx",
-                        group_names = c("Control", "Treatment", "Compound"),
-                        samples_per_group = c(10, 12, 9),
+``` r
+
+maximum_quantum(
+                    file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",
+                    group_names = c("Control", "Treatment", "Compound"),
+                    samples_per_group = c(10, 12, 9),
+                    imputation = FALSE,
+                    global_filtering = TRUE,
+                    sample_relationship = "Independent",
+                    threshold_value = 50,
+                    normalization = FALSE,
+                    parametric= FALSE,
+                    significance = "pV")
+```
+
+In the pairwise comparisons, nominators and denominators of the
+FoldChange (and consequently the sign of Log2FoldChage) are defined
+based on the order of the group names declared in the parameter
+`group_names`. The general notion based on which FoldChange is
+determined is: NextGroup/PreviousGroup. In our example the FoldChange
+for every pairwise comparison will be set as: Treatment/Control,
+Compound/Control and Compound/Treatment.
+
+## How to use `pd_multi()`
+
+`pd_multi` is tailored for the analysis of multiple **Proteome
+Discoverer** (PD) exports, each one corresponding to a single sample. To
+be able to use it, the user must save the PD exports to different
+folders corresponding to the different groups of the variable that is
+going to be analyzed. The paths to these folders are specified in the
+parameter …:
+
+    pd_multi(excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
+                           "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Treatment",
+                           "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound",
                         imputation = FALSE,
                         global_filtering = TRUE,
                         sample_relationship = "Independent",
@@ -132,10 +134,58 @@ the parameter `samples_per_group`:
 
 In the pairwise comparisons, nominators and denominators of the
 FoldChange (and consequently the sign of Log2FoldChage) are defined
-based on the order of the group names declared in the parameter
-`group_names`. The general notion based on which FoldChange is
-determined is: NextGroup/PreviousGroup. In our example the FoldChange
-for every pairwise comparison will be set as: Treatment/Control,
-Compound/Control and Compound/Treatment.
+based on the order of the declared group folders in the `pd_multi`
+function. Again, the general notion based on which FoldChange is
+determined, is: NextGroup/PreviousGroup. In our imaginary example the
+FoldChange for every pairwise comparison will be set as:
+Treatment/Control, Compound/Control and Compound/Treatment.
 
-## How to use function 4
+## Summary of the ProtE pipeline
+
+All 4 functions streamline the following process, which is reported in
+more details in the `ProtE Guide` vignette.
+
+1.  Normalization of proteomic intensity values (excluding DIA-NN files)
+
+2.  Filtering based on the percentage of missing values.
+
+3.  Imputation of missing data to ensure robust downstream analysis.
+
+4.  Description fetching for DIA-NN input files: .pg_matrix.tsv
+
+Once the data processing is complete, the package performs statistical
+analysis for every pairwise comparison to identify significant protein
+abundance differences between experimental groups. The results are
+automatically exported as Excel files, and a range of visualizations is
+generated to facilitate QC and interpretation. These include:
+
+• Principal Component Analysis (PCA) plots for dimensionality reduction
+and group comparison.
+
+• Heatmap highlighting significant proteins.
+
+• Protein rank-abundance and meanrank-sd scatterplots.
+
+• Boxplots and violin plots to display data distribution and variability
+across groups.
+
+## Output Directory
+
+The results from each function are saved in a folder named
+**ProtE_Analysis**, which is created inside the last directory of the
+provided file(s).
+
+ProtE creates 3 sub-folders: • Data_processing, with the files of the
+resulting data processing. • Statistical_Analysis, with the results of
+the statistical tests. • Plots, with all the plots saved in pdf. format.
+
+## How to cite ProtE
+
+ProtE was compiled out of R scripts utilized for routine processing,
+analysis and visualization of label-free MS data. These scripts were
+built and maintained over the course of many years in the Proteomics lab
+of Dr Antonia Vlahou, in the BRFAA institute (Greece). To continue
+enriching and expanding the functionality of ProtE we kindly request
+feedback from the users via..
+
+In order to cite ProtE the following reference can be used:

@@ -67,7 +67,8 @@ Group names are defined in the parameter ```group_names``` as a vector. The orde
 
 ```{r, eval=FALSE}
 
-maximum_quantum <- (file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",
+maximum_quantum(
+                    file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",
                     group_names = c("Control", "Treatment", "Compound"),
                     samples_per_group = c(10, 12, 9),
                     imputation = FALSE,
@@ -88,7 +89,7 @@ In our example the FoldChange for every pairwise comparison will be set as: Trea
 ```pd_multi``` is tailored for the analysis of multiple **Proteome Discoverer** (PD) exports, each one corresponding to a single sample. To be able to use it, the user must save the PD exports to different folders corresponding to the different groups of the variable that is going to be analyzed. The paths to these folders are specified in the parameter ...:
 
 ```
-pd_multi (excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
+pd_multi(excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
                        "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Treatment",
                        "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound",
                     imputation = FALSE,
