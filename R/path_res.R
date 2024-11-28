@@ -9,7 +9,7 @@
 #' @param threshold_value The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples. By default, it is set to 0. Bugs are referred to to the proteins with empty values inside a single-file analysis
 #' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
-#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). By default it is set to FALSE (non Parametric)
+#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating visualization of the features. By default it is set to FALSE (non Parametric)
 #' @param significance pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)
 #'
 #'
