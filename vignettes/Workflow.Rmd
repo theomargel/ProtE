@@ -8,13 +8,11 @@ vignette: >
 ---
 
 
-
-# Workflow
-
  
  
 
-The workflow of all these functions is the same, except for the mentioned changes, and is as follows:
+The workflow of these functions is identical, except for the specified changes, and proceeds as follows:
+
 
 ## Normalization
 
@@ -32,9 +30,11 @@ The Normalized proteomics data are saved as `Normalized.xlsx` and they will be u
 Utilizing the package's "vsn" function `meanSdPlot` a plot with the standard deviation for each protein in the Y axis and their rank based on mean abundance in the X axis will be created.
 
 
-```{r, echo=FALSE, fig.cap="An example of the Standard deviation- Rank based on mean abundance plot that will be created."}
+```{r, echo=FALSE, fig.cap="**An example of the Standard deviation- Rank based on mean abundance plot that will be created.**"}
 knitr::include_graphics(system.file("extdata", "sdmeanplot.jpeg", package = "ProtE"))
 ```
+
+
 
 
 ## Filtering Missing Values
@@ -62,15 +62,20 @@ When using algorithm-induced imputation (e.g., kNN, MissRanger), an additional h
 
 
 
-```{r, echo=FALSE, fig.cap="An example of the histogram of imputed values showing their distribution."}
+```{r, echo=FALSE, fig.cap="**An example of the histogram of imputed values showing their distribution.**"}
 knitr::include_graphics(system.file("extdata", "imputation_histogram.jpeg", package = "ProtE"))
 ```
 
+
+
+
 Additionally, a protein log2 abundance rank plot is created to provide information about the missing values for each protein:
 
-```{r, echo=FALSE, fig.cap="An example of the Protein Abundance Rank plot that will be created"}
+```{r, echo=FALSE, fig.cap="**An example of the Protein Abundance Rank plot that will be created**"}
 knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "ProtE"))
 ```
+
+
 
 
 ## Statistical Analysis
@@ -89,24 +94,27 @@ Another Excel file, `limma_statistics.xlsx`, contains results from the parametri
 To visualize the distribution of data for each sample, a boxplot and violin plot are generated using the ggplot2 package. All protein abundance values are transformed via log2 transformation to ensure normality and comparability across samples. Sample names are displayed on the plots; however, if the names are too lengthy, only their last 25 characters will appear. To improve readability, it is recommended to use shorter sample names when possible. Additionally, the samples are colored according to their respective groups.
 
 
-```{r, echo=FALSE, fig.cap="                                    An example of the Boxplot that will be created with the protein abundance values for each sample."}
+```{r, echo=FALSE, fig.cap="                                                **An example of the Boxplot that will be created with the protein abundance values for each sample.**"}
 knitr::include_graphics(system.file("extdata", "Boxplot.jpeg", package = "ProtE"))
 ```
 
 
 
-```{r, echo=FALSE, fig.cap="                                   An example of the Violin plot that will be created with the protein abundance values for each sample."}
+
+```{r, echo=FALSE, fig.cap="                                                                                                                       **An example of the Violin plot that will be created with the protein abundance values for each sample.**"}
 knitr::include_graphics(system.file("extdata", "ViolinPlot.jpeg", package = "ProtE"))
 ```
+
 
 
 Principal Component Analysis (PCA) is also performed on the log2-transformed protein abundance data for each sample. The data are scaled and centered prior to the analysis. A PCA plot is created, displaying the samples in a two-dimensional space where the axes represent the first two principal components.
 
 
 
-```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created with the 1st and 2nd Principal Components in each axis."}
+```{r, echo=FALSE, fig.cap="**An example of the PCA plot that will be created with the 1st and 2nd Principal Components in each axis.**"}
 knitr::include_graphics(system.file("extdata", "pcaplotall.jpeg", package = "ProtE"))
 ```
+
 
 
 An additional PCA plot is created using only the significant proteins identified during the statistical analysis. For pairwise comparisons between two groups, significant proteins are selected based on their statistical results from the comparison. When analyzing more than two groups, significant proteins are identified using analysis of variance (ANOVA) across all groups.
@@ -115,15 +123,19 @@ Users can select the statistical method for determining significance by setting 
 
 A PCA plot is then generated based on the significant proteins:
 
-```{r, echo=FALSE, fig.cap="An example of the PCA plot that will be created taking into account the significant proteins."}
+```{r, echo=FALSE, fig.cap="**An example of the PCA plot that will be created taking into account the significant proteins.**"}
 knitr::include_graphics(system.file("extdata", "pcaplotsig.jpeg", package = "ProtE"))
 ```
 
+
+
 Additionally, a heatmap of the significant proteins is generated using the ComplexHeatmap package. Proteins are clustered based on similarity in abundance patterns across groups, and the heatmap provides an overview of group-specific differences.
 
-```{r, echo=FALSE, fig.cap="An example of the heatmap that will be created taking into account the significant proteins."}
+```{r, echo=FALSE, fig.cap="**An example of the heatmap that will be created taking into account the significant proteins.**"}
 knitr::include_graphics(system.file("extdata", "heatmap.jpeg", package = "ProtE"))
 ```
+
+
 
 Lastly, an excel file names Quality_check.xlsx provides information about the percentage of missing values  before and after filtering, along with the scores of the first 2 principal components for each sample. 
 
