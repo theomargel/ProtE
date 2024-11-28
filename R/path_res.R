@@ -107,7 +107,7 @@ message("Removing whichever proteins have only missing values in their abundance
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
 
 path_g1 <- dirname(group1)
-path_res <- file.path(path_g1, "MS_analysis")
+path_res <- file.path(path_g1, "ProtE_Analysis")
 dir.create(path_res, showWarnings = FALSE)
 path_restat <- file.path(path_res, "Statistical_Analysis")
 path_resman <- file.path(path_res, "Data_processing")
@@ -118,7 +118,7 @@ dir.create(path_resman, showWarnings = FALSE)
 dir.create(path_resplot, showWarnings = FALSE)
 
 
-(message("All files created will be stored in the folder MS_analysis, that is located on the last directory of the first group that you input."))
+(message("All files created will be stored in the folder ProtE_Analysis, that is located on the last directory of the first group that you input."))
 mt_file_path <- file.path(path_resman, "Masterlist.xlsx")
 openxlsx::write.xlsx(dataspace, file = mt_file_path)
     message("Concatenated all data files to a single matrix, saved as Masterlist.xlsx")
@@ -886,6 +886,6 @@ if (global_filtering == TRUE) {
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
-    message("The analysis was created. The results are saved inside the MS_analysis folder. Thanks for your patience!")
+    message("The analysis was created. The results are saved inside the ProtE_Analysis folder. Thanks for your patience!")
 
 }

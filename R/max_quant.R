@@ -74,7 +74,7 @@ message("The ProtE process starts now!")
   dataspace <- dataspace[is.na(dataspace$Reverse), ]
   message("Removed REV_proteins: Reverse peptide Identifications")
   path <- dirname(file)
-  path_res <- file.path(path , "MS_analysis")
+  path_res <- file.path(path , "ProtE_Analysis")
   dir.create(path_res, showWarnings = FALSE)
 
   path_restat <- file.path(path_res, "Statistical_Analysis")
@@ -858,6 +858,6 @@ message("The ProtE process starts now!")
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
   message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
-  message("The analysis was created. The results are saved inside the MS_analysis folder. Thanks for your patience!")
+  message("The analysis was created. The results are saved inside the ProtE_Analysis folder. Thanks for your patience!")
 
 }
