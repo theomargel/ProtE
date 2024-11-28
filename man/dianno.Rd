@@ -32,7 +32,7 @@ dianno(
 
 \item{threshold_value}{The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)}
 
-\item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating the optical statistical analysis (PCA plots, heatmap). By default it is set to FALSE (non Parametric)}
+\item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating visualization of the features. By default it is set to FALSE (non Parametric)}
 
 \item{significance}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)}
 
