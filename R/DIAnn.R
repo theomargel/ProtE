@@ -34,6 +34,7 @@
 #' @importFrom car leveneTest
 #' @importFrom vsn meanSdPlot
 #' @importFrom utils read.delim2
+#' @importFrom vegan adonis2
 #'
 #' @examples
 #' #Example of running the function with paths for two groups.
@@ -501,9 +502,24 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]      } else {
         data2[i, "Bartlett_p"] <- NA
         data2[i, "Levene_p"] <- NA
-      }
+       }
 
   }
+
+  only.data <- dataspace[,-c(1:2)]
+  transposed_data <- t(only.data)
+  metadata2 <- data.frame(group = groups_list_u)
+  rownames(transposed_data) <- metadata2$group
+  metadata2$samples <- colnames(only.data)
+  adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
+  permanova_psF <- adonis2_results[4]
+  permanova_psF<- permanova_psF[-c(2:3),]
+  permanova_pV <- adonis2_results[5]
+  permanova_pV<- permanova_pV[-c(2:3),]
+  data2[1, "PERMANOVA_PseudoF"] <- permanova_psF
+  data2[1, "PERMANOVA_p"] <- permanova_pV
+
+
 
   Ddataspace<-data2
   if (description ==TRUE ){
@@ -534,6 +550,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   colnames(dataspace4) <- make.names(colnames(dataspace4), unique = TRUE)
 
 
+
+
   if (groups_number>2){
     message("Mann-Whitney, Levene, Bartlett tests done, now calculating the Kruskal-Wallis test's results:")
     df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
@@ -555,7 +573,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                     Symbol,
                     everything())
 
-  }
+  }else {Fdataspace <- Ddataspace}
   for (i in 1:groups_number){
     namesc<- colnames(Fdataspace)
     namesc<- gsub(paste0("G",i), get(paste0("g",i,".name")),namesc)

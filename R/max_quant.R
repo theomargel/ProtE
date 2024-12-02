@@ -34,6 +34,7 @@
 #' @importFrom vsn meanSdPlot
 #' @importFrom missRanger missRanger
 #' @importFrom utils read.delim
+#' @importFrom vegan adonis2
 #'
 #' @examples
 #' #Example of running the function with paths for two groups.
@@ -549,6 +550,22 @@ message("The ProtE process starts now!")
       }
 
   }
+
+  only.data <- dataspace[,-c(1:2)]
+  transposed_data <- t(only.data)
+  metadata2 <- data.frame(group = groups_list_u)
+  rownames(transposed_data) <- metadata2$group
+  metadata2$samples <- colnames(only.data)
+  adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
+  permanova_psF <- adonis2_results[4]
+  permanova_psF<- permanova_psF[-c(2:3),]
+  permanova_pV <- adonis2_results[5]
+  permanova_pV<- permanova_pV[-c(2:3),]
+  data2[1, "PERMANOVA_PseudoF"] <- permanova_psF
+  data2[1, "PERMANOVA_p"] <- permanova_pV
+
+
+
 
 
 

@@ -53,10 +53,10 @@ If the parameter `description` is set to `TRUE`, a new column named `description
 
 Imputation of missing values is provided via the `Imputation` parameter. Options include:
 
-- **kNN**
-- **MissRanger**
-- **Limit of Detection (LOD)**
-- **LOD/2**
+- kNN
+- MissRanger
+- Limit of Detection (LOD)
+- LOD/2
 
 When using algorithm-induced imputation (e.g., kNN, MissRanger), an additional histogram showcasing the distribution of the imputed values is created (`imputed.pdf`):
 
@@ -84,7 +84,7 @@ knitr::include_graphics(system.file("extdata", "prabrank.jpg", package = "ProtE"
 Statistical analyses will then be performed, including pairwise comparisons between the groups. The parameter `sample_relationship` allows users to specify whether the group variables should be analyzed as independent or paired. By default, it is set to Independent, and to run as Paired, the user must provide groups with the same number of samples, with the order of the samples across them remaining the same.
 
 
-The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2. Last but not least, the file contains in the columns "Bartlett_p" and "Levene_p" the p_values for the reported statistical tests, that examine the homoscedasticity of each proteins' abundances. 
+The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2. Additionally, the file contains in the columns "Bartlett_p" and "Levene_p" the p_values for the reported statistical tests, that examine the homoscedasticity of each proteins' abundances. Last but not least, the pValue and the pseudoF value from the multivariate PERMANOVA statistical test, utilizing the function adonis2 from the package vegan. 
 
 
 Another Excel file, `limma_statistics.xlsx`, contains results from the parametric `limma` statistical test. This includes the ANOVA F-value, p-value, and adjusted p-value, as well as the B-statistic, unadjusted p-value, and Benjamini–Hochberg adjusted p-value for pairwise t-test comparisons between groups, as well as the ANOVA F-value, p-value, and adjusted p-value when the number of groups is greater than 2.

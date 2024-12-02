@@ -17,6 +17,7 @@
 #' @return Excel files with the proteomic values that are optionally processed, via normalization , imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom vegan adonis2
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
@@ -529,6 +530,18 @@ for(i in 1:nrow(data2)){
 
 }
 
+only.data <- dataspace[,-c(1:2)]
+transposed_data <- t(only.data)
+metadata2 <- data.frame(group = groups_list_u)
+rownames(transposed_data) <- metadata2$group
+metadata2$samples <- colnames(only.data)
+adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
+permanova_psF <- adonis2_results[4]
+permanova_psF<- permanova_psF[-c(2:3),]
+permanova_pV <- adonis2_results[5]
+permanova_pV<- permanova_pV[-c(2:3),]
+data2[1, "PERMANOVA_PseudoF"] <- permanova_psF
+data2[1, "PERMANOVA_p"] <- permanova_pV
 
 
 Ddataspace<-data2
