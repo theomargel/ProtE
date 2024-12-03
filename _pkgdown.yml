@@ -2,3 +2,11 @@ url: ~
 template:
   bootstrap: 5
 
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+    fig_caption: yes
+    toc: true
+    toc_depth: 2
+pkgdown:
+  as_is: true
