@@ -1,6 +1,6 @@
 #' DIA NN  proteomics data analysis
 #'
-#' Takes as input Proteomics Data (output of DIA-NN) in the format of a tsv files pg_matrix.tsv and unique_gene_matrix.tsv. Performs exploratory data analysis for a single categorical variable, while providing different options for data manipulation (description fetching from UniProt, filtering based on the missing values and imputation) It then proceeds to perform statistical analysis, while creating exploratory plots such as relative log expression boxplots and violin plots, heatmaps and PCA plots.
+#' Processes the DIA-NN proteomics output and performs exploratory statistical analysis for a single categorical variable. Accepts as input either of the files pg_matrix.tsv or unique_gene_matrix.tsv.
 #'
 #' @param file The whole path to the input DIA-NN .tsv file (pg_matrix or unique_genes_matrix). Attention: Ensure to use forward slashes (/) for specifying paths.
 #' @param group_names A character vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.
