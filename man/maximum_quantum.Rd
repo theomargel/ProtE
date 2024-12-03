@@ -24,7 +24,7 @@ maximum_quantum(
 
 \item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted ProteinGroups.txt file.}
 
-\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
+\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 
 \item{global_filtering}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.}
 

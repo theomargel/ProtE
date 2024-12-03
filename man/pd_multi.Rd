@@ -19,7 +19,7 @@ pd_multi(
 \arguments{
 \item{...}{The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Ensure paths use '/' as a directory separator.}
 
-\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
+\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 
 \item{global_filtering}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.}
 

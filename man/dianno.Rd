@@ -18,15 +18,15 @@ dianno(
 )
 }
 \arguments{
-\item{file}{The whole path to the DIA-NN .tsv files (pg_matrix or unique_genes_matrix), that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the input DIA-NN .tsv file (pg_matrix or unique_genes_matrix). Attention: Ensure to use forward slashes (/) for specifying paths.}
 
-\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted tsv file.}
+\item{group_names}{A vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.}
 
-\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted tsv file.}
+\item{samples_per_group}{A vector giving the number of samples from each group. The order of the numbers should align with the order of the names in group_names.}
 
-\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
+\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
 
-\item{global_filtering}{TRUE/FALSE If TRUE threshold for missing values will be applied to the groups altogether, if FALSE to each group separately}
+\item{global_filtering}{TRUE/FALSE. Defines the way missing values per protein are calculated. If TRUE, threshold for missing values will be applied to the groups altogether, if FALSE to each group separately}
 
 \item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other}
 

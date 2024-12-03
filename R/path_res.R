@@ -4,7 +4,7 @@
 #'
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Ensure paths use '/' as a directory separator.
 #' @param global_filtering TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.
-#' @param imputation Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented, "LOD" for assigning the lowest protein intensity identified to each MV and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.
+#' @param imputation Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other
 #' @param threshold_value The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples. By default, it is set to 0. Bugs are referred to to the proteins with empty values inside a single-file analysis
@@ -324,6 +324,12 @@ if (global_filtering == TRUE) {
       imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path)
     }
+    if (imputation == "mean"){
+      dataspace[dataspace==0] <- NA
+      impute_value <- apply(dataspace[, 3:(2+sum(samples_per_group))], 1, mean , na.rm = TRUE)
+      dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+      imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+      openxlsx::write.xlsx(dataspace, file = imp_file_path) }
     if (imputation == "LOD"){
       dataspace[dataspace==0] <- NA
       impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
