@@ -70,9 +70,9 @@ message("The ProtE process starts now!")
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
 
-  dataspace <- read.delim(file, header = TRUE, sep = "\t")
+  dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
-  dataspace <- dataspace[is.na(dataspace$Reverse), ]
+  dataspace <- dataspace[dataspace$Reverse != "+",]
   message("Removed REV_proteins: Reverse peptide Identifications")
   path <- dirname(file)
   path_res <- file.path(path , "ProtE_Analysis")
@@ -95,12 +95,12 @@ message("The ProtE process starts now!")
     sub(".*sp\\|(\\w+)\\|.*", "\\1", dataspace$Protein.IDs),
     dataspace$Protein.IDs
   )
+
   dataspace$Majority.protein.IDs <- ifelse(
-    grepl("sp\\|\\w+\\|\\w+", dataspace$Majority.protein.IDs),
-    sub(".*sp\\|\\w+\\|([^;]+)","\\1", dataspace$Majority.protein.IDs),
-    dataspace$Majority.protein.IDs)
-
-
+    grepl("OS=", dataspace$Majority.protein.IDs),
+    dataspace$Majority.protein.IDs,
+    dataspace$Fasta.headers
+  )
   colnames(dataspace)[colnames(dataspace) == "Protein.IDs"] <- "Accession"
   colnames(dataspace)[colnames(dataspace) == "Majority.protein.IDs"] <- "Description"
 
