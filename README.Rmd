@@ -9,12 +9,18 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "30%"
 )
 ```
 
 
-
+```{r, echo=FALSE }
+if (file.exists("man/figures/ProtE.png")) {
+  knitr::include_graphics("man/figures/ProtE.png") 
+} else {
+  knitr::include_graphics(system.file("extdata", "images/ProtE.png", package = "ProtE"))
+}
+```
 
 
 
