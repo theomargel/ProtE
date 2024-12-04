@@ -40,8 +40,8 @@
 #' # The file path is a placeholder, replace it with an actual file.
 #' \dontrun{
 #' pd_single(file = "C:/Users/User/Documents/protein_matrix.xlsx",
-#' groups_number = 2,group_names = c("exp_2020","exp_2024"),
-#'  samples_per_group = c(18,8), imputation = FALSE, threshold_value = 100)}
+#'          group_names = c("Control","Treatment"),
+#'          samples_per_group = c(18,20), imputation = FALSE, threshold_value = 100)}
 #'
 #' @export
 
