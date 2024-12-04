@@ -2,8 +2,8 @@
 #'
 #' Processes the DIA-NN proteomics output and performs exploratory statistical analysis for a single categorical variable. Accepts as input either of the files pg_matrix.tsv or unique_gene_matrix.tsv.
 #'
-#' @param file The whole path to the input DIA-NN .tsv file (pg_matrix or unique_genes_matrix). Attention: Ensure to use forward slashes (/) for specifying paths.
-#' @param group_names A character vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.
+#' @param file The whole path to the input DIA-NN .tsv file (pg_matrix or unique_genes_matrix). Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for 
+#' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
 #' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
@@ -13,7 +13,7 @@
 #' @param significance "pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
 #' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
-#' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
+#' @return The function returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations. 
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom dplyr select  group_by  do everything  %>% any_of
