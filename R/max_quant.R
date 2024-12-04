@@ -3,15 +3,15 @@
 #' Takes as input Proteomics Data (output of Max Quant) in the format of ProteinGroups.txt file.Performs exploratory data analysis, while providing different options for  data manipulation (normalization, filtering based on the missing values and imputation) It then proceeds to perform statistical analysis, while creating exploratory plots such as relative log expression boxplots and violin plots, heatmaps and PCA plots.
 #'
 #' @param file The whole path to the ProteinGroups.txt file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.
-#' @param group_names The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted ProteinGroups.txt file.
-#' @param samples_per_group The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted ProteinGroups.txt file.
-#' @param global_filtering TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.
-#' @param imputation Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.
-#' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other
-#' @param threshold_value The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)
+#' @param group_names A character vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.
+#' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
 #' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
-#' @param parametric TRUE/FALSE Choose which statistical test will be taken into account when creating visualization of the features. By default it is set to FALSE (non Parametric)
-#' @param significance pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)
+#' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
+#' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
+#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
+#' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
+#' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
+#' @param significance "pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
 #'
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via normalization, imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
@@ -57,7 +57,7 @@ maximum_quantum <- function(file,
                             threshold_value = 50,
                             normalization = FALSE,
                       parametric= FALSE,
-                      significance = "pV")
+                      significance = "pValue")
 {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -566,10 +566,10 @@ message("The ProtE process starts now!")
   adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
   permanova_psF <- adonis2_results[4]
   permanova_psF<- permanova_psF[-c(2:3),]
-  permanova_pV <- adonis2_results[5]
-  permanova_pV<- permanova_pV[-c(2:3),]
+  permanova_pValue <- adonis2_results[5]
+  permanova_pValue<- permanova_pValue[-c(2:3),]
   data2[1, "PERMANOVA_PseudoF"] <- permanova_psF
-  data2[1, "PERMANOVA_p"] <- permanova_pV
+  data2[1, "PERMANOVA_p"] <- permanova_pValue
 
 
 
@@ -690,12 +690,12 @@ message("The ProtE process starts now!")
 
   which.sig<-vector()
   if (parametric == TRUE) {
-    if (significance == "pV"){
+    if (significance == "pValue"){
       if (groups_number != 2){
         which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
       } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
     }
-    if (significance == "adj.pV"){
+    if (significance == "BH"){
       if (groups_number != 2){
         which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
       } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
@@ -703,12 +703,12 @@ message("The ProtE process starts now!")
   }
 
   if (parametric == FALSE) {
-    if (significance == "pV"){
+    if (significance == "pValue"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
       } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
     }
-    if (significance == "adj.pV"){
+    if (significance == "BH"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
       } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}

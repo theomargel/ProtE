@@ -14,29 +14,29 @@ maximum_quantum(
   threshold_value = 50,
   normalization = FALSE,
   parametric = FALSE,
-  significance = "pV"
+  significance = "pValue"
 )
 }
 \arguments{
 \item{file}{The whole path to the ProteinGroups.txt file, that will be analyzed. Attention: Ensure to use forward slashes (/) for specifying paths.}
 
-\item{group_names}{The names attributed to each different group. Insert in form of a vector. The order of the names should align with the order in the inserted ProteinGroups.txt file.}
+\item{group_names}{A character vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.}
 
-\item{samples_per_group}{The number of samples attributed to each different group. Insert in form of a vector. The order of the number of groups should align with the order in the inserted ProteinGroups.txt file.}
+\item{samples_per_group}{A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.}
 
-\item{imputation}{Imputation of the Missing Values. By default it is set to FALSE. Options are FALSE for no imputation implemented,"mean" for assigning the mean intensity of each protein to its missing values, "LOD" for assigning the lowest protein intensity identified to them and "LOD/2" to apply the half of it. Option "kNN" performs a default kNN imputation and "missRanger" a missRanger one. This 2 options are combined with a boxplot that visualizes the distribution of the log2 intensities of the imputed data compared to the initial ones.}
+\item{imputation}{Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).}
 
-\item{global_filtering}{TRUE/FALSE If TRUE the threshold for missing values filtering will be applied to the groups altogether, if FALSE it will be applied to each group separately.}
+\item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.}
 
-\item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If "Paired" is selected the samples_per_group must be equal to each other}
-
-\item{threshold_value}{The percentage of missing values per protein that will cause its omission. By default it is set to 50. (50 percent)}
+\item{threshold_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
 
 \item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 
-\item{parametric}{TRUE/FALSE Choose which statistical test will be taken into account when creating visualization of the features. By default it is set to FALSE (non Parametric)}
+\item{parametric}{TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).}
 
-\item{significance}{pV or adj.pV Choose if the significant values for the PCA plots and the heatmap will derive from the unadjusted pValue or the adjusted pValue (Benjamini-Hochberg) of the comparison. By default it is set "pV" (pValue)}
+\item{significance}{"pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).}
+
+\item{global_threshold}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
 }
 \value{
 Excel files with the proteomic values that are optionally processed, via normalization, imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.

@@ -7,10 +7,10 @@
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
 #' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
-#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation). 
+#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
-#' @param significance p or adj Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
+#' @param significance "pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
 #' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
@@ -55,7 +55,7 @@ dianno <- function(file,
                       sample_relationship = "Independent",
                       threshold_value = 50,
                    parametric= FALSE,
-                   significance  = "pV", description = FALSE)
+                   significance  = "pValue", description = FALSE)
 {message("The ProtE process starts now!")
 
   Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
@@ -520,10 +520,10 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
   permanova_psF <- adonis2_results[4]
   permanova_psF<- permanova_psF[-c(2:3),]
-  permanova_pV <- adonis2_results[5]
-  permanova_pV<- permanova_pV[-c(2:3),]
+  permanova_pValue <- adonis2_results[5]
+  permanova_pValue<- permanova_pValue[-c(2:3),]
   data2[1, "PERMANOVA_PseudoF"] <- permanova_psF
-  data2[1, "PERMANOVA_p"] <- permanova_pV
+  data2[1, "PERMANOVA_p"] <- permanova_pValue
 
 
 
@@ -654,12 +654,12 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   which.sig<-vector()
   if (parametric == TRUE) {
-    if (significance  == "pV"){
+    if (significance  == "pValue"){
       if (groups_number != 2){
         which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
       } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
     }
-    if (significance  == "adj.pV"){
+    if (significance  == "BH"){
       if (groups_number != 2){
         which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
       } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
@@ -667,12 +667,12 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   }
 
   if (parametric == FALSE) {
-    if (significance  == "pV"){
+    if (significance  == "pValue"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
       } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
     }
-    if (significance  == "adj.pV"){
+    if (significance  == "BH"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_BH.adjusted < 0.05)
       } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
