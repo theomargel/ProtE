@@ -1,6 +1,6 @@
 #' MaxQuant proteomics data analysis
 #'
-#' Takes as input Proteomics Data (output of Max Quant) in the format of ProteinGroups.txt file.Performs exploratory data analysis, while providing different options for  data manipulation (normalization, filtering based on the missing values and imputation) It then proceeds to perform statistical analysis, while creating exploratory plots such as relative log expression boxplots and violin plots, heatmaps and PCA plots.
+#' Processes the MaxQuant proteomics dataset and performs exploratory statistical analysis for a single categorical variable. Accepts as input the ProteinGroups.txt file.
 #'
 #' @param file The whole path to the MaxQuant ProteinGroups.txt file. Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
 #' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
