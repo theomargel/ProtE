@@ -30,7 +30,7 @@ Then load its library with:
 
     library(ProtE)
 
-## Function inputs
+## Functions
 
 ProtE features 4 functions, each one tailored for a specific use case.
 
