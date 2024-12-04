@@ -39,12 +39,12 @@
 #'
 #' @examples
 #' #Example of running the function with paths for two groups.
-#' \donttest{
-#' report.pg_matrix <- system.file("extdata", "report.pg_matrix.tsv", package = "ProtE")
-#'  dianno(file = report.pg_matrix,
-#'  group_names= c("Healthy","Patients"), samples_per_group= c(5,5),
-#'    global_filtering = TRUE, sample_relationship = "Independent",
-#'  threshold_value = 50, description = FALSE, imputation = FALSE)}
+#' # The file path is a placeholder, replace it with an actual file.
+#' \dontrun{
+#' dianno(file = "C:/Users/User/Documents/ProteinGroups.txt",
+#'        groups_number = 2,
+#'        group_names = c("T0","T1"),
+#'        samples_per_group = c(3,3), threshold_value = 100)}
 #'
 #' @export
 
