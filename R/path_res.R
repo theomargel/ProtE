@@ -44,12 +44,12 @@
 #' Ta_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "Ta_BLCA", package = "ProtE")
 #'
-#' pd_multi(
-#'   T1_path, T2_path, Ta_path,
-#'   normalization = "PPM", sample_relationship = "Paired",
-#'   imputation = "LOD", global_filtering = TRUE
-#' )}
-#'
+#' pd_multi("C:/Bioprojects/BladderCancer/Ta",
+#'          "C:/Bioprojects/BladderCancer/T1",
+#'          "C:/Bioprojects/BladderCancer/T2",
+#'          normalization = "PPM", 
+#'          global_filtering = TRUE, imputation = "LOD", 
+#'          sample_relationship = "Independent")}
 #'
 #' @export
 
