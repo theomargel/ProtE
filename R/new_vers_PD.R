@@ -14,7 +14,7 @@
 #' @param significance "pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
 #'
 #'
-#' @return Excel files with the proteomic values that are optionally processed, via normalization , imputation and  filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
+#' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom vegan adonis2
