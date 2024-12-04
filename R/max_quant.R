@@ -40,11 +40,11 @@
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
 #' \dontrun{
-#' maximum_quantum(
-#'"C:/Users/User/Documents/ProteinGroups.txt",
-#' groups_number = 2,
-#' group_names = c("T0","T1"),
-#' samples_per_group = c(3,3), threshold_value = 100)}
+#' maximum_quantum(file = "C:/Users/User/Documents/ProteinGroups.txt",
+#'                 groups_number = 2,
+#'                 group_names = c("T0","T1"),
+#'                 samples_per_group = c(3,3), threshold_value = 100)}
+#' 
 #'
 #' @export
 
