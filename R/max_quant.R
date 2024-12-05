@@ -2,7 +2,7 @@
 #'
 #' Processes the MaxQuant proteomics dataset and performs exploratory statistical analysis for a single categorical variable. Accepts as input the ProteinGroups.txt file.
 #'
-#' @param file The whole path to the MaxQuant ProteinGroups.txt file. Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
+#' @param file The whole path to the MaxQuant ProteinGroups.txt file. The folders in the file path must be separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
 #' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
 #' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
