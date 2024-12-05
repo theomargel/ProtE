@@ -1,6 +1,6 @@
 ---
 output: github_document
----
+--- 
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -18,9 +18,7 @@ knitr::opts_chunk$set(
 ```{r, echo=FALSE }
 if (file.exists("man/figures/ProtE.png")) {
   knitr::include_graphics("man/figures/ProtE.png") 
-} else {
-  knitr::include_graphics(system.file("extdata", "images/ProtE.png", package = "ProtE"))
-}
+} 
 ```
 
 
@@ -73,7 +71,7 @@ ProtE features 4 functions, each one tailored for a specific use case.
 ## How to use functions `maximum_quantum()`,`dianno()`,`pd_multi()`
 All 3 functions expect the input file to be parsed in the parameter ```file```. To enable statistical analysis, in the input file, samples (columns) belonging to the same group must be sorted next to each other. For example, samples from an experiment with a 3-groups categorical variable (control, treatment, compound) could be arranged such that: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
 
-## Seting up the input file path:
+## Setting up the input file path:
 Assuming a MaxQuant quantification has been performed, the file ProteinGroups.txt can be fed to ProtE with the function `maximum_quantum`. 
 
 Insert the file path of the ProteinGroups.txt in the ```file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click to paste the path. 

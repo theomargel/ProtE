@@ -54,7 +54,7 @@ variable (control, treatment, compound) could be arranged such that:
 first columns = Control samples, middle columns = Treatment samples,
 last columns = Compound samples.
 
-## Seting up the input file path:
+## Setting up the input file path:
 
 Assuming a MaxQuant quantification has been performed, the file
 ProteinGroups.txt can be fed to ProtE with the function
