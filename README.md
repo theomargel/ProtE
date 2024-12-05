@@ -16,6 +16,48 @@ and Proteome Discoverer.
 
 ## How to install:
 
+Step 1: Install R
+
+To get started with R, first download and install the latest version of
+R from the official CRAN website:
+
+- Go to the [R download page](https://cran.r-project.org/).
+- Select the appropriate version for your operating system:
+  - **Windows**: Click on “Download R for Windows”.
+  - **MacOS**: Click on “Download R for macOS”.
+  - **Linux**: Follow the instructions based on your distribution.
+
+Once downloaded, run the installer and follow the instructions to
+complete the installation.
+
+Step 2: Install RStudio
+
+Next, you’ll need an Integrated Development Environment (IDE) to work
+with R. The most popular IDE is RStudio.
+
+- Go to the [RStudio download
+  page](https://www.rstudio.com/products/rstudio/download/).
+- Select “RStudio Desktop” and download the installer for your operating
+  system.
+
+Run the installer and follow the on-screen instructions to install
+RStudio.
+
+Step 3: Install RTools (For Windows Users)
+
+RTools is necessary if you need to compile packages from source on
+Windows, which is common when installing certain R packages.
+
+- Go to the [RTools download
+  page](https://cran.r-project.org/bin/windows/Rtools/).
+- Download the version of RTools that matches your R version.
+- Run the installer and follow the instructions.
+
+Make sure to select the option that allows RTools to be added to your
+system path during installation.
+
+Step 4: Download the Package
+
 Install the released ProtE version from CRAN:
 
     install.packages("ProtE")
@@ -99,7 +141,7 @@ maximum_quantum(
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
-                    significance = "pV")
+                    significance = "p")
 ```
 
 In the pairwise comparisons, nominators and denominators of the
@@ -128,7 +170,7 @@ parameter …:
                         filtering_value = 50,
                         normalization = FALSE,
                         parametric= FALSE,
-                        significance = "pV")
+                        significance = "p")
 
 In the pairwise comparisons, nominators and denominators of the
 FoldChange (and consequently the sign of Log2FoldChage) are defined

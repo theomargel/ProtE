@@ -144,7 +144,7 @@ if (file.exists("pcaplotall.jpeg")) {
 
 An additional PCA plot is created using only the significant proteins identified during the statistical analysis. For pairwise comparisons between two groups, significant proteins are selected based on their statistical results from the comparison. When analyzing more than two groups, significant proteins are identified using analysis of variance (ANOVA) across all groups.
 
-Users can select the statistical method for determining significance by setting the `parametric` parameter. Setting `parametric = TRUE` uses results from the limma t-test or ANOVA, while `parametric = FALSE` uses results from the Mann-Whitney U test or Kruskal-Wallis test. The user can further specify the significance threshold with the `significance` parameter: setting `significance = "pV"` uses a raw p-value threshold of 0.05, and `significance = "adj.pV"` uses the Benjamini-Hochberg adjusted p-value threshold.
+Users can select the statistical method for determining significance by setting the `parametric` parameter. Setting `parametric = TRUE` uses results from the limma t-test or ANOVA, while `parametric = FALSE` uses results from the Mann-Whitney U test or Kruskal-Wallis test. The user can further specify the significance threshold with the `significance` parameter: setting `significance = "p"` uses a raw p-value threshold of 0.05, and `significance = "BH"` uses the Benjamini-Hochberg adjusted p-value threshold.
 
 A PCA plot is then generated based on the significant proteins:
 

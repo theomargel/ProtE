@@ -56,7 +56,7 @@ dianno <- function(file,
                       sample_relationship = "Independent",
                       filtering_value = 50,
                    parametric= FALSE,
-                   significance  = "pValue", description = FALSE)
+                   significance  = "p", description = FALSE)
 {message("The ProtE process starts now!")
 
   Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
@@ -655,7 +655,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   which.sig<-vector()
   if (parametric == TRUE) {
-    if (significance  == "pValue"){
+    if (significance  == "p"){
       if (groups_number != 2){
         which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
       } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
@@ -668,7 +668,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   }
 
   if (parametric == FALSE) {
-    if (significance  == "pValue"){
+    if (significance  == "p"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
       } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}

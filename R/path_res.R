@@ -11,7 +11,6 @@
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
-#' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via normalization, imputation and filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
@@ -60,7 +59,7 @@ pd_multi <- function(...,
                         bugs = 0,
                         normalization = FALSE,
                         parametric= FALSE,
-                        significance = "pValue")
+                        significance = "p")
   {
    Sample=group1= Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
 message("The ProtE process starts now!")
@@ -726,7 +725,7 @@ if (global_filtering == TRUE) {
 
     which.sig<-vector()
     if (parametric == TRUE) {
-      if (significance == "pValue"){
+      if (significance == "p"){
         if (groups_number != 2){
           which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
         } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
@@ -739,7 +738,7 @@ if (global_filtering == TRUE) {
     }
 
     if (parametric == FALSE) {
-      if (significance == "pValue"){
+      if (significance == "p"){
         if (groups_number != 2){
           which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
         } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}

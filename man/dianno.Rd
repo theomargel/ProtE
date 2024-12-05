@@ -13,7 +13,7 @@ dianno(
   sample_relationship = "Independent",
   filtering_value = 50,
   parametric = FALSE,
-  significance = "pValue",
+  significance = "p",
   description = FALSE
 )
 }

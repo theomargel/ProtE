@@ -54,7 +54,7 @@ pd_single <- function(file,
                         filtering_value = 50
                         ,normalization = FALSE,
                         parametric= FALSE,
-                        significance = "pValue")
+                        significance = "p")
 {
   group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
@@ -677,7 +677,7 @@ message("PCA plot using all data was created as PCA_plot_alldata.pdf")
 
 which.sig<-vector()
 if (parametric == TRUE) {
-  if (significance == "pValue"){
+  if (significance == "p"){
     if (groups_number != 2){
       which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
     } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
@@ -690,7 +690,7 @@ if (parametric == TRUE) {
 }
 
 if (parametric == FALSE) {
-  if (significance == "pValue"){
+  if (significance == "p"){
     if (groups_number != 2){
       which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
     } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}

@@ -62,7 +62,7 @@ maximum_quantum(
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
-                    significance = "pV")
+                    significance = "p")
 ```
 
 In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the group names declared in the parameter ```group_names```. The general notion based on which FoldChange is determined is: NextGroup/PreviousGroup. 
@@ -83,7 +83,7 @@ pd_multi(excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
-                    significance = "pV")
+                    significance = "p")
 ```
 In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the declared group folders in the ```pd_multi``` function. Again, the general notion based on which FoldChange is determined, is: NextGroup/PreviousGroup. In our imaginary example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
 
