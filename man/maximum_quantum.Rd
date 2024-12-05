@@ -18,7 +18,7 @@ maximum_quantum(
 )
 }
 \arguments{
-\item{file}{The whole path to the MaxQuant ProteinGroups.txt file. Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.}
+\item{file}{The whole path to the MaxQuant ProteinGroups.txt file. The folders in the file path must be separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.}
 
 \item{group_names}{A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.}
 
