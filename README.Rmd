@@ -100,7 +100,7 @@ maximum_quantum(
                     imputation = FALSE,
                     global_filtering = TRUE,
                     sample_relationship = "Independent",
-                    threshold_value = 50,
+                    filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
                     significance = "pV")
@@ -121,7 +121,7 @@ pd_multi(excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
                     imputation = FALSE,
                     global_filtering = TRUE,
                     sample_relationship = "Independent",
-                    threshold_value = 50,
+                    filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
                     significance = "pV")

@@ -30,7 +30,7 @@ Then load its library with:
 
     library(ProtE)
 
-## Functions
+## Function inputs
 
 ProtE features 4 functions, each one tailored for a specific use case.
 
@@ -96,7 +96,7 @@ maximum_quantum(
                     imputation = FALSE,
                     global_filtering = TRUE,
                     sample_relationship = "Independent",
-                    threshold_value = 50,
+                    filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
                     significance = "pV")
@@ -125,7 +125,7 @@ parameter …:
                         imputation = FALSE,
                         global_filtering = TRUE,
                         sample_relationship = "Independent",
-                        threshold_value = 50,
+                        filtering_value = 50,
                         normalization = FALSE,
                         parametric= FALSE,
                         significance = "pV")

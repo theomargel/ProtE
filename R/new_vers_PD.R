@@ -5,13 +5,13 @@
 #' @param file The whole path to the ProteomeDiscoverer .xlsx file. Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
 #' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
-#' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
-#' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
+#' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
+#' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
+#' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
 #' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
-#' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
@@ -28,7 +28,7 @@
 #' @importFrom stringr str_trunc
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
+#' @importFrom limma topTable eBayes contrasts.fit  normalizeCyclicLoess lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom missRanger missRanger
@@ -41,7 +41,7 @@
 #' \dontrun{
 #' pd_single(file = "C:/Users/User/Documents/protein_matrix.xlsx",
 #'          group_names = c("Control","Treatment"),
-#'          samples_per_group = c(18,20), imputation = FALSE, threshold_value = 100)}
+#'          samples_per_group = c(18,20), imputation = FALSE, filtering_value = 100)}
 #'
 #' @export
 
@@ -51,7 +51,7 @@ pd_single <- function(file,
                         imputation = FALSE,
                         global_filtering = TRUE,
                         sample_relationship = "Independent",
-                        threshold_value = 50
+                        filtering_value = 50
                         ,normalization = FALSE,
                         parametric= FALSE,
                         significance = "pValue")
@@ -144,6 +144,20 @@ if (normalization == "Total_Ion_Current") {
   norm_file_path <- file.path(path_resman, "Normalized.xlsx")
   openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
   message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+if (normalization == "Cyclic_Loess"){
+  dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
+  dataspace[, -1:-2] <- limma::normalizeCyclicLoess(dataspace[, -1:-2])
+  Gdataspace<-dataspace
+  Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+  Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+  Gdataspace<-Gdataspace %>%
+    dplyr::select(Accession, Description, Symbol, everything())
+  colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+  norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+  openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+  message("Applying the selected normalization, saved as Normalized.xlsx") }
+
 if ( normalization == "VSN") {
   dataspace[, -1:-2] <- suppressMessages(limma::normalizeVSN(dataspace[, -1:-2]))
   Gdataspace<-dataspace
@@ -187,20 +201,20 @@ if (normalization == FALSE ){
 name_dataspace <-  dataspace[, -1:-2]
 
 
-if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
+if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
 if (global_filtering == TRUE) {
 
-  threshold_value <- 100- as.numeric(threshold_value)
+  filtering_value <- 100- as.numeric(filtering_value)
 
-  threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(threshold_value)/100))+0.00000000001)
+  threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(filtering_value)/100))+0.00000000001)
 }
 
 if (global_filtering == FALSE) {
   threshold<-numeric(groups_number)
-  threshold_value <- 100- as.numeric(threshold_value)
+  filtering_value <- 100- as.numeric(filtering_value)
   for (i in 1:groups_number) {
-    threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+    threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(filtering_value)/100)+0.00000000001)}
 }
 
 

@@ -5,8 +5,8 @@
 #' @param file The whole path to the DIA-NN pg_matrix.tsv file (or alternatively, to the unique_genes_matrix.tsv file). Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
 #' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
-#' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
-#' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
+#' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
+#' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
 #' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
@@ -14,7 +14,7 @@
 #' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
 #'
-#' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations. 
+#' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom dplyr select  group_by  do everything  %>% any_of
@@ -44,7 +44,7 @@
 #' dianno(file = "C:/Users/User/Documents/ProteinGroups.txt",
 #'        groups_number = 2,
 #'        group_names = c("T0","T1"),
-#'        samples_per_group = c(3,3), threshold_value = 100)}
+#'        samples_per_group = c(3,3), filtering_value = 100)}
 #'
 #' @export
 
@@ -54,7 +54,7 @@ dianno <- function(file,
                       imputation = FALSE,
                       global_filtering = TRUE,
                       sample_relationship = "Independent",
-                      threshold_value = 50,
+                      filtering_value = 50,
                    parametric= FALSE,
                    significance  = "pValue", description = FALSE)
 {message("The ProtE process starts now!")
@@ -165,20 +165,20 @@ if (description == TRUE ) {
   dat.dataspace<-dataspace
 
 
-  if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
+  if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
   if (global_filtering == TRUE) {
 
-    threshold_value <- 100- as.numeric(threshold_value)
+    filtering_value <- 100- as.numeric(filtering_value)
 
-    threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(threshold_value)/100))+0.00000000001)
+    threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(filtering_value)/100))+0.00000000001)
   }
 
   if (global_filtering == FALSE) {
     threshold<-numeric(groups_number)
-    threshold_value <- 100- as.numeric(threshold_value)
+    filtering_value <- 100- as.numeric(filtering_value)
     for (i in 1:groups_number) {
-      threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+      threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(filtering_value)/100)+0.00000000001)}
   }
 
 

@@ -11,46 +11,46 @@ dianno(
   imputation = FALSE,
   global_filtering = TRUE,
   sample_relationship = "Independent",
-  threshold_value = 50,
+  filtering_value = 50,
   parametric = FALSE,
   significance = "pValue",
   description = FALSE
 )
 }
 \arguments{
-\item{file}{The whole path to the input DIA-NN .tsv file (pg_matrix or unique_genes_matrix). Attention: Ensure to use forward slashes (/) for specifying paths.}
+\item{file}{The whole path to the DIA-NN pg_matrix.tsv file (or alternatively, to the unique_genes_matrix.tsv file). Ensure that the folders in the path are separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.}
 
-\item{group_names}{A character vector of group names. The order of the names should align with the order of the sample groups in the input tsv file.}
+\item{group_names}{A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.}
 
 \item{samples_per_group}{A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.}
 
 \item{imputation}{Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).}
 
+\item{global_filtering}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
+
 \item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.}
 
-\item{threshold_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
+\item{filtering_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
 
 \item{parametric}{TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).}
 
-\item{significance}{"pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).}
+\item{significance}{"p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).}
 
 \item{description}{TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).}
-
-\item{global_threshold}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
 }
 \value{
-Excel files with the proteomic values that are optionally processed, via imputation and the filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
+Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 }
 \description{
 Processes the DIA-NN proteomics output and performs exploratory statistical analysis for a single categorical variable. Accepts as input either of the files pg_matrix.tsv or unique_gene_matrix.tsv.
 }
 \examples{
 #Example of running the function with paths for two groups.
-\donttest{
-report.pg_matrix <- system.file("extdata", "report.pg_matrix.tsv", package = "ProtE")
- dianno(file = report.pg_matrix,
- group_names= c("Healthy","Patients"), samples_per_group= c(5,5),
-   global_filtering = TRUE, sample_relationship = "Independent",
- threshold_value = 50, description = FALSE, imputation = FALSE)}
+# The file path is a placeholder, replace it with an actual file.
+\dontrun{
+dianno(file = "C:/Users/User/Documents/ProteinGroups.txt",
+       groups_number = 2,
+       group_names = c("T0","T1"),
+       samples_per_group = c(3,3), filtering_value = 100)}
 
 }

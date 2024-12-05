@@ -9,7 +9,7 @@ pd_multi(
   imputation = FALSE,
   global_filtering = TRUE,
   sample_relationship = "Independent",
-  threshold_value = 50,
+  filtering_value = 50,
   bugs = 0,
   normalization = FALSE,
   parametric = FALSE,
@@ -21,19 +21,19 @@ pd_multi(
 
 \item{imputation}{Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).}
 
+\item{global_filtering}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
+
 \item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.}
 
-\item{threshold_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
+\item{filtering_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
 
 \item{bugs}{Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples. By default, it is set to 0. Bugs are referred to to the proteins with empty values inside a single-file analysis}
 
-\item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
+\item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 
 \item{parametric}{TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).}
 
 \item{significance}{"pValue" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).}
-
-\item{global_threshold}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
 }
 \value{
 Excel files with the proteomic values that are optionally processed, via normalization, imputation and filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
@@ -51,11 +51,9 @@ T2_path <- system.file("extdata", "PDexports(multiple_files)",
 Ta_path <- system.file("extdata", "PDexports(multiple_files)",
 "Ta_BLCA", package = "ProtE")
 
-pd_multi(
-  T1_path, T2_path, Ta_path,
-  normalization = "PPM", sample_relationship = "Paired",
-  imputation = "LOD", global_filtering = TRUE
-)}
-
+pd_multi(T1_path, T2_path, Ta_path,
+         normalization = "PPM",
+         global_filtering = TRUE, imputation = "LOD",
+         sample_relationship = "Independent")}
 
 }

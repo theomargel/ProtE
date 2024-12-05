@@ -4,9 +4,9 @@
 #'
 #' @param ... The specific path to the folder where the samples from each group are located. They are passed as unnamed arguments via "...".  Attention: Ensure paths use '/' as a directory separator.
 #' @param bugs Either 0 to treat Proteome Discoverer bugs as Zeros (0) or "average" to convert them into the average of the protein between the samples. By default, it is set to 0. Bugs are referred to to the proteins with empty values inside a single-file analysis
-#' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
-#' @param threshold_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
-#' @param global_threshold TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
+#' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
+#' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
+#' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
 #' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
@@ -28,7 +28,7 @@
 #' @importFrom stats kruskal.test p.adjust bartlett.test  prcomp sd wilcox.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom vegan adonis2
-#' @importFrom limma topTable eBayes contrasts.fit  normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
+#' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom missRanger missRanger
 #' @importFrom car leveneTest
@@ -44,11 +44,9 @@
 #' Ta_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "Ta_BLCA", package = "ProtE")
 #'
-#' pd_multi("C:/Bioprojects/BladderCancer/Ta",
-#'          "C:/Bioprojects/BladderCancer/T1",
-#'          "C:/Bioprojects/BladderCancer/T2",
-#'          normalization = "PPM", 
-#'          global_filtering = TRUE, imputation = "LOD", 
+#' pd_multi(T1_path, T2_path, Ta_path,
+#'          normalization = "PPM",
+#'          global_filtering = TRUE, imputation = "LOD",
 #'          sample_relationship = "Independent")}
 #'
 #' @export
@@ -57,7 +55,7 @@ pd_multi <- function(...,
                         imputation = FALSE,
                         global_filtering = TRUE,
                         sample_relationship = "Independent",
-                        threshold_value = 50,
+                        filtering_value = 50,
                         bugs = 0,
                         normalization = FALSE,
                         parametric= FALSE,
@@ -182,6 +180,20 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       norm_file_path <- file.path(path_resman, "Normalized.xlsx")
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+    if (normalization == "Cyclic_Loess"){
+      dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
+      dataspace[, -1:-2] <- limma::normalizeCyclicLoess(dataspace[, -1:-2])
+      Gdataspace<-dataspace
+      Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+      Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+      Gdataspace<-Gdataspace %>%
+        dplyr::select(Accession, Description, Symbol, everything())
+      colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+      norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+      openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+      message("Applying the selected normalization, saved as Normalized.xlsx") }
+
      if ( normalization == "VSN") {
        dataspace[, -1:-2] <- suppressMessages(limma::normalizeVSN(dataspace[, -1:-2]))
        Gdataspace<-dataspace
@@ -226,20 +238,20 @@ name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
 
-if (threshold_value < 0 && threshold_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
+if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
 if (global_filtering == TRUE) {
 
-    threshold_value <- 100- as.numeric(threshold_value)
+    filtering_value <- 100- as.numeric(filtering_value)
 
-      threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(threshold_value)/100))+0.00000000001)
+      threshold <-  ceiling(sum(samples_per_group)-(sum(samples_per_group)*(as.numeric(filtering_value)/100))+0.00000000001)
   }
 
  if (global_filtering == FALSE) {
       threshold<-numeric(groups_number)
-        threshold_value <- 100- as.numeric(threshold_value)
+        filtering_value <- 100- as.numeric(filtering_value)
         for (i in 1:groups_number) {
-          threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(threshold_value)/100)+0.00000000001)}
+          threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(filtering_value)/100)+0.00000000001)}
 }
 
     if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
