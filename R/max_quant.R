@@ -69,7 +69,6 @@ message("The ProtE process starts now!")
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
-file = "C:\\Users\\tedma\\OneDrive\\Έγγραφα\\itern\\proteinGroups.txt"
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
   dataspace <- dataspace[dataspace$Reverse != "+",]
