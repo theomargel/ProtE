@@ -26,11 +26,11 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix na.omit
 #' @importFrom forcats fct_inorder
-#' @importFrom UniProt.ws mapUniProt
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
-#' @importFrom stringr str_trunc
+#' @importFrom UniProt.ws mapUniProt
+#' @importFrom stringr str_extract
 #' @importFrom missRanger missRanger
 #' @importFrom car leveneTest
 #' @importFrom vsn meanSdPlot

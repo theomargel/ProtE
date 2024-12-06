@@ -69,7 +69,7 @@ message("The ProtE process starts now!")
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
-
+file = "C:\\Users\\tedma\\OneDrive\\Έγγραφα\\itern\\proteinGroups.txt"
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
   dataspace <- dataspace[dataspace$Reverse != "+",]
@@ -89,18 +89,28 @@ message("The ProtE process starts now!")
 
 
 
-  dataspace <- dataspace[,grep("Protein.IDs|Majority.protein.IDs|Intensity",colnames(dataspace))]
+  dataspace <- dataspace[,grep("Protein.IDs|Majority.protein.IDs|Fasta.headers|Intensity",colnames(dataspace))]
   dataspace$Protein.IDs <- ifelse(
     grepl("sp\\|\\w+\\|", dataspace$Protein.IDs),
     sub(".*sp\\|(\\w+)\\|.*", "\\1", dataspace$Protein.IDs),
     dataspace$Protein.IDs
   )
-
-  dataspace$Majority.protein.IDs <- ifelse(
+  if ("Fasta.headers" %in% colnames(dataspace)){
+    dataspace$Majority.protein.IDs <- ifelse(
     grepl("OS=", dataspace$Majority.protein.IDs),
     dataspace$Majority.protein.IDs,
     dataspace$Fasta.headers
   )
+  dataspace$Fasta.headers <- NULL
+  } else {
+    dataspace$Majority.protein.IDs <- ifelse(
+    grepl("OS=", dataspace$Majority.protein.IDs),
+    dataspace$Majority.protein.IDs,
+    "Not Available")
+  }
+
+
+
   colnames(dataspace)[colnames(dataspace) == "Protein.IDs"] <- "Accession"
   colnames(dataspace)[colnames(dataspace) == "Majority.protein.IDs"] <- "Description"
 

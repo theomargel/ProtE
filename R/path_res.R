@@ -11,6 +11,7 @@
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
+#' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
 #'
 #'
 #' @return Excel files with the proteomic values that are optionally processed, via normalization, imputation and filtering of proteins with a selected percentage of missing values. The result of the processing is visualized with an Protein Rank Abundance plot. PCA plots for all groups and for just their significant correlations are created. Furthermore violin and boxplots for the proteins of each sample is created and a heatmap for the significant proteins.
@@ -18,13 +19,14 @@
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
-#' @importFrom stringr str_trunc
 #' @importFrom grid gpar
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
+#' @importFrom UniProt.ws mapUniProt
+#' @importFrom stringr str_extract
 #' @importFrom stats kruskal.test p.adjust bartlett.test  prcomp sd wilcox.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom vegan adonis2
@@ -104,6 +106,42 @@ dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 message("Removing whichever proteins have only missing values in their abundances.")
 
 colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
+
+if ("Description" %in% colnames(dataspace)){
+  message("Description is already included in your input data.No fetching required.")
+} else {
+  if (description == FALSE ){
+    df_description <- data.frame("Description" = character(nrow(dataspace)), stringsAsFactors = FALSE)
+    df_description$Description <- "Not Available"
+    dataspace<-cbind(dataspace[,1],df_description,dataspace[,2:ncol(dataspace)])
+  }
+  if (description == TRUE){
+    "The Description fetching from UniProt starts now, it might take some time depending on you Network speed."
+    id_numbers <- dataspace$Accession
+    for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
+    df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
+    metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
+    df_number_ids<-as.data.frame(id_numbers)
+    fixed_data<-dplyr::left_join(df_number_ids,metadata,by=c("id_numbers"="From"))
+
+    for (i in 1:nrow( fixed_data)){
+      organism<- fixed_data$Organism[i]
+      gene<-stringr::str_extract(fixed_data$Gene.Names[i], "^[^ ]*")
+      entry_name<- fixed_data$Entry.Name[i]
+      protein_name<- fixed_data$Protein.names[i]
+      sv<- fixed_data$Sequence.version[i]
+      if (fixed_data$Protein.existence[i]=="Evidence at protein level"){pe<-1}
+      if (fixed_data$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
+      if (fixed_data$Protein.existence[i]=="Inferred by homology"){pe<-3}
+      if (fixed_data$Protein.existence[i]=="Predicted") {pe<-4}
+      if (fixed_data$Protein.existence[i]=="Uncertain") {pe<-5}
+      details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
+      df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
+    }
+
+    dataspace<-cbind(dataspace[,1],df_description,dataspace[,2:ncol(dataspace)])
+  }
+}
 
 path_g1 <- dirname(group1)
 path_res <- file.path(path_g1, "ProtE_Analysis")
