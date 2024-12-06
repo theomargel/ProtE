@@ -237,7 +237,6 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
-
 if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
 
 if (global_filtering == TRUE) {
@@ -254,7 +253,7 @@ if (global_filtering == TRUE) {
           threshold[i] <-  ceiling(samples_per_group[i]-(samples_per_group[i])*(as.numeric(filtering_value)/100)+0.00000000001)}
 }
 
-    if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
+        if (bugs != 0 && bugs != "average") {stop("Error, you should assign bugs as 0 or average")}
 
     coln <- list()
     case_last <- 2
@@ -337,9 +336,18 @@ if (global_filtering == TRUE) {
       openxlsx::write.xlsx(dataspace, file = imp_file_path)
     }
     if (imputation == "mean"){
-      dataspace[dataspace==0] <- NA
-      impute_value <- apply(dataspace[, 3:(2+sum(samples_per_group))], 1, mean , na.rm = TRUE)
-      dataspace[, -c(1, 2)][is.na(dataspace[, -c(1, 2)])]  <- impute_value
+      data_to_impute <- dataspace[, 3:(2 + sum(samples_per_group))]
+      for (i in seq_len(nrow(data_to_impute))) {
+        row_data <- data_to_impute[i, ]
+
+        if (any(is.na(row_data))) {
+          row_data  <- as.numeric(row_data)
+          row_mean <- mean(row_data, na.rm = TRUE)
+          row_data[is.na(row_data)] <- row_mean
+          data_to_impute[i, ] <- row_data
+        }
+      }
+        dataspace[, 3:(2 + sum(samples_per_group))] <- data_to_impute
       imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
       openxlsx::write.xlsx(dataspace, file = imp_file_path) }
     if (imputation == "LOD"){
@@ -366,7 +374,7 @@ if (global_filtering == TRUE) {
       imp.values<- dataspace1 - pre_dataspace1
 
       his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
-      if   (normalization %in% c("log2", "Quantile")){loghis_dataspace = his_dataspace
+      if   (normalization %in% c("log2", "Quantile","mean")){loghis_dataspace = his_dataspace
       }else{loghis_dataspace<-log2(his_dataspace+1)}
 
       his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
@@ -390,7 +398,7 @@ if (global_filtering == TRUE) {
                       dpi = 300, limitsize = TRUE)
       message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
       }
-      if (imputation %in% c("LOD/2","LOD","kNN","missRanger")){
+      if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean")){
       message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
@@ -636,23 +644,46 @@ if (global_filtering == TRUE) {
     dataspace4<-cbind(Group,dataspace3)
     dataspace4$Group<-as.factor(dataspace4$Group)
 
-    if (groups_number>2){
-      message("Mann-Whitney, Levene, Bartlett tests done, now calculating the Kruskal-Wallis test's results:")
-      df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
-      df4 <- df3 %>% dplyr::group_by(key)
-      df4$value<-as.numeric(df4$value)
-      df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x= .$value, g = .$Group)))
-      Kruskal_Wallis.pvalue <- df5$p.value
-      data3<-cbind(Ddataspace,Kruskal_Wallis.pvalue)
-      data3$Kruskal_Wallis.pvalue_BH.adjusted<- p.adjust(data3$Kruskal_Wallis.pvalue, method = "BH")
+    if (groups_number > 2) {
+      if (sample_relationship == "Independent") {
+        message("Performing Kruskal-Wallis test for independent groups:")
+        df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
+        df4 <- df3 %>% dplyr::group_by(key)
+        df4$value <- as.numeric(df4$value)
+        df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x = .$value, g = .$Group)))
+        Test.pvalue <- df5$p.value
+        test_type <- "Kruskal_Wallis"
+      } else if (sample_relationship == "Paired") {
+        message("Performing Friedman test for paired samples:")
+        df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
+        df4 <- df3 %>% dplyr::group_by(key)
+        df4$value <- as.numeric(df4$value)
+        samples_fried <- rep(1:samples_per_group[1],nrow(dataspace)*groups_number)
+        df4<- suppressMessages(cbind(df4, samples_fried ))
+        colnames(df4)[ncol(df4)] <- "sample"
+        p_values <- numeric(nrow(df4_wide))
+        for (i in seq_along(unique(df4$key))) {
+        gene_data <- subset(df4, key == unique(df4$key)[i])
+          friedman_result <- tryCatch({
+            friedman.test(value ~ Group | sample, data = gene_data)$p.value
+          }, error = function(e) NA)
+          p_values[i] <- friedman_result
+        }
+            Test.pvalue <- p_values
+        test_type <- "Friedman"
+      }
 
-      Fdataspace<-data3
-      Fdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Fdataspace$Description)
-      Fdataspace$Symbol[Fdataspace$Symbol==Fdataspace$Description] = "Not available"
-      Fdataspace<-Fdataspace %>%
+      data3 <- cbind(Ddataspace, Test.pvalue)
+      colnames(data3)[ncol(data3)] <- paste0(test_type, ".pvalue")
+      data3[[paste0(test_type, ".pvalue_BH.adjusted")]] <- p.adjust(data3[[paste0(test_type, ".pvalue")]], method = "BH")
+
+      Fdataspace <- data3
+      Fdataspace$Symbol <- sub(".*GN=(.*?) .*", "\\1", Fdataspace$Description)
+      Fdataspace$Symbol[Fdataspace$Symbol == Fdataspace$Description] <- "Not available"
+      Fdataspace <- Fdataspace %>%
         dplyr::select(Accession, Description, Symbol, everything())
-
     }
+
     for (i in 1:groups_number){
       namesc<- colnames(Fdataspace)
       namesc<- gsub(paste0("G",i), get(paste0("g",i,".name")),namesc)
