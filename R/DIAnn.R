@@ -404,7 +404,7 @@ if (description == TRUE ) {
 fit<- limma::eBayes(fit)
   if (groups_number>2){
     anova_res <- data.frame()
-    anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
+    anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf, sort.by = "none")
     colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
 anova_res<- anova_res[,-c(1:groups_number)]}
 
@@ -415,7 +415,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       contrast_fref <- limma::makeContrasts(contrasts = paste0(colnames(mm)[i],"-",colnames(mm)[j]), levels = mm)
       fit2 <- limma::contrasts.fit(fit, contrast_fref)
       fit2 <- limma::eBayes(fit2)
-      top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf)
+      top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf, sort.by = "none")
       column_groups<- top_table[,c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
       colnames(column_groups)<-paste(colnames(column_groups), comparison, sep = "_")
 

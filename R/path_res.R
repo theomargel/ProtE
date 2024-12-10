@@ -412,7 +412,7 @@ if (global_filtering == TRUE) {
       imp.values<- dataspace1 - pre_dataspace1
 
       his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
-      if   (normalization %in% c("log2", "Quantile","mean")){loghis_dataspace = his_dataspace
+      if   (normalization %in% c("log2", "Quantile","Cyclic_Loess")){loghis_dataspace = his_dataspace
       }else{loghis_dataspace<-log2(his_dataspace+1)}
 
       his_long <-tidyr::pivot_longer(loghis_dataspace, cols = everything())
@@ -442,7 +442,7 @@ if (global_filtering == TRUE) {
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
         dataspace$percentage <- dataspace_0s$percentage
         dataspace$mean <- rowMeans(dataspace[,3:(2+sum(samples_per_group))])
-        if (normalization %in% c("log2", "Quantile")){dataspace$log = dataspace$mean}
+        if (normalization %in% c("log2", "Quantile","Cyclic_Loess")){dataspace$log = dataspace$mean}
         else {
           dataspace$log<-log2(dataspace$mean)}
         dataspace$rank <- rank(-dataspace$mean)
@@ -469,7 +469,7 @@ if (global_filtering == TRUE) {
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
     dataspace$mean <- apply(dataspace[, 3:(2+sum(samples_per_group))], 1, function(x) mean(x[x != 0]))
-    if (normalization %in% c("log2", "Quantile")){dataspace$log = dataspace$mean}
+    if (normalization %in% c("log2", "Quantile","Cyclic_Loess")){dataspace$log = dataspace$mean}
     else {
       dataspace$log<-log2(dataspace$mean)}
     dataspace$rank <- rank(-dataspace$mean)
@@ -510,7 +510,7 @@ if (global_filtering == TRUE) {
 
     nndataspace<- dataspace[,-1:-2]
     nndataspace[is.na(nndataspace)] <- 0
-    if   (normalization %in% c("log2", "Quantile")){nndataspace = nndataspace
+    if   (normalization %in% c("log2", "Quantile","Cyclic_Loess","VSN")){nndataspace = nndataspace
     }else{nndataspace <- log2(nndataspace+1)}
 
     if (sample_relationship == "Paired"){
@@ -527,7 +527,7 @@ if (global_filtering == TRUE) {
       fit <- limma::lmFit(nndataspace, mm)}
     fit<- limma::eBayes(fit)
     if (groups_number>2){
-      anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf)
+      anova_res<- limma::topTable(fit, adjust.method = "BH", number = Inf, sort.by = "none")
       colnames(anova_res)<-paste("ANOVA",colnames(anova_res), sep = "_")
       anova_res<- anova_res[,-c(1:groups_number)]}
     lima.res <- data.frame()
@@ -537,7 +537,7 @@ if (global_filtering == TRUE) {
         contrast_fref <- limma::makeContrasts(contrasts = paste0(colnames(mm)[i],"-",colnames(mm)[j]), levels = mm)
         fit2 <- limma::contrasts.fit(fit, contrast_fref)
         fit2 <- limma::eBayes(fit2)
-        top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf)
+        top_table<- limma::topTable(fit2, adjust.method = "BH", number = Inf, sort.by = "none")
         column_groups<- top_table[,c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
         colnames(column_groups)<-paste(colnames(column_groups), comparison, sep = "_")
 
@@ -743,7 +743,7 @@ if (global_filtering == TRUE) {
 
     Group2<-unique(groups_list_f)
 
-    if   (normalization %in% c("log2", "Quantile")){log.dataspace = dataspace[,-c(1:2)]
+    if   (normalization %in% c("log2", "Quantile","Cyclic_Loess")){log.dataspace = dataspace[,-c(1:2)]
     }else{
       log.dataspace <- log(dataspace[,-c(1:2)]+1,2)}
 
