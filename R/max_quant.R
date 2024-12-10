@@ -452,7 +452,6 @@ message("The ProtE process starts now!")
   colnames(mm)<- group_names
 
   nndataspace<- dataspace[,-1:-2]
-  nndataspace[is.na(nndataspace)] <- 0
   if   (normalization %in% c("log2", "Quantile","Cyclic_Loess","VSN")){nndataspace = nndataspace
   }else{nndataspace <- log2(nndataspace+1)}
 
