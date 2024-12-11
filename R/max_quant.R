@@ -8,7 +8,7 @@
 #' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
 #' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
-#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
+#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
@@ -122,6 +122,7 @@ message("The ProtE process starts now!")
   dataspace <- dataspace[!dataspace$Intensity == 0,]
   dataspace$Intensity <- NULL
   colnames(dataspace) <- gsub("Intensity.", "", colnames(dataspace))
+  dataspace[dataspace == 0] <- NA
 
   if (sum(samples_per_group) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
 
@@ -315,6 +316,19 @@ message("The ProtE process starts now!")
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
+  if (imputation == "Zeros"){
+    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)    }
+  if (imputation == "Gaussian_LOD") {
+    dataspace[dataspace==0] <- NA
+    LOD <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
+    replace_gaussian <- function(x) {
+      ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.2), x)
+    }
+    dataspace[, -c(1, 2)] <- apply(dataspace[, -c(1, 2)], 2, replace_gaussian)
+    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)
+  }
   if (imputation == "LOD"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[, -c(1, 2)]),na.rm = TRUE)
@@ -379,7 +393,7 @@ message("The ProtE process starts now!")
                     dpi = 300, limitsize = TRUE)
     message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
   }
-  if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean")){
+  if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
     message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
