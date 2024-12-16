@@ -8,7 +8,7 @@
 #' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
 #' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
-#' @param sample_relationship Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.
+#' @param independent TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).
 #' @param description TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).
@@ -49,14 +49,14 @@
 #' pd_multi(T1_path, T2_path, Ta_path,
 #'          normalization = "PPM",
 #'          global_filtering = TRUE, imputation = "LOD",
-#'          sample_relationship = "Independent")}
+#'          independent = TRUE)}
 #'
 #' @export
 
 pd_multi <- function(...,
                         imputation = FALSE,
                         global_filtering = TRUE,
-                        sample_relationship = "Independent",
+                        independent = TRUE,
                         filtering_value = 50,
                         bugs = 0,
                         normalization = FALSE,
@@ -525,7 +525,7 @@ if (global_filtering == TRUE) {
     if   (normalization %in% c("log2", "Quantile","Cyclic_Loess","VSN")){nndataspace = nndataspace
     }else{nndataspace <- log2(nndataspace+1)}
 
-    if (sample_relationship == "Paired"){
+    if (independent == FALSE){
       if (length(unique(samples_per_group)) != 1){
         message("Error: Paired comparison did not happen correctly because you have input different number of samples in some groups")
       }
@@ -535,7 +535,7 @@ if (global_filtering == TRUE) {
       corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
       fit <- limma::lmFit(nndataspace, mm, block = pairing, correlation = corfit$consensus.correlation)
     }
-    if (sample_relationship == "Independent"){
+    if (independent == TRUE){
       fit <- limma::lmFit(nndataspace, mm)}
     fit<- limma::eBayes(fit)
     if (groups_number>2){
@@ -569,7 +569,7 @@ if (global_filtering == TRUE) {
     openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
     message("The statistics from the limma parametric tests are showcased in the created Dataset_limma.test.xlsx file.")
 
-    if (sample_relationship != "Paired" && sample_relationship != "Independent"){stop("Error. You need to assign sample_relationship = 'Paired' or 'Indepedent'")}
+    if (independent != FALSE && independent != TRUE){stop("Error. You need to assign independent = TRUE or FALSE")}
     data2 <- dataspace
 
     for (j in 1:groups_number) {
@@ -595,32 +595,32 @@ if (global_filtering == TRUE) {
             values_k <- as.numeric(data2[i, coln[[k]]])
             values_j <- as.numeric(data2[i, coln[[j]]])
 
-            if (sample_relationship == "Independent") {
+            if (independent == TRUE) {
               if (sum(!is.na(values_k)) > 0 & sum(!is.na(values_j)) > 0) {
                 test_list <- stats::wilcox.test(
                   values_k, values_j,
                   exact = FALSE, paired = FALSE, na.rm = TRUE
                 )
-                data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
+                data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- test_list$p.value
               } else {
-                data2[i, paste0("MW_G", j, "vsG", k)] <- NA
+                data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- NA
               }
-            } else if (sample_relationship == "Paired") {
+            } else if (independent == FALSE) {
               paired_values <- na.omit(cbind(values_k, values_j))
               if (nrow(paired_values) > 0) {
                 test_list <- stats::wilcox.test(
                   paired_values[, 1], paired_values[, 2],
                   exact = FALSE, paired = TRUE
                 )
-                data2[i, paste0("MW_G", j, "vsG", k)] <- test_list$p.value
+                data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- test_list$p.value
               } else {
-                data2[i, paste0("MW_G", j, "vsG", k)] <- NA
+                data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- NA
               }
             }
           }
 
           data2[[paste0("BH_p_G", j, "vsG", k)]] <- p.adjust(
-            data2[[paste0("MW_G", j, "vsG", k)]],
+            data2[[paste0("Wilcoxon_p_G", j, "vsG", k)]],
             method = "BH"
           )
 
@@ -695,7 +695,7 @@ if (global_filtering == TRUE) {
     dataspace4$Group<-as.factor(dataspace4$Group)
 
     if (groups_number > 2) {
-      if (sample_relationship == "Independent") {
+      if (independent == TRUE) {
         message("Performing Kruskal-Wallis test for independent groups:")
         df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
         df4 <- df3 %>% dplyr::group_by(key)
@@ -703,7 +703,7 @@ if (global_filtering == TRUE) {
         df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x = .$value, g = .$Group)))
         Test.pvalue <- df5$p.value
         test_type <- "Kruskal_Wallis"
-      } else if (sample_relationship == "Paired") {
+      } else if (independent == FALSE) {
         message("Performing Friedman test for paired samples:")
         df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
         df4 <- df3 %>% dplyr::group_by(key)
@@ -822,7 +822,7 @@ if (global_filtering == TRUE) {
       if (significance == "p"){
         if (groups_number != 2){
           which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
-        } else {(which.sig <- which(Ddataspace$MW_G2vsG1 < 0.05))}
+        } else {(which.sig <- which(Ddataspace$Wilcoxon_p_G2vsG1 < 0.05))}
       }
       if (significance == "BH"){
         if (groups_number != 2){

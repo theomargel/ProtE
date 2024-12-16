@@ -10,7 +10,7 @@ maximum_quantum(
   samples_per_group,
   imputation = FALSE,
   global_filtering = TRUE,
-  sample_relationship = "Independent",
+  independent = TRUE,
   filtering_value = 50,
   normalization = FALSE,
   parametric = FALSE,
@@ -28,7 +28,7 @@ maximum_quantum(
 
 \item{global_filtering}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
 
-\item{sample_relationship}{Either "Independent" when the samples come from different populations or "Paired" when they come from the same. By default, it is set to "Independent". If set to "Paired", the numbers given in the samples_per_group param must be equal to each other.}
+\item{independent}{TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.}
 
 \item{filtering_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
 
