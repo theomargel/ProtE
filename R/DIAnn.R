@@ -24,7 +24,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin  scale_x_discrete scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
@@ -59,7 +59,7 @@ dianno <- function(file,
                    significance  = "p", description = FALSE)
 {message("The ProtE process starts now!")
 
-  Protein.Ids =Protein.Names =Symbol =X =Y = percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
+  Protein.Ids =Protein.Names =Symbol =X =Y = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(samples_per_group) != groups_number) {
     stop("The length of 'samples_per_group' must match 'groups_number'") }

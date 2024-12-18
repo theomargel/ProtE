@@ -27,7 +27,7 @@
 #' @importFrom VIM kNN
 #' @importFrom UniProt.ws mapUniProt
 #' @importFrom stringr str_extract
-#' @importFrom stats kruskal.test p.adjust bartlett.test  prcomp sd wilcox.test model.matrix heatmap median na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom vegan adonis2
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
@@ -61,9 +61,10 @@ pd_multi <- function(...,
                         bugs = 0,
                         normalization = FALSE,
                         parametric= FALSE,
-                        significance = "p")
+                        significance = "p",
+                     description = FALSE)
   {
-   Sample=group1= Accession =Description =Symbol =X =Y = percentage=variable =.= g1.name =g2.name=key =value = NULL
+   Sample=group1= Accession =Description =Symbol =X =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = NULL
 message("The ProtE process starts now!")
 group_paths <- list(...)
 groups_number <- length(group_paths)

@@ -58,7 +58,7 @@ maximum_quantum(
                     samples_per_group = c(10, 12, 9),
                     imputation = FALSE,
                     global_filtering = TRUE,
-                    sample_relationship = "Independent",
+                    independent = TRUE,
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
@@ -79,7 +79,7 @@ pd_multi(excel_file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
                        "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound",
                     imputation = FALSE,
                     global_filtering = TRUE,
-                    sample_relationship = "Independent",
+                    independent = TRUE,
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
@@ -92,13 +92,13 @@ All 4 functions streamline the following process, which is reported in more deta
 
 1.	Normalization of proteomic intensity values (excluding DIA-NN files)
 
-2.	Filtering based on the percentage of missing values.
+2.	Filtering based on the percentage of missing values of each protein.
 
 3.	Imputation of missing data to ensure robust downstream analysis.
 
-4.  Description fetching for DIA-NN input files: .pg_matrix.tsv 
+4.  Description fetching for DIA-NN's .pg_matrix.tsv and Proteome Discoverer files
 
-Once the data processing is complete, the package performs statistical analysis for every pairwise comparison to identify significant protein abundance differences between experimental groups. The results are automatically exported as Excel files, and a range of visualizations is generated to facilitate QC and interpretation. These include:
+Once the data processing is complete, the package performs statistical analysis for every pairwise comparison to identify significant protein abundance differences between experimental groups. The results are automatically exported as Excel files, and a range of visualizations is generated to facilitate quality check and interpretation. These include:
 
 •	Principal Component Analysis (PCA) plots for dimensionality reduction and group comparison.
 

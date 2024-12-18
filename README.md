@@ -16,6 +16,8 @@ and Proteome Discoverer.
 
 ## How to install:
 
+If you already have R Studio in your PC skip to Step 4.
+
 Step 1: Install R
 
 To get started with R, first download and install the latest version of
@@ -58,10 +60,6 @@ system path during installation.
 
 Step 4: Download the Package
 
-Install the released ProtE version from CRAN:
-
-    install.packages("ProtE")
-
 Install the development version of ProtE from GitHub:
 
     install.packages("pak")
@@ -81,10 +79,11 @@ ProtE features 4 functions, each one tailored for a specific use case.
 2.  `dianno()` accepts as input either of the two DIA-NN (or the
     FragPipe - DIANN) output files pg_matrix.tsv or
     unique_genes_matrix.tsv
-3.  `pd_single()` accepts as input the Proteome Discoverer output file
-    that contains all sample protein intensities/abundances in one table
+3.  `pd_single()` accepts as input the Proteome Discoverer output
+    consensus file that contains all sample protein
+    intensities/abundances in one table in excel format
 4.  `pd_multi()` accepts as input separate Proteome Discoverer protein
-    intensity files
+    intensity files in excel format
 
 ## How to use functions `maximum_quantum()`,`dianno()`,`pd_multi()`
 
@@ -137,7 +136,7 @@ maximum_quantum(
                     samples_per_group = c(10, 12, 9),
                     imputation = FALSE,
                     global_filtering = TRUE,
-                    sample_relationship = "Independent",
+                    independent = TRUE,
                     filtering_value = 50,
                     normalization = FALSE,
                     parametric= FALSE,
@@ -191,7 +190,8 @@ more details in the `ProtE Guide` vignette.
 
 3.  Imputation of missing data to ensure robust downstream analysis.
 
-4.  Description fetching for DIA-NN input files: .pg_matrix.tsv
+4.  Description fetching for DIA-NN’s .pg_matrix.tsv and Proteome
+    Discoverer files
 
 Once the data processing is complete, the package performs statistical
 analysis for every pairwise comparison to identify significant protein

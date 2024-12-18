@@ -25,7 +25,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix median na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeCyclicLoess lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
@@ -59,7 +59,7 @@ maximum_quantum <- function(file,
                       parametric= FALSE,
                       significance = "p")
 {
-  group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
+  group1 = group2 = Accession =Description =Symbol= df4_wide =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
 message("The ProtE process starts now!")
 

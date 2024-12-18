@@ -13,7 +13,8 @@ pd_multi(
   bugs = 0,
   normalization = FALSE,
   parametric = FALSE,
-  significance = "p"
+  significance = "p",
+  description = FALSE
 )
 }
 \arguments{

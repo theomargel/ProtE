@@ -27,7 +27,7 @@
 #' @importFrom VIM kNN
 #' @importFrom UniProt.ws mapUniProt
 #' @importFrom stringr str_extract
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test model.matrix heatmap median na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit  normalizeCyclicLoess lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
@@ -57,9 +57,10 @@ pd_single <- function(file,
                         filtering_value = 50
                         ,normalization = FALSE,
                         parametric= FALSE,
-                        significance = "p")
+                        significance = "p",
+                      description = FALSE)
 {
-  group1 = group2 = Accession =Description =Symbol =X =Y = percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
+  group1 = group2 = Accession =Description =Symbol =X =Y = df4_wide= percentage=Sample= variable =.= g1.name =g2.name= g3.name =g4.name= g5.name =g6.name= g7.name= g8.name =g9.name =group3= group4= group5= group6 =group7= group8= group9 =key =value = NULL
 
 message("The ProtE process starts now")
 

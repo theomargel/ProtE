@@ -14,7 +14,8 @@ pd_single(
   filtering_value = 50,
   normalization = FALSE,
   parametric = FALSE,
-  significance = "p"
+  significance = "p",
+  description = FALSE
 )
 }
 \arguments{

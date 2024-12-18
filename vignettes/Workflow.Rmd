@@ -21,9 +21,11 @@ Firstly, the data can be processed via normalization, excluding the DIA-NN outpu
 - Parts Per Million (PPM)
 - Total Ion Current (TIC)
 - Log2 transformation
-- Quantile normalization
+- Quantile normalization (after Log2 transformation)
+- Cyclic Loess normalization(after Log2 transformation)
 - Median normalization
 - VSN normalization
+
 
 The Normalized proteomics data are saved as `Normalized.xlsx` and they will be used in the downstream analysis.
 
@@ -50,18 +52,22 @@ The data can be filtered based on the percentage of missing values per protein. 
 - The parameter `global_filtering` determines if filtering for missing values will be performed across all groups (`TRUE`), or separately inside each group (`FALSE`). If set to FALSE, proteins passing the frequency threshold in only 1 of the groups, will remain in the data (maximum coverage).
 
 ## Description fetching
-Because the output of DIA NN does not include any description of the proteins found, when using the function `dianno` the parameter `description` will be available. 
-If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access and will be utilized only when the input is the .pg_matrix.tsv and not unique_genes_matrix.tsv
+Because the output of DIA NN and ProteomeDiscoverer sometimes does not include any description of the proteins found, when using the functions `pd_multi`, `pd_single` and `dianno` the parameter `description` will be available. 
+If the parameter `description` is set to `TRUE`, a new column named `description` with metadata will be included in the created Excel files. These metadata will be fetched using the UniProt.ws library, based on the first protein of the protein.Ids column in the .pg_matrix Excel file. This process requires internet access for dianno it will be utilized only when the input is the .pg_matrix.tsv and not unique_genes_matrix.tsv. If ProteomeDiscoverer files already include a Description column no fetching will happen. 
 
 
 ## Imputation
 
 Imputation of missing values is provided via the `Imputation` parameter. Options include:
 
+- mean of the gene intensity 
+- Missing values as zeros (0s)
 - kNN
 - MissRanger
 - Limit of Detection (LOD)
 - LOD/2
+- Sample from the Gaussian distribution of the LOD
+
 
 When using algorithm-induced imputation (e.g., kNN, MissRanger), an additional histogram showcasing the distribution of the imputed values is created (`imputed.pdf`):
 
@@ -94,13 +100,13 @@ if (file.exists("prabrank.jpg")) {
 ## Statistical Analysis
 
 
-Statistical analysis will then be performed, including pairwise comparisons between the groups. The parameter `sample_relationship` allows users to specify whether the group variables should be analyzed as independent or paired. By default, it is set to Independent, and to run as Paired, the user must provide groups with the same number of samples, with the order of the samples across them remaining the same.
+Statistical analysis will then be performed, including pairwise comparisons between the groups. The parameter `independent` allows users to specify whether the group variables should be analyzed as independent (e.g. control samples vs patient samples) or as matched pairs (e.g. same patients before and after treatment) By default, it is set to `independent = TRUE` , and to run a paired/matched test `independent = FALSE`, the user must provide groups with the same number of samples, with the order of the samples across them remaining the same.
 
 
 The output includes an Excel file, `Statistical_analysis.xlsx`, which provides detailed information for each protein, including the average abundance, standard deviation, ratio, and log2 fold change of values between groups. It also includes the p-values and Benjamini–Hochberg adjusted p-values from pairwise Mann-Whitney comparisons, as well as Kruskal-Wallis test results when the number of groups is greater than 2. Additionally, the file contains in the columns "Bartlett_p" and "Levene_p" the p_values for the reported statistical tests, that examine the homoscedasticity of each proteins' abundances. Last but not least, the pValue and the pseudoF value from the multivariate PERMANOVA statistical test, utilizing the function adonis2 from the package vegan. 
 
 
-Another Excel file, `limma_statistics.xlsx`, contains results from the parametric `limma` statistical test. This includes the ANOVA F-value, p-value, and adjusted p-value, as well as the B-statistic, unadjusted p-value, and Benjamini–Hochberg adjusted p-value for pairwise t-test comparisons between groups, as well as the ANOVA F-value, p-value, and adjusted p-value when the number of groups is greater than 2.
+Another Excel file, `limma_statistics.xlsx`, contains results from the parametric `limma` statistical test. For the limma statistics the dataset has been fit to a linear model and then moderated by empirical Bayes method. This includes the ANOVA F-value, p-value, and adjusted p-value, as well as the B-statistic, unadjusted p-value, and Benjamini–Hochberg adjusted p-value for pairwise t-test comparisons between groups, as well as the ANOVA F-value, p-value, and adjusted p-value when the number of groups is greater than 2.
 
 ## Data visualization 
 
