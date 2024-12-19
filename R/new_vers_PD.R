@@ -840,7 +840,7 @@ if (length(which.sig) == 0){
     qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
     openxlsx::write.xlsx(qc, file = qc_file_path)
 
-    message("Sample quality metrics and association scores to the first Principal Components have been saved as Sample_QC.xlsx")
+    message("Sample quality metrics and association scores to the first 2 Principal Components have been saved as Sample_QC.xlsx")
     pca.var<-pca$sdev^2
     pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
