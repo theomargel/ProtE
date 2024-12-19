@@ -788,7 +788,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
         openxlsx::write.xlsx(qc, file = qc_file_path)
 
-        message("Sample quality metrics and association scores to the first Principal Components have been saved as Sample_QC.xlsx")
+        message("Sample quality metrics and association scores to the first two Principal Components have been saved as Sample_QC.xlsx")
 
     pca.var<-pca$sdev^2
 
