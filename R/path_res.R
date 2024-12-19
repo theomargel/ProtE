@@ -846,7 +846,7 @@ if (global_filtering == TRUE) {
       colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
       zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
-      range_limit <- max(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
+      range_limit <- min(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
 
       mycols <- circlize::colorRamp2(
         c(-range_limit, 0, range_limit),
