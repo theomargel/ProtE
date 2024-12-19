@@ -215,7 +215,7 @@ if (description == TRUE ) {
 
   if (global_filtering == TRUE) {
     dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-    at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
+    at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
     openxlsx::write.xlsx(dataspace, file = at_file_path)
   }
 
@@ -225,9 +225,9 @@ if (description == TRUE ) {
       keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
     }
     dataspace <- dataspace[keep_rows, ]
-    at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
+    at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
     openxlsx::write.xlsx(dataspace, file = at_file_path)}
-    message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_filtering_applied.xlsx")
+    message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_after_filtering.xlsx")
     dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -508,7 +508,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
           avg_k == 0, NA, avg_j / avg_k
         )
         data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
-          data2[[paste0("Ratio_G", j, "vsG", k)]]+1
+          data2[[paste0("Ratio_G", j, "vsG", k)]]
         )
       }
     }
@@ -738,7 +738,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     message("There are no significant proteins, to create a PCA plot with them and a heatmap")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
     qc[,-1]<-round(qc[,-1],3)
-    qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
+    qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
     openxlsx::write.xlsx(qc, file = qc_file_path)
     } else {
     log.dataspace.sig <- log.dataspace[which.sig,]
@@ -778,9 +778,9 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
 
         qc[,-1]<-round(qc[,-1],3)
-        qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
+        qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
         openxlsx::write.xlsx(qc, file = qc_file_path)
-        message("An excel file named Quality_check.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
+        message("An excel file named Sample_QC.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
 
     pca.var<-pca$sdev^2
 
