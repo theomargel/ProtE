@@ -800,11 +800,12 @@ if (length(which.sig) == 0){
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
     zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
+    range_limit <- max(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
+
     mycols <- circlize::colorRamp2(
-      c(min(zlog.dataspace.sig, na.rm = TRUE), 0, max(zlog.dataspace.sig, na.rm = TRUE)),
+      c(-range_limit, 0, range_limit),
       c("blue", "white", "red")
     )
-
     heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                            cluster_rows = TRUE,
                                            cluster_columns = FALSE,
@@ -940,7 +941,7 @@ if (imputation == FALSE) {
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 }
-message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples has been created as Boxplot.pdf" )
+message("A boxplot showing the log2 Protein Abundance of each protein, across the samples has been created as Boxplot.pdf" )
 
 qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
   geom_violin(aes(color = Group),lwd=1)+
@@ -958,7 +959,7 @@ qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(var
 ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_resplot,
                 scale = 1, width = 12, height = 5, units = "in",
                 dpi = 300, limitsize = TRUE, bg = "white")
-message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
+message("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as Violin_plot.pdf" )
 message("The analysis has been completed. All results are saved inside the ProtE_Analysis folder. Thank you for activating the Proteomics Eye!")
 
 }
