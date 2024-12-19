@@ -227,11 +227,8 @@ if (description == TRUE ) {
     dataspace <- dataspace[keep_rows, ]
     at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
     openxlsx::write.xlsx(dataspace, file = at_file_path)}
-<<<<<<< HEAD
-    message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_after_filtering.xlsx")
-=======
-    message("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Dataset_filtering_applied.xlsx")
->>>>>>> f5cb47131eb55e80c9f88acda122ef8d2336c604
+
+    message("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Dataset_after_filtering.xlsx")
     dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -342,7 +339,7 @@ if (description == TRUE ) {
 
         abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
           geom_point(size = 3, alpha = 0.8) +
-          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Protein Abundance")) +
+          labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean", expression(Log[2] ~ "Protein Abundance")) +
           scale_color_gradient(low = "darkblue", high = "yellow",
                                name = "Imputations\nin each\nprotein\n(%)") +
           theme_linedraw()+
@@ -450,7 +447,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   limma_file_path <- file.path(path_restat, "Dataset_limma.test.xlsx")
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
   message("The limma output has been saved as Dataset_limma.test.xlsx")
-  if (independent != FALSE && independent != TRUE){stop("Error: Sample relationship between groups should be defined in the parameter 'independent' either as TRUE or FALSE".)}
+  if (independent != FALSE && independent != TRUE){stop("Error: Sample relationship between groups should be defined in the parameter 'independent' either as TRUE or FALSE")}
 
   data2 <- dataspace
 
@@ -595,7 +592,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       Test.pvalue <- df5$p.value
       test_type <- "Kruskal_Wallis"
     }  else if (independent == FALSE) {
-      message("Mann-Whitney, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
+      message("Wilcoxon, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
       df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
       df4 <- df3 %>% dplyr::group_by(key)
       df4$value <- as.numeric(df4$value)
@@ -784,11 +781,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         qc[,-1]<-round(qc[,-1],3)
         qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
         openxlsx::write.xlsx(qc, file = qc_file_path)
-<<<<<<< HEAD
-        message("An excel file named Sample_QC.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
-=======
-        message("Sample quality metrics and association scores to the first Principal Components have been saved as Quality_check.xlsx")
->>>>>>> f5cb47131eb55e80c9f88acda122ef8d2336c604
+
+        message("Sample quality metrics and association scores to the first Principal Components have been saved as Sample_QC.xlsx")
 
     pca.var<-pca$sdev^2
 
@@ -849,7 +843,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       ylab(expression(Log[2]~"Protein Abundance"))+
       theme_classic()+
       theme(text = element_text(size = 19),
-            axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+            axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
@@ -874,7 +868,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     ylab(expression(Log[2]~"Protein Abundance"))+
     theme_classic()+
     theme(text = element_text(size = 19),
-          axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+          axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
     guides(color = guide_legend(override.aes = list(size = 1)))+
@@ -901,7 +895,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     ylab(expression(Log[2]~"Protein Abundance"))+
     theme_classic()+
     theme(text = element_text(size = 19),
-          axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+          axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
           axis.title.x=element_blank(),
           plot.title = element_text(hjust = 0.5, face = "bold"))+
     guides(color = guide_legend(override.aes = list(size = 1)))+

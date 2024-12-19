@@ -258,25 +258,25 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
 
-    if (normalization == FALSE ){
-      dataspace <- dataspace
+    if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
+      log.dataspace <- log2(dataspace+1)
       sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
-      suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
+      suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
       dev.off()
-      message("Mean-SD plot of the data saved as meanSdPlot.pdf has been created.")
+      message("Creating Mean-SD plot on the log2 data.")
     } else {
       sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
       dev.off()
-      message("Mean-SD plot of the normalized data saved as meanSdPlot.pdf has been created.")
+      message("Creating Mean-SD plot.")
     }
 
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace
 
-if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
+if (filtering_value < 0 && filtering_value > 100) {stop("Error: The filtering_value must be a number ranging from 0 to 100")}
 
 if (global_filtering == TRUE) {
 
@@ -339,7 +339,7 @@ if (global_filtering == TRUE) {
 
     if (global_filtering == TRUE) {
       dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-      at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
+      at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)
     }
 
@@ -349,9 +349,9 @@ if (global_filtering == TRUE) {
         keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
       }
       dataspace <- dataspace[keep_rows, ]
-      at_file_path <- file.path(path_resman, "Dataset_filtering_applied.xlsx")
+      at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
       openxlsx::write.xlsx(dataspace, file = at_file_path)}
-      message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_filtering_applied.xlsx")
+    message("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Dataset_after_filtering.xlsx")
     dataspace_0s<- dataspace
     dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
     dataspace$Number_0_all_groups <- NULL
@@ -448,10 +448,10 @@ if (global_filtering == TRUE) {
       ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-      message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
-      }
+      message("A frequency histogram of real and imputed values has been created as Imputed_values_histogram.pdf")
+    }
       if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
-      message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
+        message("An excel with the imputed missing values has been created as Dataset_Imputed.xlsx")
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
         dataspace$percentage <- dataspace_0s$percentage
@@ -463,7 +463,7 @@ if (global_filtering == TRUE) {
 
         abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
           geom_point(size = 3, alpha = 0.8) +
-          labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
+          labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean", expression(Log[2] ~ "Protein Abundance")) +
           scale_color_gradient(low = "darkblue", high = "yellow",
                                name = "Imputations\nin each\nprotein\n(%)") +
           theme_linedraw()+
@@ -505,7 +505,7 @@ if (global_filtering == TRUE) {
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     }
-  message("The plot named Proteins_abundance_rank.pdf, which depicts the proteins abundance rank and their percentage of missing values was created.")
+    message("A protein abundance rank order plot has been created as Proteins_abundance_rank.pdf")
     dataspace$percentage <- NULL
     dataspace$mean <- NULL
     dataspace$log<- NULL
@@ -528,7 +528,7 @@ if (global_filtering == TRUE) {
 
     if (independent == FALSE){
       if (length(unique(samples_per_group)) != 1){
-        message("Error: Paired comparison did not happen correctly because you have input different number of samples in some groups")
+        message("Error: The paired group analysis requires an equal number of samples in each group. Please consider removing any samples that lack a corresponding matched pair.")
       }
       n = sum(samples_per_group)/groups_number
       pairing <- rep(1:n, each = groups_number)
@@ -568,7 +568,7 @@ if (global_filtering == TRUE) {
     limma_dataspace <- limma_dataspace[,1:ncollimma]
     limma_file_path <- file.path(path_restat, "Dataset_limma.test.xlsx")
     openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
-    message("The statistics from the limma parametric tests are showcased in the created Dataset_limma.test.xlsx file.")
+    message("The limma output has been saved as Dataset_limma.test.xlsx")
 
     if (independent != FALSE && independent != TRUE){stop("Error. You need to assign independent = TRUE or FALSE")}
     data2 <- dataspace
@@ -631,7 +631,7 @@ if (global_filtering == TRUE) {
             avg_k == 0, NA, avg_j / avg_k
           )
           data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
-            data2[[paste0("Ratio_G", j, "vsG", k)]]+1
+            data2[[paste0("Ratio_G", j, "vsG", k)]]
           )
         }
       }
@@ -697,7 +697,7 @@ if (global_filtering == TRUE) {
 
     if (groups_number > 2) {
       if (independent == TRUE) {
-        message("Performing Kruskal-Wallis test for independent groups:")
+        message("Mann-Whitney, Levene's and Bartlett's tests have been completed, calculating the Kruskal-Wallis p-values:")
         df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
         df4 <- df3 %>% dplyr::group_by(key)
         df4$value <- as.numeric(df4$value)
@@ -705,7 +705,7 @@ if (global_filtering == TRUE) {
         Test.pvalue <- df5$p.value
         test_type <- "Kruskal_Wallis"
       } else if (independent == FALSE) {
-        message("Performing Friedman test for paired samples:")
+        message("Wilcoxon, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
         df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
         df4 <- df3 %>% dplyr::group_by(key)
         df4$value <- as.numeric(df4$value)
@@ -748,7 +748,7 @@ if (global_filtering == TRUE) {
 
     stats_file_path <- file.path(path_restat, "Statistics.xlsx")
     openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-    message("An excel with the statistical tests (Mann Whitney, Bartlett, Leven, Kruskal Wallis tests) was created as Statistical_analysis.xlsx")
+    message("The non-parametric statistical output along with tests for homoscedasticity have been saved as Statistical_analysis.xlsx")
 
 
 
@@ -802,7 +802,7 @@ if (global_filtering == TRUE) {
     ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
-    message("PCA plot using all data was created as PCA_plot_alldata.pdf")
+    message("PCA plot using all post-processing proteins has been created as PCA_plot_alldata.pdf")
 
 
     which.sig<-vector()
@@ -832,11 +832,11 @@ if (global_filtering == TRUE) {
       }}
 
     if (length(which.sig) == 0){
-      message("There are no significant proteins, to create a PCA plot with them and a heatmap")
+      message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)
 
-      qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
+      qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)    }   else {
       log.dataspace.sig <- log.dataspace[which.sig,]
 
@@ -863,7 +863,7 @@ if (global_filtering == TRUE) {
       ComplexHeatmap::draw(heatmap_data)
       dev.off()
 
-      message("A heatmap with the significantly differentially expressed proteins was created as heatmap.pdf")
+      message("A heatmap with the differentially expressed proteins was created as heatmap.pdf")
 
 
       pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
@@ -876,10 +876,10 @@ if (global_filtering == TRUE) {
       qc$PC2.score.Significant <-pca$x[,2]
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)
-      qc_file_path <- file.path(path_restat, "Quality_check.xlsx")
+      qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
       openxlsx::write.xlsx(qc, file = qc_file_path)
 
-      message("An excel file named Quality_check.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
+      message("Sample quality metrics and association scores to the first Principal Components have been saved as Sample_QC.xlsx")
       pca.var<-pca$sdev^2
       pca.var.per<-round(pca.var/sum(pca.var)*100,1)
 
@@ -902,7 +902,7 @@ if (global_filtering == TRUE) {
       ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-      message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
+      message("PCA plot using only the significant proteins was created as PCA_plot_significant.pdf" )
       a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
                            common.legend = TRUE, legend = "bottom")
 
@@ -937,7 +937,7 @@ if (global_filtering == TRUE) {
         ylab(expression(Log[2]~"Protein Abundance"))+
         theme_classic()+
         theme(text = element_text(size = 19),
-              axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+              axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
               axis.title.x=element_blank(),
               plot.title = element_text(hjust = 0.5, face = "bold"))+
         guides(color = guide_legend(override.aes = list(size = 1)))+
@@ -962,7 +962,7 @@ if (global_filtering == TRUE) {
       ylab(expression(Log[2]~"Protein Abundance"))+
       theme_classic()+
       theme(text = element_text(size = 19),
-            axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+            axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
@@ -980,7 +980,7 @@ if (global_filtering == TRUE) {
                       scale = 1, width = 12, height = 5, units = "in",
                       dpi = 300, limitsize = TRUE, bg = "white")
     }
-    message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Boxplot.pdf" )
+    message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples has been created as Boxplot.pdf" )
 
     qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
       geom_violin(aes(color = Group),lwd=1)+
@@ -988,7 +988,7 @@ if (global_filtering == TRUE) {
       ylab(expression(Log[2]~"Protein Abundance"))+
       theme_classic()+
       theme(text = element_text(size = 19),
-            axis.text.x=element_text(angle=90, vjust = 0.5, hjust = 0.5),
+            axis.text.x=element_text(size = 9, angle=90, vjust = 0.5, hjust = 0.5),
             axis.title.x=element_blank(),
             plot.title = element_text(hjust = 0.5, face = "bold"))+
       guides(color = guide_legend(override.aes = list(size = 1)))+
@@ -999,6 +999,6 @@ if (global_filtering == TRUE) {
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
     message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
-    message("The analysis was created. The results are saved inside the ProtE_Analysis folder. Thanks for your patience!")
+    message("The analysis has been completed. All results are saved inside the ProtE_Analysis folder. Thank you for activating the Proteomics Eye!")
 
 }
