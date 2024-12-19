@@ -466,7 +466,7 @@ if (global_filtering == TRUE) {
           geom_point(size = 3, alpha = 0.8) +
           labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean", expression(Log[2] ~ "Protein Abundance")) +
           scale_color_gradient(low = "darkblue", high = "yellow",
-                               name = "Imputations\nin each\nprotein\n(%)") +
+                               name = "Imputations\nin each\nprotein\n(%)",limits = c(0,100-filtering_value)) +
           theme_linedraw()+
           theme(plot.title = element_text(hjust = 0.5, face = "bold"),
                 panel.grid = element_line(color = "grey80"),
@@ -493,7 +493,7 @@ if (global_filtering == TRUE) {
       geom_point(size = 3, alpha = 0.8) +
       labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
-                           name = "MVs\nin each\nprotein\n(%)") +
+                           name = "MVs\nin each\nprotein\n(%)",limits = c(0,100-filtering_value)) +
       theme_linedraw()+
       theme(plot.title = element_text(hjust = 0.5, face = "bold"),
             panel.grid = element_line(color = "grey80"),

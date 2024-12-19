@@ -410,7 +410,7 @@ message("The ProtE process starts now!")
       geom_point(size = 3, alpha = 0.8) +
       labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean", expression(Log[2] ~ "Protein Abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
-                           name = "Imputations\nin each\nprotein\n(%)",limits = c(0,filtering_value))
+                           name = "Imputations\nin each\nprotein\n(%)",limits = c(0,100-filtering_value))+
       theme_linedraw()+
       theme(plot.title = element_text(hjust = 0.5, face = "bold"),
             panel.grid = element_line(color = "grey80"),
@@ -423,7 +423,8 @@ message("The ProtE process starts now!")
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
 
-  if (imputation == FALSE){dataspace <- dataspace
+  if (imputation == FALSE){
+    dataspace <- dataspace
 
   dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
   dataspace$percentage <- dataspace_0s$percentage
@@ -432,12 +433,12 @@ message("The ProtE process starts now!")
   else {
     dataspace$log<-log2(dataspace$mean)}
   dataspace$rank <- rank(-dataspace$mean)
-
+dataspace$percentage
   abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
     geom_point(size = 3, alpha = 0.8) +
     labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
     scale_color_gradient(low = "darkblue", high = "yellow",
-                         name = "MVs\nin each\nprotein\n(%)",limits = c(0,filtering_value)) +
+                         name = "MVs\nin each\nprotein\n(%)",limits = c(0,100-filtering_value)) +
     theme_linedraw()+
     theme(plot.title = element_text(hjust = 0.5, face = "bold"),
           panel.grid = element_line(color = "grey80"),
@@ -610,6 +611,7 @@ message("The ProtE process starts now!")
   metadata2$samples <- colnames(only.data)
   adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
   permanova_psF <- adonis2_results[4]
+
   permanova_psF<- permanova_psF[-c(2:3),]
   permanova_pValue <- adonis2_results[5]
   permanova_pValue<- permanova_pValue[-c(2:3),]
@@ -887,7 +889,8 @@ message("The ProtE process starts now!")
   melt.log.dataspace$Group <- factor(melt.log.dataspace$Group, levels = Group2)
 
   if (imputation == FALSE) {
-    qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
+
+        qc.boxplots<-ggplot2::ggplot(melt.log.dataspace, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
       geom_boxplot(aes(color = Group),lwd=1, outlier.size=0.2, outlier.alpha = 0.2)+
       xlab("Sample")+
       ylab(expression(Log[2]~"Protein Abundance"))+
