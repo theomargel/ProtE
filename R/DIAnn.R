@@ -62,7 +62,7 @@ dianno <- function(file,
   Protein.Ids =Protein.Names =Symbol =X =Y = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(samples_per_group) != groups_number) {
-    stop("The length of 'samples_per_group' must match 'groups_number'") }
+    stop("The length of 'samples_per_group' must be equal to the length of 'group_names'. Each of the numerical values in 'samples_per_group' must denote the sample size for the corresponding group in 'group_names") }
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
@@ -148,7 +148,7 @@ if (description == TRUE ) {
   rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
 
-  if (sum(samples_per_group) != ncol(dataspace)-2) {stop("Error: Number of samples does not match the samples in the mastertable")}
+  if (sum(samples_per_group) != ncol(dataspace)-2) {stop("Error: The specified number of samples in the parameter samples_per_group does not align with the total samples in the input file.")}
 
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
@@ -158,14 +158,14 @@ if (description == TRUE ) {
     pdf(sdrankplot_path)
     suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
     dev.off()
-    message("Mean-SD plot of the data saved as meanSdPlot.pdf has been created.")
+    message("Creating Mean-SD plot.")
 
 
   name_dataspace <-  dataspace[, -1:-2]
   dat.dataspace<-dataspace
 
 
-  if (filtering_value < 0 && filtering_value > 100) {stop("Error, you should add a threshold value number between 0 and 100")}
+  if (filtering_value < 0 && filtering_value > 100) {stop("Error: The filtering_value must be a number ranging from 0 to 100")}
 
   if (global_filtering == TRUE) {
 
@@ -227,7 +227,11 @@ if (description == TRUE ) {
     dataspace <- dataspace[keep_rows, ]
     at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
     openxlsx::write.xlsx(dataspace, file = at_file_path)}
+<<<<<<< HEAD
     message("An excel file with the proteins that have % of missing values at the selected threshold was created as Dataset_after_filtering.xlsx")
+=======
+    message("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Dataset_filtering_applied.xlsx")
+>>>>>>> f5cb47131eb55e80c9f88acda122ef8d2336c604
     dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -324,11 +328,11 @@ if (description == TRUE ) {
       ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-      message("A plot named Imputed_values_histogram.pdf, showcasing the distribution of the imputed values was created.")
+      message("A frequency histogram of real and imputed values has been created as Imputed_values_histogram.pdf")
 
   }
       if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
-        message("An excel with the imputed missing values was created as Dataset_Imputed.xlsx")
+        message("An excel with the imputed missing values has been created as Dataset_Imputed.xlsx")
 
         dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
         dataspace$percentage <- dataspace_0s$percentage
@@ -379,7 +383,7 @@ if (description == TRUE ) {
                   dpi = 300, limitsize = TRUE, bg = "white")
 
    }
-  message("The plot named Proteins_abundance_rank.pdf, which depicts the proteins abundance rank and their percentage of missing values was created.")
+  message("A protein abundance rank order plot has been created as Proteins_abundance_rank.pdf")
 
   dataspace$percentage <- NULL
   dataspace$mean <- NULL
@@ -404,7 +408,7 @@ if (description == TRUE ) {
   nndataspace <- log2(nndataspace+1)
   if (independent == FALSE){
     if (length(unique(samples_per_group)) != 1){
-      message("Error: Paired comparison did not happen correctly because you have input different number of samples in some groups")
+      message("Error: The paired group analysis requires an equal number of samples in each group. Please consider removing any samples that lack a corresponding matched pair.")
     }
     n = sum(samples_per_group)/groups_number
     pairing <- rep(1:n, each = groups_number)
@@ -445,8 +449,8 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   limma_dataspace <- limma_dataspace[,1:ncollimma]
   limma_file_path <- file.path(path_restat, "Dataset_limma.test.xlsx")
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
-  message("The statistics from the limma parametric tests are showcased in the created Dataset_limma.test.xlsx file.")
-  if (independent != FALSE && independent != TRUE){stop("Error. You need to assign independent = TRUE or FALSE")}
+  message("The limma output has been saved as Dataset_limma.test.xlsx")
+  if (independent != FALSE && independent != TRUE){stop("Error: Sample relationship between groups should be defined in the parameter 'independent' either as TRUE or FALSE".)}
 
   data2 <- dataspace
 
@@ -583,7 +587,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   if (groups_number > 2) {
     if (independent == TRUE) {
-      message("Mann-Whitney, Levene, Bartlett tests done, now calculating the Kruskal-Wallis test's results:")
+      message("Mann-Whitney, Levene's and Bartlett's tests have been completed, calculating the Kruskal-Wallis p-values:")
       df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
       df4 <- df3 %>% dplyr::group_by(key)
       df4$value <- as.numeric(df4$value)
@@ -591,7 +595,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       Test.pvalue <- df5$p.value
       test_type <- "Kruskal_Wallis"
     }  else if (independent == FALSE) {
-      message("Performing Friedman test for paired samples:")
+      message("Mann-Whitney, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
       df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
       df4 <- df3 %>% dplyr::group_by(key)
       df4$value <- as.numeric(df4$value)
@@ -643,7 +647,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   stats_file_path <- file.path(path_restat, "Statistics.xlsx")
   openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-  message("An excel with the statistical tests for the normalized data was created as Statistical_analysis.xlsx")
+  message("The non-parametric statistical output along with tests for homoscedasticity have been saved as Statistical_analysis.xlsx")
 
   dataspace[is.na(dataspace)] <- 0
 
@@ -699,7 +703,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_resplot,
                   scale = 1, width = 5, height = 4, units = "in",
                   dpi = 300, limitsize = TRUE)
-  message("PCA plot using all data was created as PCA_plot_alldata.pdf")
+  message("PCA plot using all post-processing proteins has been created as PCA_plot_alldata.pdf")
 
   groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
@@ -735,7 +739,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
 
   if (length(which.sig) == 0){
-    message("There are no significant proteins, to create a PCA plot with them and a heatmap")
+    message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
     qc[,-1]<-round(qc[,-1],3)
     qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
@@ -764,7 +768,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     pdf(pdf_file_path, width = 7.37, height = 6.09)
     ComplexHeatmap::draw(heatmap_data)
     dev.off()
-    message("A heatmap with the significantly differentially expressed proteins was created as heatmap.pdf")
+    message("A heatmap with the differentially expressed proteins was created as heatmap.pdf")
 
 
     pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
@@ -780,7 +784,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         qc[,-1]<-round(qc[,-1],3)
         qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
         openxlsx::write.xlsx(qc, file = qc_file_path)
+<<<<<<< HEAD
         message("An excel file named Sample_QC.xlsx, that provides information on the missing values and the Principal Component score for each sample was created")
+=======
+        message("Sample quality metrics and association scores to the first Principal Components have been saved as Quality_check.xlsx")
+>>>>>>> f5cb47131eb55e80c9f88acda122ef8d2336c604
 
     pca.var<-pca$sdev^2
 
@@ -803,7 +811,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
-    message("PCA plot with the significant data was created as PCA_plot_significant.pdf" )
+    message("PCA plot using only the significant proteins was created as PCA_plot_significant.pdf" )
 
     a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
                          common.legend = TRUE, legend = "bottom")
@@ -885,7 +893,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
-  message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Boxplot.pdf" )
+  message("A boxplot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples has been created as Boxplot.pdf" )
 
   qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_violin(aes(color = Group),lwd=1)+
@@ -905,6 +913,6 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                   dpi = 300, limitsize = TRUE, bg = "white")
   message("A Violin Plot showing the ", expression(Log[2]~"Abundance")," of each protein, across the samples was created as Violin_plot.pdf" )
 
- message("The analysis was created. The results are saved inside the ProtE_Analysis folder. Thanks for your patience!")
+ message("The analysis has been completed. All results are saved inside the ProtE_Analysis folder. Thank you for activating the Proteomics Eye!")
  }
 
