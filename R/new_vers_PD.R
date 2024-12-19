@@ -16,7 +16,8 @@
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom grDevices  dev.off pdf
+#' @importFrom circlize colorRamp2
 #' @importFrom vegan adonis2
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
@@ -225,8 +226,8 @@ if (normalization == "median") {
   message("Applying the selected normalization, saved as Normalized.xlsx")}
 
 if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
-  log.dataspace <- log2(dataspace+1)
-  sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
+  log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
+sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
   pdf(sdrankplot_path)
   suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
   dev.off()
@@ -797,8 +798,13 @@ if (length(which.sig) == 0){
 
     zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
+    zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
-    mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+    mycols <- circlize::colorRamp2(
+      c(min(zlog.dataspace.sig, na.rm = TRUE), 0, max(zlog.dataspace.sig, na.rm = TRUE)),
+      c("blue", "white", "red")
+    )
+
     heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                            cluster_rows = TRUE,
                                            cluster_columns = FALSE,

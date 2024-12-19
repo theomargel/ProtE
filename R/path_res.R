@@ -20,7 +20,8 @@
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom grid gpar
-#' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom grDevices  dev.off pdf
+#' @importFrom circlize colorRamp2
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
@@ -259,8 +260,8 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       message("Applying the selected normalization, saved as Normalized.xlsx")}
 
     if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
-      log.dataspace <- log2(dataspace+1)
-      sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
+      log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
+    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
       pdf(sdrankplot_path)
       suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
       dev.off()
@@ -843,8 +844,12 @@ if (global_filtering == TRUE) {
 
       zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
       colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
+      zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
-      mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+      mycols <- circlize::colorRamp2(
+        c(min(zlog.dataspace.sig, na.rm = TRUE), 0, max(zlog.dataspace.sig, na.rm = TRUE)),
+        c("blue", "white", "red")
+      )
       heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                              cluster_rows = TRUE,
                                              cluster_columns = FALSE,

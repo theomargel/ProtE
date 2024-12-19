@@ -16,7 +16,8 @@
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom grDevices  dev.off pdf
+#' @importFrom circlize colorRamp2
 #' @importFrom stringr str_trunc
 #' @importFrom dplyr select  group_by  do everything  %>%
 #' @importFrom tidyr gather pivot_longer
@@ -25,7 +26,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp complete.cases sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeCyclicLoess lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
@@ -71,6 +72,7 @@ message("The ProtE process starts now!")
     assign(paste0("g",i,".name"),group_names[[i]])}
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
+  dataspace <- dataspace[complete.cases(dataspace[,1]),]
   dataspace <- dataspace[dataspace$Reverse != "+",]
   message("Removed REV_proteins: Reverse peptide Identifications")
   path <- dirname(file)
@@ -219,8 +221,8 @@ message("The ProtE process starts now!")
     message("Applying the selected normalization, saved as Normalized.xlsx")}
 
   if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
-    log.dataspace <- log2(dataspace+1)
-    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
+    log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
+  sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
     pdf(sdrankplot_path)
     suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
     dev.off()
@@ -408,7 +410,7 @@ message("The ProtE process starts now!")
       geom_point(size = 3, alpha = 0.8) +
       labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean", expression(Log[2] ~ "Protein Abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
-                           name = "Imputations\nin each\nprotein\n(%)") +
+                           name = "Imputations\nin each\nprotein\n(%)",limits = c(0,filtering_value))
       theme_linedraw()+
       theme(plot.title = element_text(hjust = 0.5, face = "bold"),
             panel.grid = element_line(color = "grey80"),
@@ -435,7 +437,7 @@ message("The ProtE process starts now!")
     geom_point(size = 3, alpha = 0.8) +
     labs(title = "Protein Abundance Rank", x = "Rank", y = expression(Log[2] ~ "Proteins Abundance")) +
     scale_color_gradient(low = "darkblue", high = "yellow",
-                         name = "MVs\nin each\nprotein\n(%)") +
+                         name = "MVs\nin each\nprotein\n(%)",limits = c(0,filtering_value)) +
     theme_linedraw()+
     theme(plot.title = element_text(hjust = 0.5, face = "bold"),
           panel.grid = element_line(color = "grey80"),
@@ -791,8 +793,12 @@ message("The ProtE process starts now!")
 
       zlog.dataspace.sig <- t(scale(t(log.dataspace.sig)))
       colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
+      zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
-      mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+      mycols <- circlize::colorRamp2(
+        c(min(zlog.dataspace.sig, na.rm = TRUE), 0, max(zlog.dataspace.sig, na.rm = TRUE)),
+        c("blue", "white", "red")
+      )
       heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                              cluster_rows = TRUE,
                                              cluster_columns = FALSE,

@@ -16,7 +16,7 @@ and Proteome Discoverer.
 
 ## How to install:
 
-If you already have R Studio in your PC skip to Step 4.
+If you already have R Studio and Rtools in your PC skip to Step 4.
 
 Step 1: Install R
 

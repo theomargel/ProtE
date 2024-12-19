@@ -16,7 +16,8 @@
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon_p_+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom grDevices  dev.off pdf
+#' @importFrom circlize colorRamp2
 #' @importFrom dplyr select  group_by  do everything  %>% any_of
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
@@ -747,8 +748,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     colnames(zlog.dataspace.sig) <- colnames(log.dataspace.sig)
  zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
-    mycols <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
-    heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
+ mycols <- circlize::colorRamp2(
+   c(min(zlog.dataspace.sig, na.rm = TRUE), 0, max(zlog.dataspace.sig, na.rm = TRUE)),
+   c("blue", "white", "red")
+ )
+ heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
                                            cluster_rows = TRUE,
                                            cluster_columns = FALSE,
                                            show_row_names = FALSE,
