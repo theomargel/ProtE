@@ -751,7 +751,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
  range_limit <- min(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
 
  mycols <- circlize::colorRamp2(
-   c(-2, 0, 2),
+   c(-range_limit, 0, range_limit),
    c("blue", "white", "red")
  )
  heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
