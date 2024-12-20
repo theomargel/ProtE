@@ -184,7 +184,7 @@ Treatment/Control, Compound/Control and Compound/Treatment.
 All 4 functions streamline the following process, which is reported in
 more details in the `ProtE Guide` vignette.
 
-1.  Normalization of proteomic intensity values (excluding DIA-NN files)
+1.  Normalization of proteomic intensity values
 
 2.  Filtering based on the percentage of missing values.
 

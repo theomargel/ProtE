@@ -17,7 +17,7 @@ vignette: >
 
 All 4 functions streamline the following data processing:
 
-1.	Normalization of proteomic intensity values (excluding DIA-NN files)
+1.	Normalization of proteomic intensity values 
 
 2.	Filtering based on the percentage of missing values.
 
@@ -32,7 +32,7 @@ All 4 functions streamline the following data processing:
 Mass Spectrometry quantitative data produced by software tools such as Proteome Discoverer and MaxQuant may be required to be processed with Normalization methods to reduce their systemic bias. The ProtE package offers different methods of normalization that are provided via the normalization argument. 
 These options include a simple log2 transformation of the data, Cyclic Loess normalization that aims to reduce their dissimilarities , and Quantile normalization which is implemented to make the distribution of each feature identical. Both Quantile and Cyclic loess Normalization are applied to the log2 transformed data and are implemented using functions of the limma package.
  The data can also be transformed with median normalization, in which all intensity values are divided by each sample’s median intensity, resulting in a median equal to 1 across the protein data set .  Other normalization methods share an initial step of dividing each intensity value by the total sum of intensities for its respective sample. Total Ion Current normalization then rescales the values by multiplying them by the average Total Ion Current while Parts Per Million (PPM) normalization scales the values by multiplying them by one million. Lastly, Variable Stabilizing Normalization is also available implementing the corresponding function of the vsn package .
- Because the data output from DIA-NN has already been normalized with the MaxLFQ quantification, normalizing methods are incompatible with the dianno function. 
+ Because the data output from DIA-NN has already been normalized with the MaxLFQ quantification, extra normalizing methods are suggested to be selected cautiously. 
 
 
 ## Filtering of Missing Values
