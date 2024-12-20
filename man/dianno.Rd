@@ -37,6 +37,8 @@ dianno(
 \item{significance}{"p" or "BH" Specifies which of the p-values (nominal vs BH adjusted for multiple hypothesis) will be taken into account for creating the PCA plots and the heatmap. By default it is set to "p" (nominal p-value).}
 
 \item{description}{TRUE/FALSE. If TRUE, establishes connection to the Uniprot database (via the Uniprot.ws package) and adds the "Description" annotation in the data. This option requires protein Accession IDs and is thus applicable only to the pg.matrix file. It requires also internet access. By default it is set to FALSE (No description fetching).}
+
+\item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. As DIA-NN output has already been normalized with the MaxLFQ algorithm, we suggest to be cautious if you select any method. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 }
 \value{
 Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon_p_+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.

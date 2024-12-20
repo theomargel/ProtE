@@ -5,6 +5,7 @@
 #' @param file The whole path to the DIA-NN pg_matrix.tsv file (or alternatively, to the unique_genes_matrix.tsv file). The folders in the file path must be separated either with the forward slashes (/), or with the double backslashes (\\). See the example for inserting correctly the file path.
 #' @param group_names A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
+#' @param normalization The specific method for normalizing the data.By default it is set to FALSE. As DIA-NN output has already been normalized with the MaxLFQ algorithm, we suggest to be cautious if you select any method. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
 #' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
 #' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
@@ -27,7 +28,7 @@
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
-#' @importFrom limma topTable eBayes contrasts.fit lmFit normalizeQuantiles duplicateCorrelation
+#' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom UniProt.ws mapUniProt
@@ -154,16 +155,112 @@ if (description == TRUE ) {
   zero_per_sample <- colSums(is.na(dataspace[,-1:-2]))*100/nrow(dataspace)
   IDs <- colSums(!is.na(dataspace[,-1:-2]))
 
+  name_dataspace <-  dataspace[, -1:-2]
+  dat.dataspace<-dataspace
 
+  if (normalization == "PPM"){
+    dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) {
+      sum_x <- sum(x, na.rm = TRUE)
+      ifelse(is.na(x), NA, (x / sum_x) * 10^6)
+    })
+
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+  if (normalization == "Quantile"){
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
+    dataspace[, -1:-2] <- limma::normalizeQuantiles(dataspace[, -1:-2])
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx") }
+  if (normalization == "log2"){
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx") }
+  if (normalization == "Total_Ion_Current") {
+    dataspace[, -1:-2] <- lapply(dataspace[, -1:-2], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+  if (normalization == "Cyclic_Loess"){
+    dataspace[, -1:-2] <- log(dataspace[, -1:-2]+1,2)
+    dataspace[, -1:-2] <- limma::normalizeCyclicLoess(dataspace[, -1:-2])
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx") }
+
+  if ( normalization == "VSN") {
+    dataspace[, -1:-2] <- suppressMessages(limma::normalizeVSN(dataspace[, -1:-2]))
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx")
+  }
+  if (normalization == "median") {
+    sample_medians <- apply(dataspace[, -1:-2], 2, median, na.rm = TRUE)
+    dataspace[, -1:-2] <- sweep(dataspace[, -1:-2], 2, sample_medians, FUN = "/")
+    Gdataspace<-dataspace
+    Gdataspace$Symbol = sub(".*GN=(.*?) .*","\\1",Gdataspace$Description)
+    Gdataspace$Symbol[Gdataspace$Symbol==Gdataspace$Description] = "Not available"
+    Gdataspace<-Gdataspace %>%
+      dplyr::select(Accession, Description, Symbol, everything())
+    colnames(Gdataspace) <- gsub(".xlsx", "", colnames(Gdataspace))
+    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
+    message("Applying the selected normalization, saved as Normalized.xlsx")}
+
+  if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
+    log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
+    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
+    pdf(sdrankplot_path)
+    suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
+    dev.off()
+    message("Creating Mean-SD plot on the log2 data.")
+  } else {
     sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
     pdf(sdrankplot_path)
     suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
     dev.off()
     message("Creating Mean-SD plot.")
-
-
-  name_dataspace <-  dataspace[, -1:-2]
-  dat.dataspace<-dataspace
+  }
 
 
   if (filtering_value < 0 && filtering_value > 100) {stop("Error: The filtering_value must be a number ranging from 0 to 100")}
