@@ -53,6 +53,7 @@
 dianno <- function(file,
                       group_names,
                       samples_per_group,
+                      normalization = FALSE,
                       imputation = FALSE,
                       global_filtering = TRUE,
                       independent = TRUE,
@@ -61,7 +62,7 @@ dianno <- function(file,
                    significance  = "p", description = FALSE)
 {message("The ProtE process starts now!")
 
-  Protein.Ids =Protein.Names =Symbol =X =Y = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
+  Protein.Ids =Protein.Names =Symbol =X =Y = Description = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(samples_per_group) != groups_number) {
     stop("The length of 'samples_per_group' must be equal to the length of 'group_names'. Each of the numerical values in 'samples_per_group' must denote the sample size for the corresponding group in 'group_names") }
