@@ -38,7 +38,7 @@ Next, you’ll need an Integrated Development Environment (IDE) to work
 with R. The most popular IDE is RStudio.
 
 - Go to the [RStudio download
-  page](https://www.rstudio.com/products/rstudio/download/).
+  page](https://posit.co/download/rstudio-desktop/).
 - Select “RStudio Desktop” and download the installer for your operating
   system.
 
@@ -59,6 +59,10 @@ Make sure to select the option that allows RTools to be added to your
 system path during installation.
 
 Step 4: Download the Package
+
+Install the package from CRAN:
+
+`install.packages("ProtE")`
 
 Install the development version of ProtE from GitHub:
 
