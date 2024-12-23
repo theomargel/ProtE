@@ -42,11 +42,12 @@
 #' @examples
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
-#' \dontrun{
-#' dianno(file = "C:/Users/User/Documents/ProteinGroups.txt",
+#' \donttest{
+#' jittered.pg_matrix.tsv <- system.file("extdata", report.pg_matrix.tsv, package = "ProtE")
+#' dianno(file = jittered.pg_matrix.tsv,
 #'        groups_number = 2,
-#'        group_names = c("T0","T1"),
-#'        samples_per_group = c(3,3), filtering_value = 100)}
+#'        group_names = c("Healthy","Control"),
+#'        samples_per_group = c(5,5), filtering_value = 80)}
 #'
 #' @export
 

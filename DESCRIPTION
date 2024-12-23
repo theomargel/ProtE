@@ -6,7 +6,7 @@ Authors@R:
     c(person("Theodoros", "Margelos", email = "ted.margelos02@gmail.com",role = c("aut","cre","cph")),
     person("Rafael", "Stroggilos", email = "rstrog@bioacademy.gr", role = c("ctb","cph")))
 Maintainer: Theodoros Margelos <ted.margelos02@gmail.com> 
-Description: The Proteomics Eye (ProtE) offers a comprehensive and intuitive framework for the univariate analysis of label-free proteomics data. By integrating essential data wrangling and processing steps into a single function, ProtE streamlines pairwise statistical comparisons for categorical variables. It provides quality checks and generates publication-ready visualizations, enabling efficient and robust data analysis. ProtE is compatible with proteomics data outputs from MaxQuant, DIA-NN, and Proteome Discoverer.
+Description: The Proteomics Eye ('ProtE') offers a comprehensive and intuitive framework for the univariate analysis of label-free proteomics data. By integrating essential data wrangling and processing steps into a single function, 'ProtE' streamlines pairwise statistical comparisons for categorical variables. It provides quality checks and generates publication-ready visualizations, enabling efficient and robust data analysis. 'ProtE' is compatible with proteomics data outputs from 'MaxQuant', 'DIA-NN', and 'Proteome Discoverer'.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
