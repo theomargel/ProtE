@@ -43,9 +43,8 @@
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
 #' \donttest{
-#' PDconsesus_file.xlsx <- system.file("extdata", PDconsesus_file.xlsx, package = "ProtE")
+#' PDconsesus_file.xlsx <- system.file("extdata", "PDconsesus_file.xlsx", package = "ProtE")
 #' pd_single(file = PDconsesus_file.xlsx,
-#'        groups_number = 2,
 #'        group_names = c("Healthy","Control"),
 #'        samples_per_group = c(4,4), filtering_value = 80)}
 #' @export

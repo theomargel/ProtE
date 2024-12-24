@@ -41,9 +41,8 @@
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
 #' \donttest{
-#' proteinGroups.txt <- system.file("extdata", proteinGroups.txt, package = "ProtE")
-#' pd_single(file = proteinGroups.txt,
-#'        groups_number = 2,
+#' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
+#' maximum_quantum(file = proteinGroups.txt,
 #'        group_names = c("Healthy","Control"),
 #'        samples_per_group = c(4,4), filtering_value = 80)}
 #'
@@ -74,7 +73,7 @@ message("The ProtE process starts now!")
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
   dataspace <- dataspace[complete.cases(dataspace[,1]),]
-  dataspace <- dataspace[dataspace$Reverse != "+",]
+  dataspace <- dataspace[is.na(dataspace$Reverse) == TRUE,]
   message("Removed REV_proteins: Reverse peptide Identifications")
   path <- dirname(file)
   path_res <- file.path(path , "ProtE_Analysis")

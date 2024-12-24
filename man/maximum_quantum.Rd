@@ -48,9 +48,8 @@ Processes the MaxQuant proteomics dataset and performs exploratory statistical a
 #Example of running the function with paths for two groups.
 # The file path is a placeholder, replace it with an actual file.
 \donttest{
-proteinGroups.txt <- system.file("extdata", proteinGroups.txt, package = "ProtE")
-pd_single(file = proteinGroups.txt,
-       groups_number = 2,
+proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
+maximum_quantum(file = proteinGroups.txt,
        group_names = c("Healthy","Control"),
        samples_per_group = c(4,4), filtering_value = 80)}
 
