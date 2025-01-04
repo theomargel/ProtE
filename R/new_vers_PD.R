@@ -19,7 +19,7 @@
 #' @importFrom grDevices  dev.off pdf
 #' @importFrom circlize colorRamp2
 #' @importFrom vegan adonis2
-#' @importFrom dplyr select  group_by  do everything  %>%
+#' @importFrom dplyr select  group_by  group_modify everything  %>%
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
@@ -656,7 +656,9 @@ if (groups_number > 2) {
     df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
     df4 <- df3 %>% dplyr::group_by(key)
     df4$value <- as.numeric(df4$value)
-    df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x = .$value, g = .$Group)))
+    df5 <- df4 %>%
+      dplyr::group_modify(~ broom::tidy(kruskal.test(value ~ Group, data = .x)))
+    df5<- df5[,c(1,3)]
     data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
     data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
 
