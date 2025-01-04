@@ -657,8 +657,10 @@ if (groups_number > 2) {
     df4 <- df3 %>% dplyr::group_by(key)
     df4$value <- as.numeric(df4$value)
     df5 <- df4 %>% dplyr::do(broom::tidy(kruskal.test(x = .$value, g = .$Group)))
-    Test.pvalue <- df5$p.value
-    test_type <- "Kruskal_Wallis"
+    data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
+    data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
+
+
   }  else if (independent == FALSE) {
     message("Wilcoxon, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
     df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
@@ -677,13 +679,11 @@ if (groups_number > 2) {
     }
     Test.pvalue <- p_values
     test_type <- "Friedman"
+    data3 <- cbind(Ddataspace, Test.pvalue)
   }
 
-
-  data3 <- cbind(Ddataspace, Test.pvalue)
   colnames(data3)[ncol(data3)] <- paste0(test_type, ".pvalue")
   data3[[paste0(test_type, ".pvalue_BH.adjusted")]] <- p.adjust(data3[[paste0(test_type, ".pvalue")]], method = "BH")
-
   Fdataspace <- data3
   Fdataspace$Symbol <- sub(".*GN=(.*?) .*", "\\1", Fdataspace$Description)
   Fdataspace$Symbol[Fdataspace$Symbol == Fdataspace$Description] <- "Not available"
