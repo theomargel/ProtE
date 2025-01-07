@@ -679,11 +679,6 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   colnames(dataspace4) <- make.names(colnames(dataspace4), unique = TRUE)
 
 
-  data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
-  data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
-  colnames(data3)[ncol(data3)] <- paste0(test_type, ".pvalue")
-  data3[[paste0(test_type, ".pvalue_BH.adjusted")]] <- p.adjust(data3[[paste0(test_type, ".pvalue")]], method = "BH")
-  Fdataspace <- data3
 
 
   if (groups_number > 2) {
