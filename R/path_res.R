@@ -39,18 +39,16 @@
 #'
 #' @examples
 #' #Example of running the function with paths for three groups.
-#' \donttest{
+#'
 #' T1_path <- system.file("extdata", "PDexports(multiple_files)",
 #'  "T1_BLCA", package = "ProtE")
 #' T2_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "T2_BLCA", package = "ProtE")
-#' Ta_path <- system.file("extdata", "PDexports(multiple_files)",
-#' "Ta_BLCA", package = "ProtE")
 #'
-#' pd_multi(T1_path, T2_path, Ta_path,
-#'          normalization = "PPM",
-#'          global_filtering = TRUE, imputation = "LOD",
-#'          independent = TRUE)}
+#' pd_multi(T1_path, T2_path,
+#'          normalization = FALSE,
+#'          global_filtering = TRUE, imputation = FALSE,
+#'          independent = TRUE)
 #'
 #' @export
 
@@ -837,7 +835,7 @@ if (global_filtering == TRUE) {
         } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
       }}
 
-    if (length(which.sig) == 0){
+    if (length(which.sig) < 2){
       message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
       qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
       qc[,-1]<-round(qc[,-1],3)

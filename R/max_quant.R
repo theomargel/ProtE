@@ -40,11 +40,11 @@
 #' @examples
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
-#' \donttest{
+#'
 #' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 #' maximum_quantum(file = proteinGroups.txt,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(4,4), filtering_value = 80)}
+#'        samples_per_group = c(4,4))
 #'
 #'
 #' @export
@@ -67,7 +67,6 @@ message("The ProtE process starts now!")
   groups_number <- length(group_names)
   if (length(samples_per_group) != groups_number) {
     stop("The length of 'samples_per_group' must match 'groups_number'") }
-
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
@@ -786,7 +785,7 @@ dataspace$percentage
       } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
     }}
 
-  if (length(which.sig) == 0){
+  if (length(which.sig) < 2){
     message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
     qc[,-1]<-round(qc[,-1],3)

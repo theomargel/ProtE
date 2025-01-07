@@ -42,11 +42,11 @@
 #' @examples
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
-#' \donttest{
+#'
 #' jittered.pg_matrix.tsv <- system.file("extdata", "report.pg_matrix.tsv", package = "ProtE")
 #' dianno(file = jittered.pg_matrix.tsv,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(5,5), filtering_value = 80)}
+#'        samples_per_group = c(5,5), filtering_value = 80)
 #'
 #' @export
 
@@ -838,7 +838,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
 
 
-  if (length(which.sig) == 0){
+  if (length(which.sig) <2 ){
     message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
     qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
     qc[,-1]<-round(qc[,-1],3)

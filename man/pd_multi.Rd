@@ -46,17 +46,15 @@ Takes as input Proteomics Data (output of PD) in the format of a single file per
 }
 \examples{
 #Example of running the function with paths for three groups.
-\donttest{
+
 T1_path <- system.file("extdata", "PDexports(multiple_files)",
  "T1_BLCA", package = "ProtE")
 T2_path <- system.file("extdata", "PDexports(multiple_files)",
 "T2_BLCA", package = "ProtE")
-Ta_path <- system.file("extdata", "PDexports(multiple_files)",
-"Ta_BLCA", package = "ProtE")
 
-pd_multi(T1_path, T2_path, Ta_path,
-         normalization = "PPM",
-         global_filtering = TRUE, imputation = "LOD",
-         independent = TRUE)}
+pd_multi(T1_path, T2_path,
+         normalization = FALSE,
+         global_filtering = TRUE, imputation = FALSE,
+         independent = TRUE)
 
 }

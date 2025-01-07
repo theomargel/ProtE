@@ -42,11 +42,11 @@
 #' @examples
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
-#' \donttest{
+#'
 #' PDconsesus_file.xlsx <- system.file("extdata", "PDconsesus_file.xlsx", package = "ProtE")
 #' pd_single(file = PDconsesus_file.xlsx,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(4,4), filtering_value = 80)}
+#'        samples_per_group = c(4,4), filtering_value = 80)
 #' @export
 
 pd_single <- function(file,
@@ -789,7 +789,7 @@ if (parametric == FALSE) {
     } else {(which.sig <- which(Ddataspace$BH_p_G2vsG1 < 0.05))}
   }}
 
-if (length(which.sig) == 0){
+if (length(which.sig) <2){
   message("PCA and heatmap plots of the significant data cannot be generated since there are no significant proteins")
   qc[,-1] <- lapply(qc[,-1], function(x) as.numeric(unlist(x)))
   qc[,-1]<-round(qc[,-1],3)
