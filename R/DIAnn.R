@@ -17,7 +17,7 @@
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon_p_+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices  dev.off pdf
+#' @importFrom grDevices  dev.off bmp
 #' @importFrom circlize colorRamp2
 #' @importFrom dplyr select  group_by  group_modify everything  %>% any_of
 #' @importFrom tidyr gather pivot_longer
@@ -250,14 +250,14 @@ if (description == TRUE ) {
 
   if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
     log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
-    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
-    pdf(sdrankplot_path)
+    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
+    bmp(sdrankplot_path)
     suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
     dev.off()
     message("Creating Mean-SD plot on the log2 data.")
   } else {
-    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.pdf")
-    pdf(sdrankplot_path)
+    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
+    bmp(sdrankplot_path)
     suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
     dev.off()
     message("Creating Mean-SD plot.")
@@ -421,10 +421,10 @@ if (description == TRUE ) {
 
       imp_hist
 
-      ggplot2::ggsave("Imputed_values_histogram.pdf", plot = imp_hist,  path = path_resplot,
+      ggplot2::ggsave("Imputed_values_histogram.bmp", plot = imp_hist,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
                       dpi = 300, limitsize = TRUE)
-      message("A frequency histogram of real and imputed values has been created as Imputed_values_histogram.pdf")
+      message("A frequency histogram of real and imputed values has been created as Imputed_values_histogram.bmp")
 
   }
       if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
@@ -448,7 +448,7 @@ if (description == TRUE ) {
                 legend.text = element_text(size = 9))
         abund.plot
 
-        ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_resplot,
+        ggplot2::ggsave("Proteins_abundance_rank.bmp", plot = abund.plot ,  path = path_resplot,
                         scale = 1, width = 12, height = 5, units = "in",
                         dpi = 300, limitsize = TRUE, bg = "white")
     }
@@ -474,12 +474,12 @@ if (description == TRUE ) {
 
   abund.plot
 
-  ggplot2::ggsave("Proteins_abundance_rank.pdf", plot = abund.plot ,  path = path_resplot,
+  ggplot2::ggsave("Proteins_abundance_rank.bmp", plot = abund.plot ,  path = path_resplot,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
 
    }
-  message("A protein abundance rank order plot has been created as Proteins_abundance_rank.pdf")
+  message("A protein abundance rank order plot has been created as Proteins_abundance_rank.bmp")
 
   dataspace$percentage <- NULL
   dataspace$mean <- NULL
@@ -800,10 +800,10 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   pca.ent
 
-  ggplot2::ggsave("PCA_plot_alldata.pdf", plot = pca.ent,  path = path_resplot,
+  ggplot2::ggsave("PCA_plot_alldata.bmp", plot = pca.ent,  path = path_resplot,
                   scale = 1, width = 5, height = 4, units = "in",
                   dpi = 300, limitsize = TRUE)
-  message("PCA plot using all post-processing proteins has been created as PCA_plot_alldata.pdf")
+  message("PCA plot using all post-processing proteins has been created as PCA_plot_alldata.bmp")
 
   groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
@@ -869,11 +869,11 @@ anova_res<- anova_res[,-c(1:groups_number)]}
                                              title = "Z-Score",
                                              color_bar = "continuous"
                                            ))
-    pdf_file_path <- file.path(path_resplot, "heatmap.pdf")
-    pdf(pdf_file_path, width = 7.37, height = 6.09)
+    bmp_file_path <- file.path(path_resplot, "heatmap.bmp")
+    bmp(bmp_file_path, width = 7.37, height = 6.09)
     ComplexHeatmap::draw(heatmap_data)
     dev.off()
-    message("A heatmap with the differentially expressed proteins was created as heatmap.pdf")
+    message("A heatmap with the differentially expressed proteins was created as heatmap.bmp")
 
 
     pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)
@@ -910,18 +910,18 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
     pca.sig
 
-    ggplot2::ggsave("PCA_plot_significant.pdf", plot = pca.sig,  path = path_resplot,
+    ggplot2::ggsave("PCA_plot_significant.bmp", plot = pca.sig,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)
-    message("PCA plot using only the significant proteins was created as PCA_plot_significant.pdf" )
+    message("PCA plot using only the significant proteins was created as PCA_plot_significant.bmp" )
 
     a<-ggpubr::ggarrange(pca.ent, pca.sig, nrow = 1, ncol=2,
                          common.legend = TRUE, legend = "bottom")
 
-    ggplot2::ggsave("PCA_plots_combined.pdf", plot = a,  path = path_resplot,
+    ggplot2::ggsave("PCA_plots_combined.bmp", plot = a,  path = path_resplot,
                     scale = 1, width = 8, height = 4.5, units = "in",
                     dpi = 300, limitsize = TRUE)
-    message ("The 2 PCA plots are combined in PCA_plots_combined.pdf")
+    message ("The 2 PCA plots are combined in PCA_plots_combined.bmp")
   }
   p<- function(x) {
     sapply(x, function(label) {
@@ -960,7 +960,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
     qc.boxplots
 
-    ggplot2::ggsave("Boxplot_withZeros.pdf", plot = qc.boxplots,  path = path_resplot,
+    ggplot2::ggsave("Boxplot_withZeros.bmp", plot = qc.boxplots,  path = path_resplot,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
 
@@ -987,15 +987,15 @@ anova_res<- anova_res[,-c(1:groups_number)]}
 
   qc.boxplots.na
   if (imputation == FALSE) {
-    ggplot2::ggsave("Boxplot_withoutZeros.pdf", plot = qc.boxplots.na, path = path_resplot,
+    ggplot2::ggsave("Boxplot_withoutZeros.bmp", plot = qc.boxplots.na, path = path_resplot,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }else{
-    ggplot2::ggsave("Boxplot.pdf", plot = qc.boxplots.na, path = path_resplot,
+    ggplot2::ggsave("Boxplot.bmp", plot = qc.boxplots.na, path = path_resplot,
                     scale = 1, width = 12, height = 5, units = "in",
                     dpi = 300, limitsize = TRUE, bg = "white")
   }
-  message("A boxplot showing the log2 Abundance of each protein, across the samples has been created as Boxplot.pdf" )
+  message("A boxplot showing the log2 Abundance of each protein, across the samples has been created as Boxplot.bmp" )
 
   qc.violin<-ggplot2::ggplot(melt.log.dataspace.na, aes(x=forcats::fct_inorder(variable), y=value, color=Group))+
     geom_violin(aes(color = Group),lwd=1)+
@@ -1010,10 +1010,10 @@ anova_res<- anova_res[,-c(1:groups_number)]}
     scale_x_discrete(labels = p) +
     geom_jitter(shape=16, position=position_jitter(0.2), size = 0.5, alpha = 0.5)
 
-  ggplot2::ggsave("Violin_plot.pdf", plot = qc.violin,  path = path_resplot,
+  ggplot2::ggsave("Violin_plot.bmp", plot = qc.violin,  path = path_resplot,
                   scale = 1, width = 12, height = 5, units = "in",
                   dpi = 300, limitsize = TRUE, bg = "white")
-  message("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as Violin_plot.pdf" )
+  message("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as Violin_plot.bmp" )
 
  message("The analysis has been completed. All results are saved inside the ProtE_Analysis folder. Thank you for activating the Proteomics Eye!")
  }

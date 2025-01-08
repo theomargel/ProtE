@@ -221,7 +221,7 @@ provided file(s).
 
 ProtE creates 3 sub-folders: • Data_processing, with the files of the
 resulting data processing. • Statistical_Analysis, with the results of
-the statistical tests. • Plots, with all the plots saved in pdf. format.
+the statistical tests. • Plots, with all the plots saved in bmp. format.
 
 ## How to cite ProtE
 
