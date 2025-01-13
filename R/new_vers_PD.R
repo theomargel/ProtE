@@ -228,13 +228,13 @@ if (normalization == "median") {
 if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
   log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
 sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
-  bmp(sdrankplot_path)
+  bmp(sdrankplot_path,width = 1920, height = 1080, res = 150)
   suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
   dev.off()
   message("Creating Mean-SD plot on the log2 data.")
 } else {
   sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
-  bmp(sdrankplot_path)
+  bmp(sdrankplot_path,width = 1920, height = 1080, res = 150)
   suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
   dev.off()
   message("Creating Mean-SD plot.")
@@ -823,7 +823,7 @@ if (length(which.sig) <2){
                                              color_bar = "continuous"
                                            ))
     bmp_file_path <- file.path(path_resplot, "heatmap.bmp")
-    bmp(bmp_file_path, width = 7.37, height = 6.09)
+    bmp(bmp_file_path,width = 1920, height = 1080, res = 150)
     ComplexHeatmap::draw(heatmap_data)
     dev.off()
 
