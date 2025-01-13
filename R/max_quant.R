@@ -72,8 +72,10 @@ message("The ProtE process starts now!")
   dataspace <- read.delim(file = file, header = TRUE, sep = "\t")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
   dataspace <- dataspace[complete.cases(dataspace[,1]),]
+  if("Reverse" %in% colnames(dataspace)) {
   dataspace <- dataspace[dataspace$Reverse == "",]
-  message("Removed REV_proteins: Reverse peptide Identifications")
+  message("Removed REV_proteins: Reverse peptide Identifications")}
+
   path <- dirname(file)
   path_res <- file.path(path , "ProtE_Analysis")
   dir.create(path_res, showWarnings = FALSE)
