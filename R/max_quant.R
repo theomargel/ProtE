@@ -44,7 +44,7 @@
 #' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 #' maximum_quantum(file = proteinGroups.txt,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(4,4))
+#'        samples_per_group = c(4,4), filtering_value = 80)
 #'
 #'
 #' @export
@@ -73,7 +73,7 @@ message("The ProtE process starts now!")
   dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
   dataspace <- dataspace[complete.cases(dataspace[,1]),]
   if("Reverse" %in% colnames(dataspace)) {
-  dataspace <- dataspace[dataspace$Reverse == "",]
+  dataspace <- dataspace[dataspace$Reverse == ""|is.na(dataspace$Reverse) == TRUE,]
   message("Removed REV_proteins: Reverse peptide Identifications")}
 
   path <- dirname(file)
@@ -658,7 +658,7 @@ dataspace$percentage
       df5<- df5[,c(1,3)]
       data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
       data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
-      test_type <- "Kruskal-Wallis"
+      test_type <- "Kruskal_Wallis"
 
 
     }  else if (independent == FALSE) {

@@ -692,7 +692,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
       df5<- df5[,c(1,3)]
       data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
       data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
-      test_type <- "Kruskal-Wallis"
+      test_type <- "Kruskal_Wallis"
 
 
     }  else if (independent == FALSE) {
