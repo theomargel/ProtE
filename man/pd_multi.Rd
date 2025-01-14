@@ -54,7 +54,7 @@ T2_path <- system.file("extdata", "PDexports(multiple_files)",
 
 pd_multi(T1_path, T2_path,
          normalization = FALSE,
-         global_filtering = TRUE, imputation = FALSE,
+         global_filtering = TRUE,  imputation = FALSE,
          independent = TRUE)
 
 }
