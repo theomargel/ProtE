@@ -140,7 +140,7 @@ if (description == TRUE ) {
     colnames(dataspace) <- col_names
     dataspace <- dataspace[rowSums(!is.na(dataspace[,-1])) > 0, ]
 
-      dataspace$Description = "Not Available"
+      dataspace$Description <- rep("Not Available", nrow(dataspace))
     dataspace<-dataspace %>%
       dplyr::select(Genes,any_of(c("Protein.Names","Description")) , everything())
     message("The description fetching is not available when the input is a unique_genes matrix")
