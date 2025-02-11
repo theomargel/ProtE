@@ -26,7 +26,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom UniProt.ws mapUniProt
+#' @importFrom UniprotR GetProteinAnnontate
 #' @importFrom stringr str_extract
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
@@ -35,17 +35,20 @@
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom missRanger missRanger
 #' @importFrom car leveneTest
-#' @importFrom vsn meanSdPlot
 #'
 #' @examples
 #' #Example of running the function with paths for three groups.
+#'
 #'
 #' T1_path <- system.file("extdata", "PDexports(multiple_files)",
 #'  "T1_BLCA", package = "ProtE")
 #' T2_path <- system.file("extdata", "PDexports(multiple_files)",
 #' "T2_BLCA", package = "ProtE")
 #'
-#' pd_multi(T1_path, T2_path,
+#' temp_dir1 <- file.path(tempdir(), "T1_path")
+#' temp_dir2 <- file.path(tempdir(), "T2_path")
+#'
+#' pd_multi(temp_dir1, temp_dir2,
 #'          normalization = FALSE,
 #'          global_filtering = TRUE,  imputation = FALSE,
 #'          independent = TRUE)
@@ -117,27 +120,14 @@ if ("Description" %in% colnames(dataspace)){
   }
   if (description == TRUE){
     "The Description fetching from UniProt starts now, it might take some time depending on you Network speed."
-    id_numbers <- dataspace$Accession
+    id_numbers <- dataspace$Protein.Ids
     for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
     df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
-    metadata<-UniProt.ws::mapUniProt( from = "UniProtKB_AC-ID", to = "UniProtKB", columns = c("protein_name","organism_name","gene_names","protein_existence","sequence_version","id"), id_numbers,pageSize = 500L)
-    df_number_ids<-as.data.frame(id_numbers)
-    fixed_data<-dplyr::left_join(df_number_ids,metadata,by=c("id_numbers"="From"))
+    dataspace$Protein.Ids<-id_numbers
+    conv_ID <- GetProteinAnnontate(dataspace$Protein.Ids, columns =c("organism_name"	, "protein_name"	, "id"	,"gene_names") )
+    details<-paste(conv_ID$Protein.names," OS=",conv_ID$Organism," GN=",conv_ID$Gene.Names," -[",conv_ID$Entry.Name,"]")
+    df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
 
-    for (i in 1:nrow( fixed_data)){
-      organism<- fixed_data$Organism[i]
-      gene<-stringr::str_extract(fixed_data$Gene.Names[i], "^[^ ]*")
-      entry_name<- fixed_data$Entry.Name[i]
-      protein_name<- fixed_data$Protein.names[i]
-      sv<- fixed_data$Sequence.version[i]
-      if (fixed_data$Protein.existence[i]=="Evidence at protein level"){pe<-1}
-      if (fixed_data$Protein.existence[i]=="Evidence at transcript level"){pe<-2}
-      if (fixed_data$Protein.existence[i]=="Inferred by homology"){pe<-3}
-      if (fixed_data$Protein.existence[i]=="Predicted") {pe<-4}
-      if (fixed_data$Protein.existence[i]=="Uncertain") {pe<-5}
-      details<-paste(protein_name," OS=",organism," GN=",gene," PE=",pe," SV=",sv," -[",entry_name,"]")
-      df_description <- rbind(df_description, data.frame(Description = details, stringsAsFactors = FALSE))
-    }
 
     dataspace<-cbind(dataspace[,1],df_description,dataspace[,2:ncol(dataspace)])
   }
@@ -259,18 +249,36 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
 
     if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
       log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
-    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
-      bmp(sdrankplot_path,width = 1500, height = 1080, res = 150)
-      suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
-      dev.off()
+      row_means <- rowMeans(log.dataspace, na.rm = TRUE)
+      row_sds <- apply(log.dataspace, 1, sd, na.rm = TRUE)
+      plot_data <- data.frame(Mean = row_means, SD = row_sds)
+      meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
+        geom_point(alpha = 0.5, color = "blue") +
+        geom_smooth(method = "loess", color = "red", se = FALSE) +
+        theme_minimal() +
+        labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
+      meansd
+      ggplot2::ggsave("meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+                      scale = 1, width = 5, height = 4, units = "in",
+                      dpi = 300, limitsize = TRUE)
+
       message("Creating Mean-SD plot on the log2 data.")
     } else {
-      sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
-      bmp(sdrankplot_path,width = 1500, height = 1080, res = 150)
-      suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
-      dev.off()
+      row_means <- rowMeans(dataspace[,-c(1,2)], na.rm = TRUE)
+      row_sds <- apply(dataspace[,-c(1,2)], 1, sd, na.rm = TRUE)
+      plot_data <- data.frame(Mean = row_means, SD = row_sds)
+      meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
+        geom_point(alpha = 0.5, color = "blue") +
+        geom_smooth(method = "loess", color = "red", se = FALSE) +
+        theme_minimal() +
+        labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
+      meansd
+      ggplot2::ggsave("meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+                      scale = 1, width = 5, height = 4, units = "in",
+                      dpi = 300, limitsize = TRUE)
       message("Creating Mean-SD plot.")
     }
+
 
 name_dataspace <-  dataspace[, -1:-2]
     dat.dataspace<-dataspace

@@ -32,7 +32,6 @@
 #' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
 #' @importFrom car leveneTest
-#' @importFrom vsn meanSdPlot
 #' @importFrom missRanger missRanger
 #' @importFrom utils read.delim
 #' @importFrom vegan adonis2
@@ -41,8 +40,14 @@
 #' #Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
 #'
+#'
+#'
 #' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
-#' maximum_quantum(file = proteinGroups.txt,
+#' # Copy the file to a temporary directory for CRAN checks
+#' temp_file <- file.path(tempdir(), "proteinGroups.txt")
+#' file.copy(proteinGroups.txt, temp_file, overwrite = TRUE)
+#'
+#' maximum_quantum(file = temp_file,
 #'        group_names = c("Healthy","Control"),
 #'        samples_per_group = c(4,4), filtering_value = 80)
 #'
@@ -223,18 +228,36 @@ message("The ProtE process starts now!")
 
   if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
     log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
-  sdrankplot_path <- file.path(path_resplot, "meanSdPlot.bmp")
-  bmp(sdrankplot_path, width = 1500, height = 1080, res = 150)
-  suppressWarnings(vsn::meanSdPlot(as.matrix(log.dataspace[, -1:-2])))
-    dev.off()
+    row_means <- rowMeans(log.dataspace, na.rm = TRUE)
+    row_sds <- apply(log.dataspace, 1, sd, na.rm = TRUE)
+    plot_data <- data.frame(Mean = row_means, SD = row_sds)
+    meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
+      geom_point(alpha = 0.5, color = "blue") +
+      geom_smooth(method = "loess", color = "red", se = FALSE) +
+      theme_minimal() +
+      labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
+    meansd
+    ggplot2::ggsave("meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+                    scale = 1, width = 5, height = 4, units = "in",
+                    dpi = 300, limitsize = TRUE)
+
     message("Creating Mean-SD plot on the log2 data.")
   } else {
-    sdrankplot_path <- file.path(path_resplot, "meanSdPlot.png")
-    bmp(sdrankplot_path, width = 1500, height = 1080, res = 150)
-    suppressWarnings(vsn::meanSdPlot(as.matrix(dataspace[, -1:-2])))
-    dev.off()
+    row_means <- rowMeans(dataspace[,-c(1,2)], na.rm = TRUE)
+    row_sds <- apply(dataspace[,-c(1,2)], 1, sd, na.rm = TRUE)
+    plot_data <- data.frame(Mean = row_means, SD = row_sds)
+    meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
+      geom_point(alpha = 0.5, color = "blue") +
+      geom_smooth(method = "loess", color = "red", se = FALSE) +
+      theme_minimal() +
+      labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
+    meansd
+    ggplot2::ggsave("meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+                    scale = 1, width = 5, height = 4, units = "in",
+                    dpi = 300, limitsize = TRUE)
     message("Creating Mean-SD plot.")
   }
+
 
   name_dataspace <-  dataspace[, -1:-2]
 

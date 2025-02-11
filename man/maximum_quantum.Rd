@@ -48,8 +48,14 @@ Processes the MaxQuant proteomics dataset and performs exploratory statistical a
 #Example of running the function with paths for two groups.
 # The file path is a placeholder, replace it with an actual file.
 
+
+
 proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
-maximum_quantum(file = proteinGroups.txt,
+# Copy the file to a temporary directory for CRAN checks
+temp_file <- file.path(tempdir(), "proteinGroups.txt")
+file.copy(proteinGroups.txt, temp_file, overwrite = TRUE)
+
+maximum_quantum(file = temp_file,
        group_names = c("Healthy","Control"),
        samples_per_group = c(4,4), filtering_value = 80)
 

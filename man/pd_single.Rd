@@ -52,7 +52,12 @@ Processes the ProteomeDiscoverer proteomics dataset and performs exploratory sta
 # The file path is a placeholder, replace it with an actual file.
 
 PDconsesus_file.xlsx <- system.file("extdata", "PDconsesus_file.xlsx", package = "ProtE")
-pd_single(file = PDconsesus_file.xlsx,
+
+# Copy the file to a temporary directory for CRAN checks
+temp_file <- file.path(tempdir(), "PDconsesus_file.xlsx")
+file.copy(PDconsesus_file.xlsx, temp_file, overwrite = TRUE)
+
+pd_single(file = temp_file,
        group_names = c("Healthy","Control"),
        samples_per_group = c(4,4), filtering_value = 80)
 }

@@ -52,7 +52,12 @@ Processes the DIA-NN proteomics output and performs exploratory statistical anal
 # The file path is a placeholder, replace it with an actual file.
 
 jittered.pg_matrix.tsv <- system.file("extdata", "report.pg_matrix.tsv", package = "ProtE")
-dianno(file = jittered.pg_matrix.tsv,
+
+# Copy the file to a temporary directory for CRAN checks
+temp_file <- file.path(tempdir(), "report.pg_matrix.tsv")
+file.copy(jittered.pg_matrix.tsv, temp_file, overwrite = TRUE)
+
+dianno(file = temp_file,
        group_names = c("Healthy","Control"),
        samples_per_group = c(5,5), filtering_value = 80)
 
