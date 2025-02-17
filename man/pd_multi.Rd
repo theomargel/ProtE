@@ -56,6 +56,17 @@ T2_path <- system.file("extdata", "PDexports(multiple_files)",
 temp_dir1 <- file.path(tempdir(), "T1_path")
 temp_dir2 <- file.path(tempdir(), "T2_path")
 
+dir.create(temp_dir1, recursive = TRUE, showWarnings = FALSE)
+dir.create(temp_dir2, recursive = TRUE, showWarnings = FALSE)
+
+
+
+excel_files1 <- list.files(T1_path, pattern = "\\\\.xlsx$", full.names = TRUE)
+excel_files2 <- list.files(T2_path, pattern = "\\\\.xlsx$", full.names = TRUE)
+
+file.copy(excel_files1, temp_dir1)
+file.copy(excel_files2, temp_dir2)
+
 pd_multi(temp_dir1, temp_dir2,
          normalization = FALSE,
          global_filtering = TRUE,  imputation = FALSE,

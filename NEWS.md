@@ -4,4 +4,4 @@
 
 # ProtE 1.0.0
 
-* Initial CRAN submission.
+Changes in the examples so that there is no issue with writing directories in the Debian Linux server, and removing Bioconductor packages for the MacOS server. 

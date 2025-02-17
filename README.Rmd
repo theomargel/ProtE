@@ -98,17 +98,17 @@ library(ProtE)
 
 ProtE features 4 functions, each one tailored for a specific use case.
 
-1.  ```maximum_quantum()``` accepts as input the MaxQuant generated file ProteinGroups.txt
-2.  ```dianno()``` accepts as input either of the two DIA-NN (or the FragPipe - DIANN) output files pg_matrix.tsv or unique_genes_matrix.tsv
-3.  ```pd_single()``` accepts as input the Proteome Discoverer output consensus file that contains all sample protein intensities/abundances in one table in excel format 
-4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity files in excel format
+1.  ```maximum_quantum()``` accepts as input the MaxQuant generated file ProteinGroups.txt or the same file transposed to .xlsx format
+2.  ```dianno()``` accepts as input either of the two DIA-NN (or the FragPipe - DIANN) output files pg_matrix.tsv / unique_genes_matrix.tsv or the same files transposed to .xlsx format
+3.  ```pd_single()``` accepts as input the Proteome Discoverer output consensus file that contains all sample protein intensities/abundances in one table in .xlsx format 
+4.  ```pd_multi()``` accepts as input separate Proteome Discoverer protein intensity files in .xlsx format
 
  
 ## How to use functions `maximum_quantum()`,`dianno()`,`pd_multi()`
 All 3 functions expect the input file to be parsed in the parameter ```file```. To enable statistical analysis, in the input file, samples (columns) belonging to the same group must be sorted next to each other. For example, samples from an experiment with a 3-groups categorical variable (control, treatment, compound) could be arranged such that: first columns = Control samples, middle columns = Treatment samples, last columns = Compound samples.
 
 ## Setting up the input file path:
-Assuming a MaxQuant quantification has been performed, the file ProteinGroups.txt can be fed to ProtE with the function `maximum_quantum`. 
+Assuming a MaxQuant quantification has been performed, the file ProteinGroups.txt (or ProteinGroups.xlsx) can be fed to ProtE with the function `maximum_quantum`. 
 
 Insert the file path of the ProteinGroups.txt in the ```file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click to paste the path. 
 
@@ -192,7 +192,7 @@ The results from each function are saved in a folder named **ProtE_Analysis**, w
 ProtE creates 3 sub-folders:
 • Data_processing, with the files of the resulting data processing.
 • Statistical_Analysis, with the  results of the statistical tests.
-• Plots, with all the plots saved in bmp. format.
+• Plots, with all the plots saved in .bmp format.
 
 
 
@@ -200,7 +200,7 @@ ProtE creates 3 sub-folders:
 
 
 ## How to cite ProtE
-ProtE was compiled out of R scripts utilized for routine processing, analysis and visualization of label-free MS data. These scripts were built and maintained over the course of many years in the Proteomics lab of Dr Antonia Vlahou, in the BRFAA institute (Greece). To continue enriching and expanding the functionality of ProtE we kindly request feedback from the users via..
+ProtE was compiled out of R scripts utilized for routine processing, analysis and visualization of label-free MS data. These scripts were built and maintained over the course of many years in the Proteomics lab of Dr Antonia Vlahou, in the BRFAA institute (Greece). To continue enriching and expanding the functionality of ProtE we kindly request feedback from the users via contacting ted.margelos02@gmail.com
 
 In order to cite ProtE the following reference can be used:
 

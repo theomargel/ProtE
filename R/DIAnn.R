@@ -17,20 +17,19 @@
 #'
 #' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon_p_+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx
-#' @importFrom grDevices  dev.off bmp
-#' @importFrom circlize colorRamp2
+#' @importFrom grDevices  dev.off bmp colorRampPalette
 #' @importFrom dplyr select  group_by  group_modify everything  %>% any_of
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave geom_violin  scale_x_discrete scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave geom_violin  scale_x_discrete scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point geom_smooth xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom stats kruskal.test p.adjust prcomp sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
-#' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
 #' @importFrom grid gpar
+#' @importFrom pheatmap pheatmap
 #' @importFrom UniprotR GetProteinAnnontate
 #' @importFrom stringr str_extract
 #' @importFrom missRanger missRanger
@@ -50,7 +49,7 @@
 #'
 #' dianno(file = temp_file,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(5,5), filtering_value = 80)
+#'        samples_per_group = c(5,4), filtering_value = 80)
 #'
 #' @export
 
@@ -66,16 +65,19 @@ dianno <- function(file,
                    significance  = "p", description = FALSE)
 {message("The ProtE process starts now!")
 
-  Protein.Ids =Protein.Names =Symbol =X =Y = Description = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
+  Protein.Ids =Protein.Names =Symbol =X =Y = Mean = SD = Description = df4_wide= percentage=Sample= Genes = variable =.=key=Accession =value =g1.name=g2.name= NULL
 groups_number <- length(group_names)
  if (length(samples_per_group) != groups_number) {
     stop("The length of 'samples_per_group' must be equal to the length of 'group_names'. Each of the numerical values in 'samples_per_group' must denote the sample size for the corresponding group in 'group_names") }
 
   for (i in 1:groups_number) {
     assign(paste0("g",i,".name"),group_names[[i]])}
-
+if(grepl("\\.tsv$", file)) {
   dataspace <- utils::read.delim2(file, header = TRUE, sep = "\t")
-
+}
+else if(grepl("\\.xlsx$", file)) {
+  dataspace <- openxlsx::read.xlsx(file)
+} else {stop("Error, the file you provided is not on .tsv or .xlsx format")}
 
   path <- dirname(file)
   path_res <- file.path(path , "ProtE_Analysis")
@@ -225,7 +227,7 @@ if (description == TRUE ) {
     plot_data <- data.frame(Mean = row_means, SD = row_sds)
     meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
       geom_point(alpha = 0.5, color = "blue") +
-      geom_smooth(method = "loess", color = "red", se = FALSE) +
+      suppressMessages(geom_smooth(method = "loess", color = "red", se = FALSE)) +
       theme_minimal() +
       labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
     meansd
@@ -613,7 +615,7 @@ anova_res<- anova_res[,-c(1:groups_number)]}
   metadata2 <- data.frame(group = groups_list_u)
   rownames(transposed_data) <- metadata2$group
   metadata2$samples <- colnames(only.data)
-  adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", permutations = 999)
+  adonis2_results <- vegan::adonis2(transposed_data ~ group, data = metadata2, method = "bray", na.rm = TRUE, permutations = 999)
   permanova_psF <- adonis2_results[4]
   permanova_psF<- permanova_psF[-c(2:3),]
   permanova_pValue <- adonis2_results[5]
@@ -824,29 +826,28 @@ anova_res<- anova_res[,-c(1:groups_number)]}
  zlog.dataspace.sig <- zlog.dataspace.sig[,order(groups_list_f)]
 
  range_limit <- min(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
+ breaks <- seq(-range_limit, range_limit, length.out = 101)
+ mycols_vector <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
 
- mycols <- circlize::colorRamp2(
-   c(-range_limit, 0, range_limit),
-   c("blue", "white", "red")
- )
- heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
-                                           cluster_rows = TRUE,
-                                           cluster_columns = FALSE,
-                                           show_row_names = FALSE,
-                                           show_column_names = FALSE,
-                                           column_split = groups_list_f,
-                                           top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
-                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
-                                           col = mycols, column_title = NULL,
-                                           heatmap_legend_param = list(
-                                             title = "Z-Score",
-                                             color_bar = "continuous"
-                                           ))
-    bmp_file_path <- file.path(path_resplot, "heatmap.bmp")
-    bmp(bmp_file_path,width = 1500, height = 1080, res = 150)
-    ComplexHeatmap::draw(heatmap_data)
-    dev.off()
-    message("A heatmap with the differentially expressed proteins was created as heatmap.bmp")
+ annotation_col <- data.frame(Group = factor(groups_list_f))
+ rownames(annotation_col) <- colnames(zlog.dataspace.sig)
+ colnames(annotation_col) <- " "
+ bmp_file_path <- file.path(path_resplot, "heatmap.bmp")
+ bmp(bmp_file_path,width = 1500, height = 1080, res = 150)
+ pheatmap(as.matrix(zlog.dataspace.sig),
+          cluster_rows = TRUE,
+          cluster_cols = FALSE,
+          show_rownames = FALSE,
+          show_colnames = FALSE,
+          annotation_col = annotation_col,
+          color = mycols_vector,
+          breaks = breaks,
+          legend = TRUE,
+          legend_labels = NULL,
+          annotation_legend = TRUE,
+          scale = "none")
+ dev.off()
+ message("A heatmap with the differentially expressed proteins was created as heatmap.bmp")
 
 
     pca<-prcomp(t(log.dataspace.sig), scale=TRUE, center=TRUE)

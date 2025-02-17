@@ -11,7 +11,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     dplyr,
-    circlize,
     vegan,
     UniprotR,
     stringr,
@@ -28,7 +27,7 @@ Imports:
     grDevices,
     grid,
     limma,
-    ComplexHeatmap,
+    pheatmap,
 Suggests: 
     BiocManager,
     rmarkdown,

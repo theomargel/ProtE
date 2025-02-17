@@ -20,11 +20,10 @@
 #' @importFrom tidyr gather pivot_longer
 #' @importFrom broom tidy
 #' @importFrom grid gpar
-#' @importFrom grDevices  dev.off bmp
-#' @importFrom circlize colorRamp2
+#' @importFrom grDevices  dev.off bmp colorRampPalette
 #' @importFrom reshape2 melt
 #' @importFrom ggpubr ggarrange
-#' @importFrom ggplot2 ggplot ggsave geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
+#' @importFrom ggplot2 ggplot ggsave geom_smooth geom_violin scale_color_gradient element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
 #' @importFrom UniprotR GetProteinAnnontate
 #' @importFrom stringr str_extract
@@ -32,7 +31,7 @@
 #' @importFrom forcats fct_inorder
 #' @importFrom vegan adonis2
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeVSN lmFit normalizeQuantiles duplicateCorrelation
-#' @importFrom ComplexHeatmap HeatmapAnnotation anno_block draw Heatmap
+#' @importFrom pheatmap pheatmap
 #' @importFrom missRanger missRanger
 #' @importFrom car leveneTest
 #'
@@ -47,6 +46,17 @@
 #'
 #' temp_dir1 <- file.path(tempdir(), "T1_path")
 #' temp_dir2 <- file.path(tempdir(), "T2_path")
+#'
+#' dir.create(temp_dir1, recursive = TRUE, showWarnings = FALSE)
+#' dir.create(temp_dir2, recursive = TRUE, showWarnings = FALSE)
+#'
+#'
+#'
+#' excel_files1 <- list.files(T1_path, pattern = "\\.xlsx$", full.names = TRUE)
+#' excel_files2 <- list.files(T2_path, pattern = "\\.xlsx$", full.names = TRUE)
+#'
+#' file.copy(excel_files1, temp_dir1)
+#' file.copy(excel_files2, temp_dir2)
 #'
 #' pd_multi(temp_dir1, temp_dir2,
 #'          normalization = FALSE,
@@ -66,7 +76,7 @@ pd_multi <- function(...,
                         significance = "p",
                      description = FALSE)
   {
-   Sample=group1= Accession =Description =Symbol =X =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = NULL
+   Sample=group1= Accession =Description =Symbol =X = Mean = SD =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = NULL
 message("The ProtE process starts now!")
 group_paths <- list(...)
 groups_number <- length(group_paths)
@@ -254,7 +264,7 @@ openxlsx::write.xlsx(dataspace, file = mt_file_path)
       plot_data <- data.frame(Mean = row_means, SD = row_sds)
       meansd <- ggplot(plot_data, aes(x = Mean, y = SD)) +
         geom_point(alpha = 0.5, color = "blue") +
-        geom_smooth(method = "loess", color = "red", se = FALSE) +
+      suppressMessages(geom_smooth(method = "loess", color = "red", se = FALSE)) +
         theme_minimal() +
         labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
       meansd
@@ -859,26 +869,26 @@ if (global_filtering == TRUE) {
 
       range_limit <- min(abs(min(zlog.dataspace.sig, na.rm = TRUE)), abs(max(zlog.dataspace.sig, na.rm = TRUE)))
 
-      mycols <- circlize::colorRamp2(
-        c(-range_limit, 0, range_limit),
-        c("blue", "white", "red")
-      )
-      heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig),
-                                             cluster_rows = TRUE,
-                                             cluster_columns = FALSE,
-                                             show_row_names = FALSE,
-                                             show_column_names = FALSE,
-                                             column_split = groups_list_f,
-                                             top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = 2:(groups_number+1)),
-                                                                                                                 labels = group_names, labels_gp = gpar(col = "black", fontsize = 10))),
-                                             col = mycols, column_title = NULL,
-                                             heatmap_legend_param = list(
-                                               title = "Z-Score",
-                                               color_bar = "continuous"
-                                             ))
+      breaks <- seq(-range_limit, range_limit, length.out = 101)
+      mycols_vector <- grDevices::colorRampPalette(c("blue", "white", "red"))(100)
+
+      annotation_col <- data.frame(Group = factor(groups_list_f))
+      rownames(annotation_col) <- colnames(zlog.dataspace.sig)
+      colnames(annotation_col) <- " "
       bmp_file_path <- file.path(path_resplot, "heatmap.bmp")
       bmp(bmp_file_path,width = 1500, height = 1080, res = 150)
-      ComplexHeatmap::draw(heatmap_data)
+      pheatmap(as.matrix(zlog.dataspace.sig),
+               cluster_rows = TRUE,
+               cluster_cols = FALSE,
+               show_rownames = FALSE,
+               show_colnames = FALSE,
+               annotation_col = annotation_col,
+               color = mycols_vector,
+               breaks = breaks,
+               legend = TRUE,
+               legend_labels = NULL,
+               annotation_legend = TRUE,
+               scale = "none")
       dev.off()
 
       message("A heatmap with the differentially expressed proteins was created as heatmap.bmp")

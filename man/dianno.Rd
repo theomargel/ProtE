@@ -59,6 +59,6 @@ file.copy(jittered.pg_matrix.tsv, temp_file, overwrite = TRUE)
 
 dianno(file = temp_file,
        group_names = c("Healthy","Control"),
-       samples_per_group = c(5,5), filtering_value = 80)
+       samples_per_group = c(5,4), filtering_value = 80)
 
 }

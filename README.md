@@ -79,15 +79,15 @@ Then load its library with:
 ProtE features 4 functions, each one tailored for a specific use case.
 
 1.  `maximum_quantum()` accepts as input the MaxQuant generated file
-    ProteinGroups.txt
+    ProteinGroups.txt or the same file transposed to .xlsx format
 2.  `dianno()` accepts as input either of the two DIA-NN (or the
-    FragPipe - DIANN) output files pg_matrix.tsv or
-    unique_genes_matrix.tsv
+    FragPipe - DIANN) output files pg_matrix.tsv /
+    unique_genes_matrix.tsv or the same files transposed to .xlsx format
 3.  `pd_single()` accepts as input the Proteome Discoverer output
     consensus file that contains all sample protein
-    intensities/abundances in one table in excel format
+    intensities/abundances in one table in .xlsx format
 4.  `pd_multi()` accepts as input separate Proteome Discoverer protein
-    intensity files in excel format
+    intensity files in .xlsx format
 
 ## How to use functions `maximum_quantum()`,`dianno()`,`pd_multi()`
 
@@ -102,8 +102,8 @@ last columns = Compound samples.
 ## Setting up the input file path:
 
 Assuming a MaxQuant quantification has been performed, the file
-ProteinGroups.txt can be fed to ProtE with the function
-`maximum_quantum`.
+ProteinGroups.txt (or ProteinGroups.xlsx) can be fed to ProtE with the
+function `maximum_quantum`.
 
 Insert the file path of the ProteinGroups.txt in the `file` parameter.
 To copy-paste the file path in Windows, firstly locate the desired file
@@ -221,7 +221,7 @@ provided file(s).
 
 ProtE creates 3 sub-folders: • Data_processing, with the files of the
 resulting data processing. • Statistical_Analysis, with the results of
-the statistical tests. • Plots, with all the plots saved in bmp. format.
+the statistical tests. • Plots, with all the plots saved in .bmp format.
 
 ## How to cite ProtE
 
@@ -230,6 +230,6 @@ analysis and visualization of label-free MS data. These scripts were
 built and maintained over the course of many years in the Proteomics lab
 of Dr Antonia Vlahou, in the BRFAA institute (Greece). To continue
 enriching and expanding the functionality of ProtE we kindly request
-feedback from the users via..
+feedback from the users via contacting <ted.margelos02@gmail.com>
 
 In order to cite ProtE the following reference can be used:
