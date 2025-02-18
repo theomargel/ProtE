@@ -106,7 +106,7 @@ else if(grepl("\\.xlsx$", file)) {
 
   dataspace <- dataspace[rowSums(!is.na(dataspace[,-c(1,2)])) > 0, ]
 if (description == TRUE ) {
-  "The Description fetching from UniProt starts now, it might take some time depending on you Network speed."
+  message("The Description fetching from UniProt starts now, it might take some time depending on you Network speed.")
   id_numbers <- dataspace$Protein.Ids
   for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
   df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)

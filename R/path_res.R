@@ -129,7 +129,7 @@ if ("Description" %in% colnames(dataspace)){
     dataspace<-cbind(dataspace[,1],df_description,dataspace[,2:ncol(dataspace)])
   }
   if (description == TRUE){
-    "The Description fetching from UniProt starts now, it might take some time depending on you Network speed."
+    message("The Description fetching from UniProt starts now, it might take some time depending on you Network speed.")
     id_numbers <- dataspace$Protein.Ids
     for (j in 1:length(id_numbers)){id_numbers[j] <- stringr::str_extract(id_numbers[j], "^[^;]*")}
     df_description <- data.frame("Description" = character(), stringsAsFactors = FALSE)
