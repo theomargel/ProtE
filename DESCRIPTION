@@ -1,7 +1,7 @@
 Package: ProtE
 Type: Package
 Title: Processing Proteomics Data, Statistical Analysis and Visualization
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: 
     c(person("Theodoros", "Margelos", email = "ted.margelos02@gmail.com",role = c("aut","cre","cph")),
     person("Rafael", "Stroggilos", email = "rstrog@bioacademy.gr", role = c("ctb","cph")))
