@@ -74,8 +74,7 @@ groups_number <- length(group_names)
     assign(paste0("g",i,".name"),group_names[[i]])}
 if(grepl("\\.tsv$", file)) {
   dataspace <- utils::read.delim2(file, header = TRUE, sep = "\t")
-}
-else if(grepl("\\.xlsx$", file)) {
+} else if(grepl("\\.xlsx$", file)) {
   dataspace <- openxlsx::read.xlsx(file)
 } else {stop("Error, the file you provided is not on .tsv or .xlsx format")}
 
@@ -709,7 +708,15 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         Symbol,
         everything()
       )
-  } else {Fdataspace <- Ddataspace}
+  } else {Fdataspace <- Ddataspace
+  Fdataspace <- Fdataspace %>%
+    dplyr::select(
+      any_of(c("Accession", "Genes")),
+      dplyr::any_of(c("Description", "Protein.Names")),
+      Symbol,
+      everything()
+    )
+  }
   for (i in 1:groups_number){
     namesc<- colnames(Fdataspace)
     namesc<- gsub(paste0("G",i), get(paste0("g",i,".name")),namesc)
