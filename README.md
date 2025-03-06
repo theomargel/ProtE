@@ -169,7 +169,7 @@ parameter …:
                            "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound",
                         imputation = FALSE,
                         global_filtering = TRUE,
-                        sample_relationship = "Independent",
+                        independent = TRUE,
                         filtering_value = 50,
                         normalization = FALSE,
                         parametric= FALSE,
