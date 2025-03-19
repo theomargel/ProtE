@@ -606,9 +606,12 @@ dataspace$percentage
         data2[[paste0("Ratio_G", j, "vsG", k)]] <- ifelse(
           avg_k == 0, NA, avg_j / avg_k
         )
-        data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
-          data2[[paste0("Ratio_G", j, "vsG", k)]]
-        )
+        if (normalization %in% c(FALSE,"median", "Total_Ion_Current","VSN", "PPM") ){
+          data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
+            data2[[paste0("Ratio_G", j, "vsG", k)]]
+          )} else {
+            data2[[paste0("LFC_G", j, "vsG", k)]] <- avg_j - avg_k
+          }
       }
     }
   }

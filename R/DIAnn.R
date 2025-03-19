@@ -204,7 +204,7 @@ if (description == TRUE ) {
     openxlsx::write.xlsx(Gdataspace, file = norm_file_path)
     message("Applying the selected normalization, saved as Normalized.xlsx")}
 
-  if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
+  if (normalization %in% c(FALSE,"median", "Total_Ion_Current","VSN", "PPM") ){
     log.dataspace <- log(dataspace[,-c(1:2)]+1,2)
     row_means <- rowMeans(log.dataspace, na.rm = TRUE)
     row_sds <- apply(log.dataspace, 1, sd, na.rm = TRUE)
@@ -475,7 +475,8 @@ if (description == TRUE ) {
   colnames(mm)<- group_names
   nndataspace<- dataspace[,-1:-2]
   nndataspace[nndataspace < 0] <- 0
-  nndataspace <- log2(nndataspace+1)
+  if (normalization %in% c(FALSE,"median", "Total_Ion_Current","VSN", "PPM") ){
+  nndataspace <- log2(nndataspace+1)}
   if (independent == FALSE){
     if (length(unique(samples_per_group)) != 1){
       message("Error: The paired group analysis requires an equal number of samples in each group. Please consider removing any samples that lack a corresponding matched pair.")
@@ -581,9 +582,12 @@ anova_res<- anova_res[,-c(1:groups_number)]}
         data2[[paste0("Ratio_G", j, "vsG", k)]] <- ifelse(
           avg_k == 0, NA, avg_j / avg_k
         )
+        if (normalization %in% c(FALSE,"median", "Total_Ion_Current","VSN", "PPM") ){
         data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
           data2[[paste0("Ratio_G", j, "vsG", k)]]
-        )
+        )} else {
+          data2[[paste0("LFC_G", j, "vsG", k)]] <- avg_j - avg_k
+        }
       }
     }
   }
