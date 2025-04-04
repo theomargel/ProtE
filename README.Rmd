@@ -133,6 +133,7 @@ For the analysis of multiple **Proteome Discoverer** (PD) exports, each one corr
 ## Summary of the ProtE pipeline
 The pipeline of ProtE is reported in more details in the `ProtE Workflow` vignette. 
 
+# Data Processing
 The data are processed via the:
 
 1.  Annotation fetching for the input files that do not include established Description
@@ -143,8 +144,22 @@ The data are processed via the:
 
 4.	Imputation of missing data to ensure robust downstream analysis.
 
+# Differential Expression and Enrichment analysis
+Once the data processing is complete, the package performs *statistical analysis* for every pairwise comparison to identify significant protein abundance differences between experimental groups.
 
-Once the data processing is complete, the package performs statistical analysis for every pairwise comparison to identify significant protein abundance differences between experimental groups. The results are automatically exported as Excel files, and a range of visualizations is generated to facilitate quality check and interpretation. These include:
+ProtE offers users:
+
+• Conventional statistics (Group averages, Standard Deviations, Log2 Fold Changes )
+
+• Traditional tests for independent and paired samples via the parameter `independent` 
+  Wilcoxon, Kruskal/Friedman, Bartlett & Levene, PERMANOVA
+
+• Limma statistics: Coefficients for every group and covariate, Anova-like F test results     and moderated t-test for every pairwise comparison. If existing on the `metadata_file`,     covariates will also be fitted in the linear model. 
+
+• *GSEA* to find the up and downregulated gene sets/ pathways in every pairwise comparison.
+
+# Visualization Plots
+The results are automatically exported as Excel files, and a range of visualizations is generated to facilitate quality check and interpretation. These include:
 
 •	Principal Component Analysis (PCA) plots for dimensionality reduction and group             comparison.
 
