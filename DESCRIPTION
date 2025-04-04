@@ -12,8 +12,6 @@ LazyData: true
 Imports:
     dplyr,
     vegan,
-    UniprotR,
-    stringr,
     missRanger,
     car,
     openxlsx,
@@ -27,7 +25,11 @@ Imports:
     grDevices,
     grid,
     limma,
-    pheatmap,
+    ComplexHeatmap,
+    circlize,
+    msigdbr,
+    fgsea,
+    queryup
 Suggests: 
     BiocManager,
     rmarkdown,
