@@ -162,12 +162,12 @@ directories are parsed via the `pd_single_dir` argument, if a
 of comparison should be inside distinct folders, whose names will be
 attributed to each Group.
 
-## Summary of the ProtE pipeline
+# Summary of the ProtE pipeline
 
 The pipeline of ProtE is reported in more details in the
 `ProtE Workflow` vignette.
 
-# Data Processing
+## Data Processing
 
 The data are processed via the:
 
@@ -180,7 +180,7 @@ The data are processed via the:
 
 4.  Imputation of missing data to ensure robust downstream analysis.
 
-# Differential Expression and Enrichment analysis
+## Differential Expression and Enrichment analysis
 
 Once the data processing is complete, the package performs *statistical
 analysis* for every pairwise comparison to identify significant protein
@@ -202,7 +202,7 @@ fitted in the linear model.
 • *GSEA* to find the up and downregulated gene sets/ pathways in every
 pairwise comparison.
 
-# Visualization Plots
+## Visualization Plots
 
 The results are automatically exported as Excel files, and a range of
 visualizations is generated to facilitate quality check and
