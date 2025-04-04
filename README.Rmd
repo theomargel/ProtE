@@ -97,7 +97,7 @@ While for case 4 the path to the folder(s) that contain the .xlsx files for each
 
 A metadata table (.xlsx or .txt format) is also optional to be provided, via the parameter `metadata_file`. It must containthe Sample names that should match the naming inside the input table (or the naming of the Excel files for case 4.) in the 1st column, and the experimental Groups of comparison in the 2nd column. The next columns can include information about covariates that will be taken into account in the statistical analysis. 
 
-## Seting up the file path:
+## Setting up the file path:
 Assuming a MaxQuant quantification has been performed, the file ProteinGroups.txt (or ProteinGroups.xlsx) shall be fed to ProtE. 
 
 Insert the file path of the ProteinGroups.txt in the ```file``` parameter. To copy-paste the file path in Windows, firstly locate the desired file inside your folders. Hold Shift and right-click the file, then select "Copy as Path" from the context menu. Go to RStudio and click Ctrl+V or right-click to paste the path. 

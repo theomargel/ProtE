@@ -108,7 +108,7 @@ of comparison in the 2nd column. The next columns can include
 information about covariates that will be taken into account in the
 statistical analysis.
 
-## Seting up the file path:
+## Setting up the file path:
 
 Assuming a MaxQuant quantification has been performed, the file
 ProteinGroups.txt (or ProteinGroups.xlsx) shall be fed to ProtE.

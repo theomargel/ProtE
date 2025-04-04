@@ -1491,7 +1491,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         plot_data <- plot_data %>% mutate(pathway = gsub("HALLMARK_", "", pathway))
       }
       if (subcollection == "GO:BP") {
-        plot_data <- plot_data %>% mutate(pathway = gsub("GO_", "", pathway))
+        plot_data <- plot_data %>% mutate(pathway = gsub("GOBP_", "", pathway))
       }
     plot_data <-  plot_data %>% mutate( pathway = factor(pathway, levels = pathway))
     minNES <- floor(min(plot_data$NES))
