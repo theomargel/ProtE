@@ -10,7 +10,7 @@
 #' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
 #' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
-#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
+#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD,  "Gaussian_mean_sd" for sampling values from the normal distribution of the mean value of each sample with its standard deviation, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
 #' @param independent TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "p.adj" Specifies which of the p-values (nominal vs p.adjusted for multiple hypothesis) will be taken into account for creating the PCA plots, the heatmap and the Volcano plots. By default it is set to "p" (nominal p-value).
@@ -111,7 +111,7 @@ ProtE_analyse <-function(file = NULL,
   if (!normalization %in% c(FALSE,"median","Quantile","log2","VSN", "Total_Ion_Current","Cyclic_Loess", "PPM") ){
     stop("An incompatible normalization method was provided, please check the available and run the function again.") }
 
-  if (!imputation %in% c("kNN","missRanger","mean","Zeros","LOD","Gaussian_LOD", FALSE))  {
+  if (!imputation %in% c("kNN","missRanger","mean","Zeros","LOD","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
     stop("incompatible imputation method was selected, please check the availables and run again.")}
 
 
@@ -235,9 +235,18 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace <- dataspace[!grepl("^;",dataspace$Protein.IDs),]
     dataspace <- dataspace[complete.cases(dataspace[,1]),]
     if("Reverse" %in% colnames(dataspace)) {
-      dataspace <- dataspace[dataspace$Reverse == ""|is.na(dataspace$Reverse) == TRUE,]
+      dataspace <- dataspace[dataspace$Reverse == ""|is.na(dataspace$Reverse),]
       print("Removed REV_proteins: Reverse peptide Identifications. If you want to exclude the CON (Contaminants) proteins and proteins only identified by site, do so manually from the imported table.")}
-    dataspace <- dataspace[,grep("Protein.IDs|Fasta.headers|Intensity",colnames(dataspace))]
+
+    if (any(grepl("^LFQ intensity", colnames(dataspace)))){
+      dataspace <- dataspace[,grep("Protein.IDs|Fasta.headers|LFQ.intensity",colnames(dataspace))]
+      colnames(dataspace) <- gsub("LFQ.intensity.", "", colnames(dataspace))
+
+       } else {
+     dataspace <- dataspace[,grep("Protein.IDs|Fasta.headers|Intensity",colnames(dataspace))]
+     dataspace$Intensity <- NULL
+     colnames(dataspace) <- gsub("Intensity.", "", colnames(dataspace))
+    }
     dataspace$Protein.IDs <- ifelse(
       grepl("sp\\|\\w+\\|", dataspace$Protein.IDs),
       sub(".*sp\\|(\\w+)\\|.*", "\\1", dataspace$Protein.IDs),
@@ -249,9 +258,6 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     } else { dataspace$Description <- "Not available" }
 
     colnames(dataspace)[colnames(dataspace) == "Protein.IDs"] <- "Accession"
-    dataspace <- dataspace[!dataspace$Intensity == 0,]
-    dataspace$Intensity <- NULL
-    colnames(dataspace) <- gsub("Intensity.", "", colnames(dataspace))
     dataspace[dataspace == 0] <- NA
   } else if(length(group_paths) > 0 & is.null(file)){
     print("ProteomeDiscoverer multiple files mode.")
@@ -607,6 +613,19 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.2), x)
     }
     dataspace[,-1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian)
+    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    openxlsx::write.xlsx(dataspace, file = imp_file_path)
+  }
+  if (imputation == "Gaussian_mean_sd") {
+    dataspace[dataspace == 0] <- NA
+      replace_gaussian_mean_sd <- function(x) {
+      if (all(is.na(x))) return(x)
+      col_mean <- mean(x, na.rm = TRUE)
+      col_sd <- sd(x, na.rm = TRUE)
+      if (is.na(col_sd) || col_sd == 0) col_sd <- col_mean * 0.2
+      ifelse(is.na(x), rnorm(length(x), mean = col_mean, sd = col_sd), x)
+    }
+    dataspace[, -1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian_mean_sd)
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
