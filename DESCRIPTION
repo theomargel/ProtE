@@ -28,7 +28,6 @@ Imports:
     ComplexHeatmap,
     circlize,
     msigdbr,
-    msigdbdf,
     fgsea,
     queryup
 Suggests: 

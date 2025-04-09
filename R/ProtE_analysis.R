@@ -78,6 +78,9 @@ ProtE_analyse <-function(file = NULL,
                          subcollection ="CS:REACTOME",
                          LFC = 1)
 {
+  if (!requireNamespace("msigdbdf", quietly = TRUE)) {
+    install.packages("msigdbdf", repos = "https://igordot.r-universe.dev")
+  }
   Sample=group1= samples_per_group=  Accession =Description =Symbol =X = Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
   uqg = FALSE
   print("The ProtE process starts now!")
