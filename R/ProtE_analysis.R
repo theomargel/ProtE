@@ -1268,7 +1268,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                            show_column_names = FALSE,
                                            column_split = groups_list_f,
                                            top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = group_colors),
-                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 10))),
+                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 14))),
                                            ,col = mycols, column_title = NULL,
                                            heatmap_legend_param = list(
                                              title = "Z-Score",
@@ -1405,7 +1405,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                              show_column_names = FALSE,
                                              column_split = groups_list_h,
                                              top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill =block_colors_h),
-                                                                                                                 labels = unique_groups_h, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 10))),
+                                                                                                                 labels = unique_groups_h, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 14))),
                                              ,col = mycols, column_title = NULL,
                                              heatmap_legend_param = list(
                                                title = "Z-Score",
