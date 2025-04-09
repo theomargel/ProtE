@@ -75,7 +75,7 @@ ProtE_analyse <-function(file = NULL,
                          metadata_file = NULL,
                          species = "Homo sapiens",
                          p.adjust.method = "BH",
-                         subcollection ="CS:REACTOME",
+                         subcollection = "CP:REACTOME",
                          LFC = 1)
 {
   if (!requireNamespace("msigdbdf", quietly = TRUE)) {
