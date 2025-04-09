@@ -75,10 +75,11 @@ ProtE_analyse <-function(file = NULL,
                          metadata_file = NULL,
                          species = "Homo sapiens",
                          p.adjust.method = "BH",
-                         subcollection ="GO:BP",
+                         subcollection ="CS:REACTOME",
                          LFC = 1)
 {
-  Sample=group1=  Accession =Description =Symbol =X = Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
+  Sample=group1= samples_per_group=  Accession =Description =Symbol =X = Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
+  uqg = FALSE
   print("The ProtE process starts now!")
   if (!is.logical(global_filtering)) {
     stop("Argument 'global_filtering' must be a logical value (TRUE or FALSE).")
@@ -287,6 +288,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       colnames(dataspace)[colnames(dataspace) == "Genes"] <- "Gene.Symbol"
       dataspace$Description <- rep("Unavailable for Genes matrices", nrow(dataspace))
       dataspace$Accession <- rep("Unavailable for Genes matrices", nrow(dataspace))
+      uqg <- TRUE
     } else stop("Incompatible input file was inserted.")
   }
 
@@ -499,13 +501,13 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       geom_point(alpha = 0.5, color = "blue") +
       geom_smooth(method = "loess", color = "red", se = FALSE) +
       theme_minimal() +
-      labs(title = "Mean-SD Plot on the log2 normalized data, saved as normalized_meanSdPlot.bmp", x = "Mean Expression", y = "Standard Deviation")
-    meansd
-    ggplot2::ggsave("normalized_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
-                    scale = 1, width = 5, height = 4, units = "in",
-                    dpi = 300, limitsize = TRUE)
+      labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
 
-  } else {
+    suppressMessages(suppressWarnings(ggplot2::ggsave("normalized_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+                    scale = 1, width = 5, height = 4, units = "in",
+                    dpi = 300, limitsize = TRUE)))
+
+  } else if (normalization %in% c("log2","Quantile", "Cyclic_Loess")) {
     row_means <- rowMeans(dataspace[,-c(1:3)], na.rm = TRUE)
     row_sds <- apply(dataspace[,-c(1:3)], 1, sd, na.rm = TRUE)
     plot_data <- data.frame(Mean = row_means, SD = row_sds)
@@ -514,7 +516,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       geom_smooth(method = "loess", color = "red", se = FALSE) +
       theme_minimal() +
       labs(title = "Mean-SD Plot on the normalized data", x = "Mean Expression", y = "Standard Deviation")
-    meansd
+
     suppressMessages(suppressWarnings(ggplot2::ggsave("normalized_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
                                                       scale = 1, width = 5, height = 4, units = "in",
                                                       dpi = 300, limitsize = TRUE)))
@@ -610,7 +612,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace[dataspace==0] <- NA
     LOD <- min(as.matrix(dataspace[,-1:-3]),na.rm = TRUE)
     replace_gaussian <- function(x) {
-      ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.2), x)
+      ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.1), x)
     }
     dataspace[,-1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian)
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
@@ -618,17 +620,33 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   }
   if (imputation == "Gaussian_mean_sd") {
     dataspace[dataspace == 0] <- NA
-      replace_gaussian_mean_sd <- function(x) {
-      if (all(is.na(x))) return(x)
-      col_mean <- mean(x, na.rm = TRUE)
-      col_sd <- sd(x, na.rm = TRUE)
-      if (is.na(col_sd) || col_sd == 0) col_sd <- col_mean * 0.2
-      ifelse(is.na(x), rnorm(length(x), mean = col_mean, sd = col_sd), x)
+
+    data_to_impute <- dataspace[, 4:ncol(dataspace)]
+
+    for (i in seq_len(nrow(data_to_impute))) {
+      row_data <- data_to_impute[i, ]
+
+      if (any(is.na(row_data))) {
+        row_data <- as.numeric(row_data)
+        row_mean <- mean(row_data, na.rm = TRUE)
+        sd_row <- sd(row_data, na.rm = TRUE)
+
+        num_na <- sum(is.na(row_data))
+        imputed_values <- rnorm(num_na, mean = row_mean, sd = sd_row * 0.3)
+        imputed_values[imputed_values < 0] <- 0
+
+        row_data[is.na(row_data)] <- imputed_values
+        data_to_impute[i, ] <- row_data
+      }
     }
-    dataspace[, -1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian_mean_sd)
+
+    dataspace[, 4:ncol(dataspace)] <- data_to_impute
+
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
+
+
   if (imputation == "mean"){
     dataspace[dataspace==0] <- NA
 
@@ -667,7 +685,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   if(imputation == FALSE){    dataspace[dataspace==0] <- NA}
 
 
-  if (imputation %in% c("kNN","missRanger","mean"))    {
+  if (imputation %in% c("kNN","missRanger","mean","Gaussian_mean_sd", "Gaussian_LOD"))    {
     pre_dataspace1<-pre_dataspace[,-1:-3]
     dataspace1<-dataspace[,-1:-3]
     imp.values<- dataspace1 - pre_dataspace1
@@ -1247,7 +1265,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                            show_column_names = FALSE,
                                            column_split = groups_list_f,
                                            top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill = group_colors),
-                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontsize = 10))),
+                                                                                                               labels = group_names, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 10))),
                                            ,col = mycols, column_title = NULL,
                                            heatmap_legend_param = list(
                                              title = "Z-Score",
@@ -1307,6 +1325,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         }}
     }
     if (significance  == "p.adj"){
+      significance = paste0(p.adjust.method," P")
+
       for (i in 1:(ncol(mm)-1)) {
         for (j in (i+1):ncol(mm)) {
           comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
@@ -1336,6 +1356,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       }
     }
     if (significance  == "p.adj"){
+      significance = paste0(p.adjust.method," P")
       for (j in 2:groups_number) {
         for (k in 1:(j-1)) {
           comparison <- paste0("G", j, "vsG", k)
@@ -1381,7 +1402,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                              show_column_names = FALSE,
                                              column_split = groups_list_h,
                                              top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill =block_colors_h),
-                                                                                                                 labels = unique_groups_h, labels_gp = gpar(col = "white", fontsize = 10))),
+                                                                                                                 labels = unique_groups_h, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 10))),
                                              ,col = mycols, column_title = NULL,
                                              heatmap_legend_param = list(
                                                title = "Z-Score",
@@ -1396,6 +1417,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
       volcano.P.vs.Con <- volcano_list[[i]]
       volcanocolors <- c("magenta", "navy", "#6D6D6D")
+      max_y <- max(-log10(volcano.P.vs.Con[,3]), na.rm = TRUE) + 0.5
       names(volcanocolors) <- c("Significant upregulation","Significant downregulation", "Not significant")
       volcano.P.vs.Con$Regulation <- ifelse(volcano.P.vs.Con[,2]
                                             > LFC &
@@ -1410,26 +1432,13 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       volcano.P.vs.Con$size <-
         ifelse(volcano.P.vs.Con$Regulation=="Not significant", 0.1,0.7)
 
+      volcano.P.vs.Con <- volcano.P.vs.Con[!is.na(volcano.P.vs.Con$size), ]
       vol_plot <- ggplot(data = volcano.P.vs.Con, aes(x = volcano.P.vs.Con[,2],
                                                       y =
                                                         -log10(volcano.P.vs.Con[,3]), col = Regulation)) +
         geom_point(size= volcano.P.vs.Con$size) +
-        #  geom_hline(yintercept = -log10(0.05), col = "#6D6D6D", lwd = 1, lty = 2) +
-        #  geom_vline(xintercept = LFC, col = "#6D6D6D", lwd = 1, lty = 2) + #
-        # geom_vline(xintercept = -LFC, col = "#6D6D6D", lwd = 1, lty = 2) + #
-        scale_colour_manual(values = volcanocolors) +
+         scale_colour_manual(values = volcanocolors) +
 
-        # annotate(geom = "text", y = 1.5, x = -8, label = paste0(toupper(significance), " < 0.05"), color = "#6D6D6D", size = 4) +
-        #  annotate(geom = "text", y = 3.6 , x = -8, label = "LFC <= -1", color
-        #         = "#6D6D6D",
-        #        size = 4) +
-        #  annotate(geom = "text", y = 3.6 , x = 8, label = "LFC >= 1", color =
-        #            "#6D6D6D",
-        #          size = 4) +
-        coord_cartesian(xlim = c(min(volcano.P.vs.Con[,2]),
-                                 max(volcano.P.vs.Con[,2])), clip
-                        = "off",
-                        ylim = c(0,5)) +
         labs(title =  paste0(names(which_sig[i])),
              x =
                expression('Log'[2] * 'Fold Change')) +
@@ -1441,8 +1450,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                           16),
               axis.title.x = element_text(hjust = 0.5),
               legend.position = "none") +
-        ylim(0, 8) +
-        xlim(-10, 10)
+        ylim(0, max_y) +
+        xlim(-6, 6)
 
       suppressWarnings(ggplot2::ggsave(paste0(names(which_sig[i]),"_Volcano.bmp"), plot = vol_plot,  path = path_resplot,
                       scale = 1, width = 5, height = 4, units = "in",
@@ -1450,6 +1459,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
     }}
   ##ENRICHMENT ANALYSIS
+  if (uqg == TRUE) stop("GSEA analysis unavailable for unique_genes matrices.")
   lfc_list <- list()
   dbgsea <- ifelse(species == "Mus musculus", "MM", "HS")
   if (subcollection == "H"){

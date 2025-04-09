@@ -19,7 +19,7 @@ ProtE_analyse(
   metadata_file = NULL,
   species = "Homo sapiens",
   p.adjust.method = "BH",
-  subcollection = "GO:BP",
+  subcollection = "CS:REACTOME",
   LFC = 1
 )
 }
