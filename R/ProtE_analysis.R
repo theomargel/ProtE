@@ -876,7 +876,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
           cov_columns_to_remove <- unlist(lapply(cov_remove, function(i) {
             grep(paste0("cov\\[\\[", i, "\\]\\]"), colnames(mm), value = TRUE)
           }))
-          mm <- mm[, !colnames(mm) %in% cov_columns_to_remove, drop = FALSE]
+          mm <- mm[, !colnames(mm) %in% cov_columns_to_remove]
           excluded_metadata_cols <- colnames(metadata_df)[cov_remove + 2]
           warning("Non-estimable coefficients:", paste(non_estimable_short, collapse = ", "), "\n",
                   "Excluded entire covariates from the linear model based on:",
