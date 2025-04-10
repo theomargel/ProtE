@@ -60,10 +60,21 @@ system path during installation.
 
 Step 4: Download the Package
 
-Install the development version of ProtE from GitHub:
+Install the development version of ProtE from GitHub, along with its
+Bioconductor dependencies:
 
-    install.packages("devtools")
-    devtools::install_github("theomargel/ProtE")
+    if (!require("devtools", quietly = TRUE)) {
+      install.packages("devtools")}
+      
+    if (!require("BiocManager", quietly = TRUE)) {
+      install.packages("BiocManager")}
+      
+    bioc_packages <- c("limma", "ComplexHeatmap", "fgsea")
+    for (pkg in bioc_packages) {
+      if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+        BiocManager::install(pkg) }}
+
+    devtools::install_github("yourusername/ProtE", dependencies = TRUE)
 
 Then load its library with:
 

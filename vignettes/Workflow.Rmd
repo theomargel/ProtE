@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-All 4 functions streamline the following data processing:
+The data are processed via the:
 
 1.  Annotation fetching for the input files that do not include established Description
 
@@ -21,7 +21,7 @@ All 4 functions streamline the following data processing:
 ## Description fetching
 
 
-If the descriptive information column is not available in the input files, annotation information about the Protein.Ids, is important to be provided. For example the input file `.pg_matrix.tsv` from DIA-NN usually does not provide this information. Detailed data is obtained from the UniProt database, using the *queryup* package. The Description information will be shown in each Excel file created that contains the dataset.
+If the descriptive information column is not available in the input files, annotation information about the Protein.Ids, is important to be provided. For example the input file `.pg_matrix.tsv` from DIA-NN usually does not provide this information. Detailed data is obtained from the UniProt database, using the *queryup* package. The Description information will be shown in all Excel files created that contain the dataset and its statistics.
 
 
 ## Normalization

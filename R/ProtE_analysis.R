@@ -80,7 +80,8 @@ ProtE_analyse <-function(file = NULL,
 {
   if (!requireNamespace("msigdbdf", quietly = TRUE)) {
     install.packages("msigdbdf", repos = "https://igordot.r-universe.dev")
-  }
+  } else {update.packages("msigdbdf",repos = "https://igordot.r-universe.dev", ask = FALSE)}
+  update.packages("msigdbr", ask = FALSE)
   Sample=group1= samples_per_group=  Accession =Description =Symbol =X = Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
   uqg = FALSE
   print("The ProtE process starts now!")
@@ -975,9 +976,9 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   limma_dataspace<-limma_dataspace %>%
     dplyr::select(Accession ,Description ,Gene.Symbol, everything())
   limma_dataspace <- limma_dataspace[,1:ncollimma]
-  limma_file_path <- file.path(path_restat, "Dataset_limma.test.xlsx")
+  limma_file_path <- file.path(path_restat, "limma_statistics.xlsx")
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
-  print("The limma output has been saved as Dataset_limma.test.xlsx")
+  print("The limma output has been saved as limma_statistics.xlsx")
 
   data2 <- dataspace
 
@@ -1161,7 +1162,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   start_col <- 4 + as.numeric(sum(samples_per_group))
   Fdataspace <- Fdataspace[,-c(4:start_col)]
 
-  stats_file_path <- file.path(path_restat, "Statistics.xlsx")
+  stats_file_path <- file.path(path_restat, "traditional_statistics.xlsx")
   openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
   print("The non-parametric statistical output along with tests for homoscedasticity have been saved as Statistical_analysis.xlsx")
 
@@ -1562,7 +1563,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
         legend.position = "right"
       ) +
-      labs(caption = paste("Upregulated in", comp_names[2], "(Negative NES) and", comp_names[1], "(Positive NES)")) +
+      labs(caption = paste("Enriched in", comp_names[2], "(Negative NES) and", comp_names[1], "(Positive NES)")) +
       theme(plot.caption = element_text(size = 8, face = "bold", hjust = 0.5))
 
   suppressWarnings(ggplot2::ggsave(paste0(names(gsea[i]),"_GSEA_plot.bmp"), plot = enr_plot,  path = path_resplot,

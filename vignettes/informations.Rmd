@@ -31,7 +31,7 @@ ProtE features just one function ; ```ProtE_analyse()```,  which accepts as inpu
 The input file for cases 1-3 should be parsed in the parameter ```file```
 While for the case 4 the path to the folder(s) that contain the .xlsx files for each sample, should be parsed in the parameter `pd_single_dir`. 
 
-A metadata table (.xlsx or .txt format) is also optional to be provided, via the parameter `metadata_file`. It must containthe Sample names that should match the naming inside the input table (or the naming of the Excel files for case 4.) in the 1st column, and the experimental Groups of comparison in the 2nd column. The next columns can include information about covariates that will be taken into account in the statistical analysis. 
+A metadata table (.xlsx or .txt format) is also optional to be provided, via the parameter `metadata_file`. It must contain the Sample names that should match the naming inside the input table (or the naming of the Excel files for case 4.) in the 1st column, and the experimental Groups of comparison in the 2nd column. The next columns can include information about covariates that will be taken into account in the statistical analysis. 
 
 ## Seting up the file path:
 Assuming a MaxQuant quantification has been performed, the file ProteinGroups.txt (or ProteinGroups.xlsx) shall be fed to ProtE. 
@@ -59,12 +59,11 @@ Group names are defined in the parameter ```group_names``` as a vector. The orde
 ```{r, eval=FALSE}
 
 ProtE_analyse(file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt",group_names = c("Control", "Treatment", "Compound"), samples_per_group = c(10, 12, 9))
+
 ```
 
 For the analysis of multiple **Proteome Discoverer** (PD) exports, each one corresponding to a single sample (case 4) where the input directories are parsed via the `pd_single_dir` argument, if a `metadata_file` is not provided, the samples for each experimental Group of comparison should be inside distinct folders, whose names will be attributed to each Group.
 
-
-In the pairwise comparisons, nominators and denominators of the FoldChange (and consequently the sign of Log2FoldChage) are defined based on the order of the declared group folders in the ```pd_multi``` function. Again, the general notion based on which FoldChange is determined, is: NextGroup/PreviousGroup. In our imaginary example the FoldChange for every pairwise comparison will be set as: Treatment/Control, Compound/Control and Compound/Treatment.
 
 ## Summary of the ProtE pipeline
 The pipeline of ProtE is reported in more details in the `ProtE Workflow` vignette. 
