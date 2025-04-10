@@ -74,7 +74,7 @@ Bioconductor dependencies:
       if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
         BiocManager::install(pkg) }}
 
-    devtools::install_github("yourusername/ProtE", dependencies = TRUE)
+    devtools::install_github("theomargel/ProtE", dependencies = TRUE)
 
 Then load its library with:
 
