@@ -301,7 +301,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
 
 
-  if (!("Gene.Symbol" %in% colnames(dataspace))){
+  if (!"Gene.Symbol" %in% colnames(dataspace)){
     if(all(dataspace$Description == "Not available")){
       print("The Description fetching from UniProt starts now, it might take some time depending on your Network speed.")
       id_numbers <- sub("([^;]*).*", "\\1", dataspace$Accession)
@@ -318,8 +318,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                       dataspace$details)
       dataspace$details <- NULL }
   }else { print("Description fetching is not available for DIA-NN unique_genes matrices")}
-
-  dataspace$Gene.Symbol = sub(".*GN=(.*?) .*","\\1",dataspace$Description)
+  if (uqg == FALSE){
+  dataspace$Gene.Symbol = sub(".*GN=(.*?) .*","\\1",dataspace$Description)}
   dataspace<-dataspace %>%  dplyr::select(Accession, Description,Gene.Symbol , everything())
 
 
@@ -846,11 +846,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   print("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as After_Processing_violin_plot.bmp" )
 
   if(!is.null(metadata_file)){
-    for (i in 1:ncol(metadata_df)){
-      if (length(unique(metadata_df[,i])) < 2) {
-        metadata_df[,i] <- NULL
-      }
-    }
+    metadata_df <- metadata_df[, sapply(metadata_df, function(x) length(unique(x)) >= 2)]
     if (ncol(metadata_df) > 2){
       max_cols_to_process <- min(5, ncol(metadata_df) - 2)
       cov <- list()
@@ -948,7 +944,12 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
           anova_res <- anova_res[,-c(1:groups_number)]
           colnames(anova_res)<-paste("F-test",colnames(anova_res), sep = "_")
           anova_res <- cbind(coef_res,anova_res)
-        }}} else {    anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
+        } else {    anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
+        colnames(anova_res)[-c(1:groups_number)]<-paste("F-test",colnames(anova_res)[-c(1:groups_number)], sep = "_")
+        colnames(anova_res)[c(1:groups_number)]<- paste("coef",colnames(anova_res)[c(1:groups_number)], sep = "_")
+
+        }
+        }} else {    anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
         colnames(anova_res)[-c(1:groups_number)]<-paste("F-test",colnames(anova_res)[-c(1:groups_number)], sep = "_")
         colnames(anova_res)[c(1:groups_number)]<- paste("coef",colnames(anova_res)[c(1:groups_number)], sep = "_")
 
@@ -1100,6 +1101,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   transposed_data<-data.frame(transposed_data)
   dataspace<-data.frame(dataspace)
   colnames(transposed_data)<-dataspace[,1]
+  colnames(transposed_data) <- make.names(colnames(transposed_data), unique = TRUE)
   dataspace4<-cbind(Group,transposed_data)
   dataspace4$Group<-as.factor(dataspace4$Group)
 
@@ -1464,7 +1466,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
     }}
   ##ENRICHMENT ANALYSIS
-  if (uqg == TRUE) stop("GSEA analysis unavailable for unique_genes matrices.")
+ # if (uqg == TRUE) stop("GSEA analysis unavailable for unique_genes matrices.")
   lfc_list <- list()
   dbgsea <- ifelse(species == "Mus musculus", "MM", "HS")
   if (subcollection == "H"){
