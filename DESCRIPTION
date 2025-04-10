@@ -27,7 +27,7 @@ Imports:
     limma,
     ComplexHeatmap,
     circlize,
-    msigdbr (>= 10.0.1),
+    msigdbr,
     fgsea,
     queryup
 Suggests: 
