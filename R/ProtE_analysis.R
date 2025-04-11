@@ -1065,16 +1065,17 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     valid_groups <- group_values[sapply(group_values, function(x) sum(!is.na(x)) > 1)]
     if (length(valid_groups) >= 2) {
       bartlett_result <- bartlett.test(valid_groups)
-      data2[i, "Bartlett_p"] <- bartlett_result$p.value
-      leve_data <- data.frame(
-        Value = unlist(valid_groups),
-        Group = rep(seq_along(valid_groups), sapply(valid_groups, length))  )
+     data2[i, "Bartlett_p"] <- bartlett_result$p.value
+    leve_data <- data.frame(
+      Value = unlist(valid_groups),
+       Group = rep(seq_along(valid_groups), sapply(valid_groups, length))  )
 
-      levene_result <- car::leveneTest(Value ~ as.factor(Group), data = leve_data, center = median)
-      data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]      } else {
-        data2[i, "Bartlett_p"] <- NA
-        data2[i, "Levene_p"] <- NA
-      }
+   levene_result <- suppressWarnings(car::leveneTest(Value ~ as.factor(Group), data = leve_data, center = median))
+   data2[i, "Levene_p"] <- levene_result$`Pr(>F)`[1]
+    } else {
+     data2[i, "Bartlett_p"] <- NA
+     data2[i, "Levene_p"] <- NA
+     }
 
   }
 
@@ -1115,8 +1116,21 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       df4 <- df3 %>% dplyr::group_by(key)
       df4$value <- as.numeric(df4$value)
       df5 <- df4 %>%
-        dplyr::group_modify(~ broom::tidy(kruskal.test(value ~ Group, data = .x)))
-      df5<- df5[,c(1,3)]
+        dplyr::group_by(key) %>%
+        dplyr::group_modify(~ {
+          valid_data <- .x[!is.na(.x$value), ]
+          if (length(unique(valid_data$Group)) >= 2) {
+            broom::tidy(kruskal.test(value ~ Group, data = valid_data))
+          } else {
+            data.frame(
+              statistic = NA,
+              p.value = NA,
+              parameter = NA,
+              method = "Kruskal-Wallis rank sum test"
+            )
+          }
+        }, .keep = TRUE) %>%
+        dplyr::select(key, p.value)
       data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
       data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
       test_type <- "Kruskal_Wallis"
@@ -1162,7 +1176,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     colnames(Fdataspace)<-namesc
   }
 
-  start_col <- 4 + as.numeric(sum(samples_per_group))
+  start_col <- 3 + as.numeric(sum(samples_per_group))
   Fdataspace <- Fdataspace[,-c(4:start_col)]
 
   stats_file_path <- file.path(path_restat, "traditional_statistics.xlsx")
