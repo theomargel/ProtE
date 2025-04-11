@@ -733,9 +733,9 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace$log<-log2(dataspace$mean)
     dataspace$rank <- rank(-dataspace$mean)
 
-    abund.plot <- ggplot(dataspace, aes(x = rank, y = mean, colour = percentage)) +
+    abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
       geom_point(size = 3, alpha = 0.8) +
-      labs(title = "Protein Abundance Rank", x = "Rank", y = "Mean Protein Abundance") +
+      labs( x = "Proteins mean abundance rank", y= expression(Log[2]~"mean protein abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
                            name = "Imputations\nin each\nprotein\n(%)",limits = c(0,100-filtering_value)) +
       theme_linedraw()+
@@ -754,13 +754,13 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
     dataspace[,4:(3+sum(samples_per_group))] <- lapply(dataspace[,4:(3+sum(samples_per_group))], as.numeric)
-    dataspace$mean <- apply(dataspace[,4:(3+sum(samples_per_group))], 1, function(x) mean(x[x != 0]))
+    dataspace$mean <- apply(dataspace[,4:(3+sum(samples_per_group))], 1, function(x) mean(x[!is.na(x)]))
     dataspace$log<-log2(dataspace$mean)
     dataspace$rank <- rank(-dataspace$mean)
 
-    abund.plot <- ggplot(dataspace, aes(x = rank, y = mean, colour = percentage)) +
+    abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
       geom_point(size = 3, alpha = 0.8) +
-      labs(title = "Protein Abundance Rank", x = "Mean Proteins Abundance") +
+      labs( x = "Proteins mean abundance rank", y= expression(Log[2]~"mean protein abundance")) +
       scale_color_gradient(low = "darkblue", high = "yellow",
                            name = "MVs\nin each\nprotein\n(%)",limits = c(0,100-filtering_value)) +
       theme_linedraw()+
