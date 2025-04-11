@@ -117,7 +117,7 @@ ProtE_analyse <-function(file = NULL,
   if (!normalization %in% c(FALSE,"median","Quantile","log2","VSN", "Total_Ion_Current","Cyclic_Loess", "PPM") ){
     stop("An incompatible normalization method was provided, please check the available and run the function again.") }
 
-  if (!imputation %in% c("kNN","missRanger","mean","Zeros","LOD","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
+  if (!imputation %in% c("kNN","missRanger","mean","zeros","LOD","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
     stop("incompatible imputation method was selected, please check the availables and run again.")}
 
 
@@ -610,7 +610,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
-  if (imputation == "Zeros"){
+  if (imputation == "zeros"){
     imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
     openxlsx::write.xlsx(dataspace, file = imp_file_path)    }
   if (imputation == "Gaussian_LOD") {
