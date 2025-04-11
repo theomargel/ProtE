@@ -133,7 +133,7 @@ ProtE_analyse <-function(file = NULL,
    if (ncol(metadata_df) < 2) stop("Incompatible metadatafile: less than 2 columns.")
    colnames(metadata_df)[1] <- "Samples"
    colnames(metadata_df)[2] <- "Group"
-   if (colSums(is.na(metadata_df$Group)) > 0) stop("empty values in group column of the metadata file.")
+   if (sum(is.na(metadata_df$Group)) > 0) stop("empty values in group column of the metadata file.")
    if (!colSums(is.na(metadata_df)) > 0) warning("There are empty rows in metadata covariates that will be omitted.")
    metadata_df <- metadata_df[, !colSums(is.na(metadata_df)) > 0]
 
