@@ -896,7 +896,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       }
       colnames(mm) <- gsub(paste0("cov\\[\\[", i, "\\]\\]") , paste0(names(cov)[[i]], "_") , colnames(mm))
      groups_coef <- grep("^groups_list_f", colnames(mm), value = TRUE)
-    }
+     }else {
+       mm <- model.matrix(~groups_list_f + 0)
+       colnames(mm)<- group_names
+     }
     } else {
       mm <- model.matrix(~groups_list_f + 0)
       colnames(mm)<- group_names
