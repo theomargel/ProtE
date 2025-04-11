@@ -1022,7 +1022,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
             if (nrow(paired_values) > 0) {
               test_list <- stats::wilcox.test(
                 paired_values[, 1], paired_values[, 2],
-                exact = FALSE, paired = TRUE
+                exact = TRUE, paired = TRUE
               )
               data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- test_list$p.value
             } else {
