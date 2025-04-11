@@ -233,6 +233,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     print("ProteomeDiscoverer consesus file mode.")
     dataspace <- dataspace[,grep("Accession|Description|Abundance:",colnames(dataspace))]
     colnames(dataspace) <- gsub("Abundance:.|:.Sample", "", colnames(dataspace))
+    dataspace <- dataspace[complete.cases(dataspace[,1]),]
+
     if (!("Description" %in% colnames(dataspace))) {
       dataspace$Description <- "Not available"
     }
@@ -275,12 +277,14 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         dataspace <- dataspace[,c(grep("Protein.Ids",colnames(dataspace)),6:ncol(dataspace))]
       }else{dataspace <- dataspace[,c(grep("Protein.Ids",colnames(dataspace)),5:ncol(dataspace))]}
       dataspace[, -1] <- lapply(dataspace[, -1], as.numeric)
+      dataspace <- dataspace[complete.cases(dataspace[,1]),]
       col_names <- colnames(dataspace)
       col_names[-1] <- gsub("\\\\", "/", col_names[-1])
       col_names[-1] <- basename(col_names[-1])
       colnames(dataspace) <- col_names
       colnames(dataspace)[colnames(dataspace) == "Protein.Ids"] <- "Accession"
       dataspace$Description <- "Not available"
+
     } else if ("Genes" %in% colnames(dataspace)) {
       print("DIA-NN mode.")
       dataspace <- dataspace[!grepl("^;", dataspace[["Genes"]]), ]
