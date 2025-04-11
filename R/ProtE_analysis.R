@@ -133,6 +133,10 @@ ProtE_analyse <-function(file = NULL,
    if (ncol(metadata_df) < 2) stop("Incompatible metadatafile: less than 2 columns.")
    colnames(metadata_df)[1] <- "Samples"
    colnames(metadata_df)[2] <- "Group"
+   if (colSums(is.na(metadata_df$Group)) > 0) stop("empty values in group column of the metadata file.")
+   if (!colSums(is.na(metadata_df)) > 0) warning("There are empty rows in metadata covariates that will be omitted.")
+   metadata_df <- metadata_df[, !colSums(is.na(metadata_df)) > 0]
+
    metadata_df$Samples <- make.names(metadata_df$Samples, unique = TRUE)
      metadata_df <- metadata_df %>% arrange(.,Group)
     groups_number <- length(unique(metadata_df$Group))
@@ -851,7 +855,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   if(!is.null(metadata_file)){
     metadata_df <- metadata_df[, sapply(metadata_df, function(x) length(unique(x)) >= 2)]
-    if (ncol(metadata_df) > 2){
+
+     if (ncol(metadata_df) > 2){
       max_cols_to_process <- min(5, ncol(metadata_df) - 2)
       cov <- list()
       for (i in 1:max_cols_to_process) {
