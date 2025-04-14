@@ -63,23 +63,20 @@ Step 4: Download the Package
 Install the development version of ProtE from GitHub, along with its
 Bioconductor dependencies:
 
-    if (!require("devtools", quietly = TRUE)) {
-      install.packages("devtools")}
-      
-    if (!require("BiocManager", quietly = TRUE)) {
-      install.packages("BiocManager")}
-      
-    bioc_packages <- c("limma", "ComplexHeatmap", "fgsea")
-    for (pkg in bioc_packages) {
-      if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
-        BiocManager::install(pkg) }}
-
-    devtools::install_github("theomargel/ProtE", dependencies = TRUE)
+    if (!require("pak", quietly = TRUE)) {
+          install.packages("pak",binary = TRUE)}
+          
+        pak::pak("theomargel/ProtE", dependencies = TRUE)
 
 Then load its library with:
 
 
     library(ProtE)
+
+Note that when ProtE_analyse() function runs for the first time, the
+`msigdbdf` package will be downloaded, which will take up to some
+seconds. Whether you are asked if you permit the installation of
+`msigdbdf` select Yes.
 
 One function to analyze them all! The Proteomics Eye (ProtE) establishes
 an intuitive framework for the univariate analysis of label-free
