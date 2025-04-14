@@ -314,19 +314,25 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   if (!"Gene.Symbol" %in% colnames(dataspace)){
     if(all(dataspace$Description == "Not available")){
       print("The Description fetching from UniProt starts now, it might take some time depending on your Network speed.")
-      id_numbers <- sub("([^;]*).*", "\\1", dataspace$Accession)
+      dataspace$First_Accession <- sub("([^;]*).*", "\\1", dataspace$Accession)
+
+      id_numbers <-   dataspace$First_Accession
+
       query <- list("accession_id" = id_numbers)
       conv_ID <- queryup::query_uniprot(query, columns = c("accession","id","gene_names","organism_name","organism_id","protein_name","protein_existence","sequence_version"), max_keys = 200, show_progress = TRUE )
-      Accession <- conv_ID$Entry
+      First_Accession <- conv_ID$Entry
       details<-paste0(conv_ID$`Protein names`," OS=",conv_ID$Organism, " OX=", conv_ID$`Organism (ID)`, " GN=",conv_ID$`Gene Names`, " PE=", conv_ID$`Protein existence`, " SV=", conv_ID$`Sequence version`)
-      dfup <- cbind(Accession, details)
+      dfup <- cbind(First_Accession, details)
       dataspace <- merge(dataspace, dfup,
-                         by = "Accession",
+                         by = "First_Accession",
                          all.x = TRUE, sort = FALSE)
       dataspace$Description <- ifelse(is.na(dataspace$details),
                                       dataspace$Description,
                                       dataspace$details)
-      dataspace$details <- NULL }
+      dataspace$details <- NULL
+      dataspace$First_Accession <- NULL
+      dataspace <- dataspace[!duplicated(dataspace), ]
+    }
   }else { print("Description fetching is not available for DIA-NN unique_genes matrices")}
   if (uqg == FALSE){
   dataspace$Gene.Symbol = sub(".*GN=(.*?) .*","\\1",dataspace$Description)}
