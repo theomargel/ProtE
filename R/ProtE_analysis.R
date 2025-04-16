@@ -38,7 +38,7 @@
 #' @importFrom grid gpar
 #' @importFrom car leveneTest
 #' @importFrom missRanger missRanger
-#' @importFrom utils read.delim
+#' @importFrom utils read.delim install.packages update.packages
 #' @importFrom vegan adonis2
 #' @importFrom msigdbr msigdbr
 #' @importFrom fgsea fgsea
@@ -51,10 +51,10 @@
 #'
 #' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 #' # Copy the file to a temporary directory for CRAN checks
-#' temp_file <- file.path(tempdir(), "proteinGroups.txt")
-#' file.copy(proteinGroups.txt, temp_file, overwrite = TRUE)
+#' temp_file.txt <- file.path(tempdir(), "proteinGroups.txt")
+#' file.copy(proteinGroups.txt, temp_file.txt, overwrite = TRUE)
 #'
-#' ProtE_analyse(file = temp_file,
+#' ProtE_analyse(file = temp_file.txt,
 #'        group_names = c("Healthy","Control"),
 #'        samples_per_group = c(4,4), filtering_value = 80)
 #'
@@ -78,12 +78,12 @@ ProtE_analyse <-function(file = NULL,
                          subcollection = "CP:REACTOME",
                          LFC = 1)
 {
-  if (!requireNamespace("msigdbdf", quietly = TRUE)) {
-    install.packages("msigdbdf", repos = "https://igordot.r-universe.dev")
-  } else {update.packages("msigdbdf",repos = "https://igordot.r-universe.dev", ask = FALSE)}
-  update.packages("msigdbr", ask = FALSE)
+ # if (!requireNamespace("msigdbdf", quietly = TRUE)) {
+#    install.packages("msigdbdf", repos = "https://igordot.r-universe.dev")
+ # } else {update.packages("msigdbdf",repos = "https://igordot.r-universe.dev", ask = FALSE)}
+#  update.packages("msigdbr", ask = FALSE)
 
-  Sample=group1= samples_per_group=  Accession =Description =Symbol =X = Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
+  Sample=group1=  Accession =Description =Symbol =X =p.value= Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
   uqg = FALSE
   print("The ProtE process starts now!")
   if (!is.logical(global_filtering)) {

@@ -33,7 +33,8 @@ Imports:
 Suggests: 
     BiocManager,
     rmarkdown,
-    knitr
+    knitr,
+    msigdbdf
 URL: https://github.com/theomargel/ProtE
 BugReports: https://github.com/theomargel/ProtE/issues
 RoxygenNote: 7.3.2

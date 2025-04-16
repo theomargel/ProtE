@@ -70,10 +70,10 @@ Takes as input proteomics Data from DIA-NN, MaxQuant and ProteomeDiscoverer and 
 
 proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 # Copy the file to a temporary directory for CRAN checks
-temp_file <- file.path(tempdir(), "proteinGroups.txt")
-file.copy(proteinGroups.txt, temp_file, overwrite = TRUE)
+temp_file.txt <- file.path(tempdir(), "proteinGroups.txt")
+file.copy(proteinGroups.txt, temp_file.txt, overwrite = TRUE)
 
-ProtE_analyse(file = temp_file,
+ProtE_analyse(file = temp_file.txt,
        group_names = c("Healthy","Control"),
        samples_per_group = c(4,4), filtering_value = 80)
 
