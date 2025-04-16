@@ -918,8 +918,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   nndataspace<- dataspace[,-1:-3]
   if (imputation == FALSE ) {
-    nndataspace[is.na(nndataspace)] <- 0
-    warning("To perform limma statistical analysis, without imputation any missing values will be treated as 0s.")
+    warning("To perform limma statistical analysis, without imputation NA coefficients are expected for certain proteins.")
   }
   nndataspace[nndataspace < 0] <- 0
   if (normalization %in% c(FALSE,"median", "VSN","Total_Ion_Current", "PPM") ){
@@ -1206,15 +1205,16 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   if (normalization %in% c(FALSE,"median","VSN", "Total_Ion_Current","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)}
-
+pca.log.dataspace <- log.dataspace
 
   if (imputation == FALSE ) {
-    log.dataspace[is.na(log.dataspace)] <- 0
+    pca.log.dataspace[is.na(pca.log.dataspace)] <- 0
+    hcluster <- FALSE
     warning("To perform principal component analysis, without imputation any missing values will be treated as 0s.")
-  }
+  } else { hcluster <- TRUE }
 
 
-  pca<-prcomp(t(log.dataspace), scale=TRUE, center=TRUE)
+  pca<-prcomp(t(pca.log.dataspace), scale=TRUE, center=TRUE)
   pca.data <- data.frame(Sample=rownames(pca$x),
                          X=pca$x[,1],
                          Y=pca$x[,2],
@@ -1300,7 +1300,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       c("blue", "white", "red")
     )
     heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig.m),
-                                           cluster_rows = TRUE,
+                                           cluster_rows = hcluster,
                                            cluster_columns = FALSE,
                                            show_row_names = FALSE,
                                            show_column_names = FALSE,
@@ -1317,6 +1317,9 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     bmp(bmp_file_path,width = 1500, height = 1080, res = 150)
     ComplexHeatmap::draw(heatmap_data)
     dev.off()
+    if (imputation == FALSE ) {
+      log.dataspace.sig.m[is.na(log.dataspace.sig.m)] <- 0
+    }
 
     pca<-prcomp(t(log.dataspace.sig.m), scale=TRUE, center=TRUE)
 
@@ -1366,7 +1369,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         }}
     }
     if (significance  == "p.adj"){
-      significance = paste0(p.adjust.method," P")
+      significance_m = paste0(p.adjust.method," P")
 
       for (i in 1:(ncol(mm)-1)) {
         for (j in (i+1):ncol(mm)) {
@@ -1397,11 +1400,11 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       }
     }
     if (significance  == "p.adj"){
-      significance = paste0(p.adjust.method," P")
+      significance_m = paste0(p.adjust.method," P")
       for (j in 2:groups_number) {
         for (k in 1:(j-1)) {
           comparison <- paste0("G", j, "vsG", k)
-          which_sig[[comparison]] <- which(Ddataspace[,grep(paste0("Wilcoxon_p_", comparison),colnames(Ddataspace))] < 0.05)
+          which_sig[[comparison]] <- which(Ddataspace[,grep(paste0("p.adj_p_", comparison),colnames(Ddataspace))] < 0.05)
           heatmap_cols[[comparison]] <- c(coln[[k]],coln[[j]])-3
 
           volcano.select <- c("Accession",paste0("Log2_Ratio_", comparison) ,
@@ -1437,10 +1440,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         c("blue", "white", "red")
       )
       heatmap_data<- ComplexHeatmap::Heatmap(as.matrix(zlog.dataspace.sig.h),
-                                             cluster_rows = TRUE,
+                                             cluster_rows = hcluster,
                                              cluster_columns = FALSE,
                                              show_row_names = FALSE,
-                                             show_column_names = FALSE,
+                                             show_column_names = FALSE,na_col = "grey",
                                              column_split = groups_list_h,
                                              top_annotation = ComplexHeatmap::HeatmapAnnotation(foo = anno_block(gp = gpar(fill =block_colors_h),
                                                                                                                  labels = unique_groups_h, labels_gp = gpar(col = "white", fontface = "bold", fontsize = 14))),
@@ -1483,7 +1486,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         labs(title =  paste0(names(which_sig[i])),
              x =
                expression('Log'[2] * 'Fold Change')) +
-        ylab(bquote('-Log'[10] * .(toupper(significance)) * ' value')) +
+        ylab(bquote('-Log'[10] * .(toupper(significance_m)) * ' value')) +
         guides(fill = guide_legend(title = NULL)) +
         theme_minimal() +
         theme(text = element_text(size = 14),
