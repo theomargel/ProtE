@@ -63,10 +63,9 @@ Returns the complete output of the exploratory analysis: i) The processed, or fi
 Takes as input proteomics Data from DIA-NN, MaxQuant and ProteomeDiscoverer and it performs exploratory data analysis, providing different options for  data manipulation (normalization, filtering based on the missing values and imputation). It then proceeds to perform statistical analysis and gene set enrichment analysis, while creating exploratory plots such as relative log expression boxplots and violin plots, heatmaps, PCA and Volcano plots.
 }
 \examples{
-#Example of running the function with paths for two groups.
+\dontrun{
+# Example of running the function with paths for two groups.
 # The file path is a placeholder, replace it with an actual file.
-
-
 
 proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 # Copy the file to a temporary directory for CRAN checks
@@ -75,7 +74,7 @@ file.copy(proteinGroups.txt, temp_file.txt, overwrite = TRUE)
 
 ProtE_analyse(file = temp_file.txt,
        group_names = c("Healthy","Control"),
-       samples_per_group = c(4,4), filtering_value = 80)
-
+       samples_per_group = c(4,4),filtering_value = 80)
+}
 
 }

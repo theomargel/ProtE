@@ -44,10 +44,9 @@
 #' @importFrom fgsea fgsea
 #'
 #' @examples
-#' #Example of running the function with paths for two groups.
+#' \dontrun{
+#' # Example of running the function with paths for two groups.
 #' # The file path is a placeholder, replace it with an actual file.
-#'
-#'
 #'
 #' proteinGroups.txt <- system.file("extdata", "proteinGroups.txt", package = "ProtE")
 #' # Copy the file to a temporary directory for CRAN checks
@@ -56,8 +55,8 @@
 #'
 #' ProtE_analyse(file = temp_file.txt,
 #'        group_names = c("Healthy","Control"),
-#'        samples_per_group = c(4,4), filtering_value = 80)
-#'
+#'        samples_per_group = c(4,4),filtering_value = 80)
+#' }
 #'
 #' @export
 
