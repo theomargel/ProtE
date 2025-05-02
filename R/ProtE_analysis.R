@@ -1526,7 +1526,7 @@ pca.log.dataspace <- log.dataspace
       lfc_list[[comparison]] <- lfc_list[[comparison]][!duplicated(names(lfc_list[[comparison]]))]
       lfc_list[[comparison]] <- sort( lfc_list[[comparison]], decreasing = TRUE)
       gsea[[comparison]] <- suppressWarnings(fgsea(pathways = pathways, stats = lfc_list[[comparison]],
-                                  eps = 0.0, minSize = 15, maxSize = 500))
+                                  eps = 0.0, minSize = 10))
     }}
   if ( nrow(gsea[[comparison]]) == 0 ) {
     warning("No pathways were found to be related with the features inserted. No GSEA will be conducted.")
