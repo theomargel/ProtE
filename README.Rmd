@@ -682,6 +682,17 @@ showcasing the results of the GSEA.
 All visualization plots are saved as BMP files and are inside the Plots
 subfolder of the ProtE_analysis directory.
 
+
+## **Example** 
+
+So if we want to run ProtE analyse with VSN normalization method , excluding proteins with more than 80 percent missing values in each group of comparison, imputation method kNN, taking into account the limma test for visualization plots, the BH adjustment pValue for significance,  the samples are from different mice and the gene sets are from REACTOME database, we would run: 
+```
+ProtE_analyse(file = "C:/Bioprojects/BreastCancerMice/Proteomics/MaxQuant/ProteinGroups.txt", 
+ metadata_file = "C:/Bioprojects/BreastCancerMice/Proteomics/metadata.xlsx", 
+ normalization = "VSN", imputation = "kNN", filtering_value = 80, independent = TRUE, parametric = TRUE, 
+ significance = "p.adj", species = "Mus musculus", subcollection =  "CP:REACTOME"
+ )
+```
 # **References**
 
 [1] Voisinne G, queryup: Query the UniProt REST API using R. 2019.
