@@ -695,57 +695,17 @@ ProtE_analyse(file = "C:/Bioprojects/BreastCancerMice/Proteomics/MaxQuant/Protei
 ```
 # **References**
 
-[1] Voisinne G, queryup: Query the UniProt REST API using R. 2019.
-
-[2] Välikangas, T., Suomi, T., Elo, L.L., A systematic evaluation of
-normalization methods in quantitative label-free proteomics. *Brief
-Bioinform* 2018, 19, 1--11.
-
-[3] Bolstad, B.M., Irizarry, R.A., Astrand, M., Speed, T.P., A
-comparison of normalization methods for high density oligonucleotide
-array data based on variance and bias. *Bioinformatics* 2003, 19,
-185--93.
-
-[4] Zhao, Y., Wong, L., Goh, W.W. Bin, How to do quantile
-normalization correctly for gene expression data analyses. *Sci Rep*
-2020, 10, 15534.
-
-[5] Ritchie, M.E., Phipson, B., Wu, D., Hu, Y., et al., limma powers
-differential expression analyses for RNA-sequencing and microarray
-studies. *Nucleic Acids Res* 2015, 43, e47.
-
-[6] Wulff, J.E., Mitchell, M.W., A Comparison of Various Normalization
-Methods for LC/MS Metabolomics Data. *Advances in Bioscience and
-Biotechnology* 2018, 09, 339--351.
-
-[7] Cox, J., Hein, M.Y., Luber, C.A., Paron, I., et al., Accurate
-proteome-wide label-free quantification by delayed normalization and
-maximal peptide ratio extraction, termed MaxLFQ. *Mol Cell Proteomics*
-2014, 13, 2513--26.
-
-[8] Karpievitch, Y. V, Dabney, A.R., Smith, R.D., Normalization and
-missing value imputation for label-free LC-MS analysis. *BMC
-Bioinformatics* 2012, 13 Suppl 16, S5.
-
-[9] Harris, L., Fondrie, W.E., Oh, S., Noble, W.S., Evaluating
-Proteomics Imputation Methods with Improved Criteria. *J Proteome Res*
-2023, 22, 3427--3438.
-
-[10] Kowarik, A., Templ, M., Imputation with the *R* Package **VIM**.
-*J Stat Softw* 2016, 74.
-
-[11] Mayer M., missRanger: Fast imputation of missing values. R
-package version, 2(0). 2019.
-
-[12] Oksanen J,
-S.G.B.F.K.R.L.P.M.P.O.R.S.P.S.M.S.E.W.H.B.M.B.M.B.B.B.D.B.T.C.G.C.M.D.C.M.D.S.E.H.F.R.,
-vegan: Community Ecology Package. *R package version 2.7-0* 2024.
-
-[13] Hutchings, C., Dawson, C.S., Krueger, T., Lilley, K.S., Breckels,
-L.M., A Bioconductor workflow for processing, evaluating, and
-interpreting expression proteomics data. *F1000Res* 2023, 12, 1402.
-
-[14] Korotkevich, G., Sukhov, V., Budin, N., Shpak, B., et al., Fast
-gene set enrichment analysis. *bioRxiv* 2016.
-
-
+- [1] Voisinne G, queryup: Query the UniProt REST API using R. 2019. [CRAN](https://cran.r-project.org/web/packages/queryup/index.html)  
+- [2] Välikangas, T., Suomi, T., Elo, L.L., A systematic evaluation of normalization methods in quantitative label-free proteomics. *Brief Bioinform* 2018, 19, 1--11. [DOI](https://doi.org/10.1093/bib/bbw095)  
+- [3] Bolstad, B.M., Irizarry, R.A., Astrand, M., Speed, T.P., A comparison of normalization methods for high density oligonucleotide array data based on variance and bias. *Bioinformatics* 2003, 19, 185--93. [DOI](https://doi.org/10.1093/bioinformatics/btg009)  
+- [4] Zhao, Y., Wong, L., Goh, W.W. Bin, How to do quantile normalization correctly for gene expression data analyses. *Sci Rep* 2020, 10, 15534. [DOI](https://doi.org/10.1038/s41598-020-72664-6)  
+- [5] Ritchie, M.E., Phipson, B., Wu, D., Hu, Y., et al., limma powers differential expression analyses for RNA-sequencing and microarray studies. *Nucleic Acids Res* 2015, 43, e47. [DOI](https://doi.org/10.1093/nar/gkv007)  
+- [6] Wulff, J.E., Mitchell, M.W., A Comparison of Various Normalization Methods for LC/MS Metabolomics Data. *Advances in Bioscience and Biotechnology* 2018, 09, 339--351. [DOI](https://doi.org/10.4236/abb.2018.98025)  
+- [7] Cox, J., Hein, M.Y., Luber, C.A., Paron, I., et al., Accurate proteome-wide label-free quantification by delayed normalization and maximal peptide ratio extraction, termed MaxLFQ. *Mol Cell Proteomics* 2014, 13, 2513--26. [DOI](https://doi.org/10.1074/mcp.M113.031591)  
+- [8] Karpievitch, Y. V, Dabney, A.R., Smith, R.D., Normalization and missing value imputation for label-free LC-MS analysis. *BMC Bioinformatics* 2012, 13 Suppl 16, S5. [DOI](https://doi.org/10.1186/1471-2105-13-S16-S5)  
+- [9] Harris, L., Fondrie, W.E., Oh, S., Noble, W.S., Evaluating Proteomics Imputation Methods with Improved Criteria. *J Proteome Res* 2023, 22, 3427--3438. [DOI](https://doi.org/10.1021/acs.jproteome.3c00444)  
+- [10] Kowarik, A., Templ, M., Imputation with the R Package VIM. *J Stat Softw* 2016, 74. [DOI](https://doi.org/10.18637/jss.v074.i07)  
+- [11] Mayer M., missRanger: Fast imputation of missing values. R package version, 2(0). 2019. [CRAN](https://cran.r-project.org/web/packages/missRanger/index.html)  
+- [12] Oksanen J, S.G.B.F.K.R.L.P.M.P.O.R.S.P.S.M.S.E.W.H.B.M.B.M.B.B.B.D.B.T.C.G.C.M.D.C.M.D.S.E.H.F.R., vegan: Community Ecology Package. *R package version 2.7-0* 2024. [CRAN](https://cran.r-project.org/web/packages/vegan/index.html)  
+- [13] Hutchings, C., Dawson, C.S., Krueger, T., Lilley, K.S., Breckels, L.M., A Bioconductor workflow for processing, evaluating, and interpreting expression proteomics data. *F1000Res* 2023, 12, 1402. [DOI](https://doi.org/10.12688/f1000research.139116.2)  
+- [14] Korotkevich, G., Sukhov, V., Budin, N., Shpak, B., et al., Fast gene set enrichment analysis. *bioRxiv* 2016. [bioRxiv](https://doi.org/10.1101/060012)  
