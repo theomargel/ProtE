@@ -327,6 +327,20 @@ applied **cautiously**, with the DIA-NN data. The same applies to
 MaxQuant output that includes the already normalized data in LFQ
 intensity columns.
 
+| Normalization Method | Argument Value | Description | Notes |
+|----|----|----|----|
+| Log2 Transformation | `log2` | Applies a simple log2 transformation to the data. | Basic transformation, no additional steps. |
+| Cyclic Loess Normalization | `Cyclic_Loess` | Reduces dissimilarities using Cyclic Loess normalization. | Applied after log2 transformation; uses `limma` package functions. |
+| Quantile Normalization | `Quantile` | Makes the distribution of each feature identical. | Applied after log2 transformation; uses `limma` package functions. |
+| Median Normalization | `median` | Divides intensity values by each sample’s median intensity (median = 1). | Ensures median intensity is 1 across the dataset. |
+| Total Ion Current (TIC) | `TIC` | Divides intensities by total sum, rescales by average TIC. | To limit technical variability |
+| Parts Per Million (PPM) | `PPM` | Divides intensities by total sum, scales by 1 million. | The dataset has significant intensities variability and needs a fixed scaling factor |
+| Variable Stabilizing Normalization (VSN) | `VSN` | Applies Variable Stabilizing Normalization. | Uses `limma` package functions. |
+| None (for DIA-NN/MaxQuant) | `FALSE` | No additional normalization (data already normalized). | Is the default method when `normalization` is undefined |
+
+**Table 2.** Information about the normalization methods that can be
+selected with function ProtE_analyse()
+
 ## **Filtering of Missing Values**
 
 When working with mass spectrometry-based proteomics data, a common
@@ -374,10 +388,23 @@ quicker multivariate imputation algorithm alternative to missForest
 (based on random forests), from the package of the same name \[11\]. If
 no imputation is selected, you set (`imputation= FALSE`).
 
-The results of each data processing step (e.g., the normalized then
-filtered, and finally imputed dataset) are displayed in Excel files
-inside the Data_processing folder. Note that the imputed data will have
-already been normalized.
+| **Imputation Method** | **Argument Value** | **Description** | **Notes** |
+|----|----|----|----|
+| Limit of Detection (LOD) | `LOD` | Assigns the lowest abundance value in the dataset to missing values. | Reflects the experiment’s detection limit. |
+| Half of Limit of Detection | `LOD/2` | Assigns half of the lowest abundance value to missing values. | A more conservative imputation than LOD. |
+| Gaussian LOD | `Gaussian_LOD` | Assigns values derived from a Gaussian distribution of the LOD to missing values. | Introduces variability around the LOD. |
+| Missing Values as Zeros | `zeros` | Treats missing values as zeros. | Assumes missingness indicates no detection. |
+| Mean Abundance | `mean` | Assigns the mean abundance of each protein to its missing values. | Assumes missingness is random and uses protein mean. |
+| Gaussian Mean and SD | `Gaussian_mean_sd` | Samples from a Gaussian distribution around the mean abundance of each protein. | Adds variability around the mean for missing values. |
+| k-Nearest Neighbors (kNN) | `kNN` | Imputes missing values using the k-nearest neighbors algorithm. | Implemented via the `VIM` package \[10\]. |
+| missRanger | `missRanger` | Uses a multivariate imputation algorithm based on random forests. | Faster alternative to missForest; uses `missRanger` package \[11\]. |
+| No Imputation | `FALSE` | No imputation is applied to missing values. | Default if imputation is not desired. |
+
+**Table 3.** Information about the imputation methods that can be
+selected with function ProtE_analyse() The results of each data
+processing step (e.g., the normalized then filtered, and finally imputed
+dataset) are displayed in Excel files inside the Data_processing folder.
+Note that the imputed data will have already been normalized.
 
 # **<u>Statistical analysis</u>**
 
