@@ -1611,6 +1611,30 @@ pca.log.dataspace <- log.dataspace
 
  } }
 print("The ProtE analysis has been concluded.")
+timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+log_file <- file.path(getwd(), paste0("ProtE_Parameter_Report_", timestamp, ".txt"))
+
+# Write input parameters to a text file
+writeLines(c("ProtE Parameter Report",
+             paste("Timestamp:", Sys.time()),
+             "",
+             paste("normalization      =", normalization),
+             paste("imputation         =", imputation),
+             paste("global_filtering   =", global_filtering),
+             paste("independent        =", independent),
+             paste("filtering_value    =", filtering_value),
+             paste("parametric         =", parametric),
+             paste("significance       =", significance),
+             paste("species            =", species),
+             paste("p.adjust.method    =", p.adjust.method),
+             paste("subcollection      =", subcollection),
+             paste("LFC                =", LFC)),
+           con = log_file)
+
+print(paste0("User input parameters saved to: ", log_file))
+
+
+
 }
 }
 
