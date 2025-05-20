@@ -1357,6 +1357,7 @@ pca.log.dataspace <- log.dataspace
   heatmap_cols <- list()
   if (parametric == TRUE) {
     if (significance  == "p"){
+      significance_m = significance
       for (i in 1:(ncol(mm)-1)) {
         for (j in (i+1):ncol(mm)) {
           comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
@@ -1386,6 +1387,7 @@ pca.log.dataspace <- log.dataspace
 
   if (parametric == FALSE) {
     if (significance  == "p"){
+      significance_m = significance
       for (j in 2:groups_number) {
         for (k in 1:(j-1)) {
           comparison <- paste0("G", j, "vsG", k)
