@@ -113,7 +113,7 @@ ProtE_analyse <-function(file = NULL,
   if (!p.adjust.method %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")) {
     stop("Argument 'p.adjust.method' must be one of: 'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr'.")
   }
-  if (!normalization %in% c(FALSE,"median","Quantile","log2","VSN", "Total_Ion_Current","Cyclic_Loess", "PPM") ){
+  if (!normalization %in% c(FALSE,"median","Quantile","log2","VSN", "TIC","Cyclic_Loess", "PPM") ){
     stop("An incompatible normalization method was provided, please check the available and run the function again.") }
 
   if (!imputation %in% c("kNN","missRanger","mean","zeros","LOD","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
@@ -486,7 +486,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     norm_file_path <- file.path(path_resman, "Normalized.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
     print("Applying the selected normalization, saved as Normalized.xlsx") }
-  if (normalization == "Total_Ion_Current") {
+  if (normalization == "TIC") {
     dataspace[, -1:-3] <- lapply(dataspace[, -1:-3], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
     norm_file_path <- file.path(path_resman, "Normalized.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
@@ -512,7 +512,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
     print("Applying the selected normalization, saved as Normalized.xlsx")}
 
-  if (normalization %in% c("median","VSN", "Total_Ion_Current","PPM") ){
+  if (normalization %in% c("median","VSN", "TIC","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
     row_means <- rowMeans(log.dataspace, na.rm = TRUE)
     row_sds <- apply(log.dataspace, 1, sd, na.rm = TRUE)
@@ -712,7 +712,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
     his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
     x = "Protein Abundance"
-    if (normalization %in% c(FALSE,"median", "Total_Ion_Current", "PPM") ){
+    if (normalization %in% c(FALSE,"median", "TIC", "PPM") ){
       his_dataspace<-log2(his_dataspace+1)
       x= expression(Log[2]~"Protein Abundance")}
 
@@ -800,7 +800,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   dataspace$log<- NULL
   dataspace$rank <- NULL
 
-  if (normalization %in% c(FALSE,"median","VSN", "Total_Ion_Current","PPM") ){
+  if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
   } else {
     log.dataspace <- dataspace[,-c(1:3)]
@@ -920,7 +920,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     warning("To perform limma statistical analysis, without imputation NA coefficients are expected for certain proteins.")
   }
   nndataspace[nndataspace < 0] <- 0
-  if (normalization %in% c(FALSE,"median", "VSN","Total_Ion_Current", "PPM") ){
+  if (normalization %in% c(FALSE,"median", "VSN","TIC", "PPM") ){
     nndataspace <- log2(nndataspace+1)}
   if (independent == FALSE){
     if (length(unique(samples_per_group)) != 1){
@@ -1062,7 +1062,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         data2[[paste0("Ratio_G", k, "vsG", j)]] <- ifelse(
           avg_j == 0, NA, avg_k / avg_j
         )
-        if (normalization %in% c(FALSE,"median","VSN", "Total_Ion_Current","PPM") ){
+        if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
           data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
             data2[[paste0("Ratio_G", j, "vsG", k)]])
           data2[[paste0("Log2_Ratio_G", k, "vsG", j)]] <- log2(
@@ -1202,7 +1202,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   print("The non-parametric statistical output along with tests for homoscedasticity have been saved as Statistical_analysis.xlsx")
 
 
-  if (normalization %in% c(FALSE,"median","VSN", "Total_Ion_Current","PPM") ){
+  if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)}
 pca.log.dataspace <- log.dataspace
 
@@ -1423,7 +1423,7 @@ pca.log.dataspace <- log.dataspace
     if (length(which_sig[[i]]) <3 ){
       print(paste("No plots for the comparison ",names(which_sig[i]), ", will be created as there are not enough significant proteins"))
     } else {
-      if (normalization %in% c(FALSE,"median","VSN", "Total_Ion_Current","PPM")){
+      if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM")){
         log.dataspace.sig <- log.dataspace[which_sig[[i]],]} else {
           log.dataspace.sig <-  dataspace[which_sig[[i]],-c(1:3)]
         }
