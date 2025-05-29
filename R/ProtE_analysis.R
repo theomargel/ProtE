@@ -523,7 +523,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       theme_minimal() +
       labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
 
-    suppressMessages(suppressWarnings(ggplot2::ggsave("normalized_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+    suppressMessages(suppressWarnings(ggplot2::ggsave("Processed_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)))
 
@@ -537,7 +537,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       theme_minimal() +
       labs(title = "Mean-SD Plot on the normalized data", x = "Mean Expression", y = "Standard Deviation")
 
-    suppressMessages(suppressWarnings(ggplot2::ggsave("normalized_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+    suppressMessages(suppressWarnings(ggplot2::ggsave("Processed_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
                                                       scale = 1, width = 5, height = 4, units = "in",
                                                       dpi = 300, limitsize = TRUE)))
   }
