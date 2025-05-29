@@ -1614,7 +1614,7 @@ pca.log.dataspace <- log.dataspace
  } }
 print("The ProtE analysis has been concluded.")
 timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
-log_file <- file.path(getwd(), paste0("ProtE_Parameter_Report_", timestamp, ".txt"))
+log_file <- file.path(path_res, paste0("ProtE_Parameter_Report_", timestamp, ".txt"))
 
 # Write input parameters to a text file
 writeLines(c("ProtE Parameter Report",
