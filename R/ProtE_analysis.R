@@ -487,7 +487,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
     print("Applying the selected normalization, saved as Normalized.xlsx") }
   if (normalization == "TIC") {
-    dataspace[, -1:-3] <- lapply(dataspace[, -1:-3], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-2], na.rm = TRUE)))
+    dataspace[, -1:-3] <- lapply(dataspace[, -1:-3], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-3], na.rm = TRUE)))
     norm_file_path <- file.path(path_resman, "Normalized.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
     print("Applying the selected normalization, saved as Normalized.xlsx")}
