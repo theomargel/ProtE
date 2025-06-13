@@ -207,7 +207,7 @@ parameters *<span class="mark">group_names</span>* and
 *<span class="mark">samples_per_group</span>* respectively, and they are
 both entered as vectors \[using the notation **c()**\]:
 
-    ProtE_Analyse(file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt", 
+    ProtE_analyse(file = "C:\\Bioprojects\\BreastCancer\\Proteomics\\MaxQuant\\ProteinGroups.txt", 
                   group_names = c("Control", "Treatment", "Compound"), 
                   samples_per_group = c(10, 12, 9))
 
@@ -243,7 +243,7 @@ The input required in this case includes the file paths of the folders.
 These are parsed into the function by separating the folder names either
 with 2 backslashes (**\\**) or via a single forward slash (**/**):
 
-    ProtE_Analyse(pd_single_dir = c("C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
+    ProtE_analyse(pd_single_dir = c("C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Control",
                                     "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Treatment",
                                     "C:\\Bioprojects\\BreastCancer\\Proteomics\\PD\\Compound"),
                   normalization = "cyclicLoess", imputation = FALSE)
@@ -599,7 +599,6 @@ from REACTOME database, we would run:
      normalization = "VSN", imputation = "kNN", filtering_value = 80, independent = TRUE, parametric = TRUE, 
      significance = "p.adj", species = "Mus musculus", subcollection =  "CP:REACTOME"
      )
-
 
 # **References**
 
