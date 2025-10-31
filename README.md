@@ -76,6 +76,10 @@ Install the development version of ProtE from GitHub:
          install.packages("pak",binary = TRUE)}
          
        pak::pak("theomargel/ProtE", dependencies = TRUE)
+       
+       OR
+       
+       devtools::install_github("theomargel/ProtE")
 
 Then load its library with: `library(ProtE)`
 
