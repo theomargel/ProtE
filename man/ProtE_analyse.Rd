@@ -8,15 +8,15 @@ ProtE_analyse(
   file = NULL,
   pd_single_dir = NULL,
   group_names = NULL,
+  metadata_file = NULL,
   samples_per_group = NULL,
   normalization = FALSE,
-  imputation = FALSE,
-  global_filtering = TRUE,
-  independent = TRUE,
   filtering_value = 50,
+  global_filtering = TRUE,
+  imputation = FALSE,
+  independent = TRUE,
   parametric = FALSE,
   significance = "p",
-  metadata_file = NULL,
   species = "Homo sapiens",
   p.adjust.method = "BH",
   subcollection = "CP:REACTOME",
@@ -30,23 +30,23 @@ ProtE_analyse(
 
 \item{group_names}{Not requisite if metadata_file is inserted. A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.}
 
+\item{metadata_file}{Not requisite if samples_per_group and group_names are defined. An excel or txt table that includes in column 1 the Samples' names in column 2 the experimental group of comparison and in the rest columns, covariates (e.g. age, sex, batch) that affect the limma statistical procedures.}
+
 \item{samples_per_group}{Not requisite if metadata_file is inserted. A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.}
 
 \item{normalization}{The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.}
 
-\item{imputation}{Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD,  "Gaussian_mean_sd" for sampling values from the normal distribution of the mean value of each sample with its standard deviation, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).}
+\item{filtering_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
 
 \item{global_filtering}{TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.}
 
-\item{independent}{TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.}
+\item{imputation}{Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD,  "Gaussian_mean_sd" for sampling values from the normal distribution of the mean value of each sample with its standard deviation, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).}
 
-\item{filtering_value}{The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.}
+\item{independent}{TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.}
 
 \item{parametric}{TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).}
 
 \item{significance}{"p" or "p.adj" Specifies which of the p-values (nominal vs p.adjusted for multiple hypothesis) will be taken into account for creating the PCA plots, the heatmap and the Volcano plots. By default it is set to "p" (nominal p-value).}
-
-\item{metadata_file}{Not requisite if samples_per_group and group_names are defined. An excel or txt table that includes in column 1 the Samples' names in column 2 the experimental group of comparison and in the rest columns, covariates (e.g. age, sex, batch) that affect the limma statistical procedures.}
 
 \item{species}{Species name, such as "Homo sapiens" or "Mus musculus", for the genes symbols output of the msigdbr package that will be used for the GSEA. Use msigdbr_species() for available options.}
 

@@ -30,7 +30,7 @@
 #' @importFrom queryup query_uniprot
 #' @importFrom ggplot2 ggplot ggsave geom_smooth coord_cartesian ylim xlim geom_segment geom_vline scale_y_discrete scale_x_continuous scale_size_continuous scale_colour_manual geom_violin scale_color_gradient scale_x_discrete element_line theme_linedraw scale_fill_manual scale_color_manual aes geom_histogram element_rect geom_point xlab ylab ggtitle theme_bw theme_minimal theme element_text guides guide_legend geom_boxplot labs theme_classic element_blank geom_jitter position_jitter
 #' @importFrom VIM kNN
-#' @importFrom stats kruskal.test p.adjust prcomp complete.cases as.formula sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit
+#' @importFrom stats kruskal.test p.adjust prcomp complete.cases as.formula sd wilcox.test friedman.test rnorm bartlett.test model.matrix heatmap median na.omit quantile
 #' @importFrom forcats fct_inorder
 #' @importFrom limma topTable eBayes contrasts.fit normalizeCyclicLoess normalizeCyclicLoess lmFit normalizeQuantiles duplicateCorrelation
 #' @importFrom ComplexHeatmap Heatmap HeatmapAnnotation anno_block
@@ -63,15 +63,15 @@
 ProtE_analyse <-function(file = NULL,
                          pd_single_dir= NULL,
                          group_names = NULL,
+                         metadata_file = NULL,
                          samples_per_group = NULL,
                          normalization = FALSE,
-                         imputation = FALSE,
-                         global_filtering = TRUE,
-                         independent = TRUE,
                          filtering_value = 50,
+                         global_filtering = TRUE,
+                         imputation = FALSE,
+                         independent = TRUE,
                          parametric = FALSE,
                          significance = "p",
-                         metadata_file = NULL,
                          species = "Homo sapiens",
                          p.adjust.method = "BH",
                          subcollection = "CP:REACTOME",
@@ -84,6 +84,7 @@ ProtE_analyse <-function(file = NULL,
 
   Sample=group1=  Accession =Description =Symbol =X =p.value= Mean = SD=bartlett_result= size =Y =df4_wide= percentage=variable =.= g1.name =g2.name=key =value = Gene.Symbol = NES= Regulation = padj = pathway = NULL
   uqg = FALSE
+  proccount = 0
   print("The ProtE process starts now!")
   if (!is.logical(global_filtering)) {
     stop("Argument 'global_filtering' must be a logical value (TRUE or FALSE).")
@@ -128,7 +129,7 @@ ProtE_analyse <-function(file = NULL,
       metadata_df <- utils::read.delim2(metadata_file, header = TRUE, sep = "\t")
     }else if(grepl("\\.xlsx$", metadata_file)) {
       metadata_df <- openxlsx::read.xlsx(metadata_file)
-    } else {stop("Error, the metadata file you provided is not on .txt , .tsv or .xlsx format")}
+    } else {stop("Error, the metadata file you provided is not on .txt , .tsv (tab delimited) or .xlsx format")}
    if (ncol(metadata_df) < 2) stop("Incompatible metadatafile: less than 2 columns.")
    colnames(metadata_df)[1] <- "Samples"
    colnames(metadata_df)[2] <- "Group"
@@ -153,16 +154,27 @@ ProtE_analyse <-function(file = NULL,
 
     if (length(group_paths) == 1 ){
       if (is.null(metadata_file)) stop("With only one directory with single sample protemics files, a metadata_file must be present")
-      file_names <- list.files(path = group_paths[[1]], pattern = "^[^~].*\\.xlsx$")
+      file_names <- list.files(path = group_paths[[1]], pattern = "^[^~].*\\.(xlsx|txt)$")
       for (j in seq_along(file_names)) {
-        file_case <- openxlsx::read.xlsx(file.path(group_paths[[1]], file_names[j]), sheet = 1)
+        filepath <- file.path(group_paths[[1]], file_names[j])
+        if (grepl(".xlsx$", filepath)){
+        file_case <- openxlsx::read.xlsx(filepath, sheet = 1)}
+        else if (grepl(".txt$", filepath)){
+          file_case <- read.delim2(filepath, header = TRUE, sep = "\t")}
+           else {
+        stop("Incorrect format of files is provided")        }
+
         dataspace <- rbind(dataspace, file_case[,grep("Accession|Description",colnames(file_case))])
         dataspace <- dataspace %>%
           filter(!is.na(Accession)) %>%
           filter(!duplicated(Accession)) %>%
           droplevels()}
       for (j in seq_along(file_names)){
-        file_case <- openxlsx::read.xlsx(file.path(group_paths[[1]], file_names[j]), sheet = 1)
+        filepath <- file.path(group_paths[[1]], file_names[j])
+        if (grepl(".xlsx$", filepath)){
+          file_case <- openxlsx::read.xlsx(filepath, sheet = 1)}
+        else if (grepl(".txt$", filepath)){
+          file_case <- read.delim2(filepath, header = TRUE, sep = "\t")}
         dataspace <- merge(x = dataspace,y = file_case[,grep("Accession|Area|Abundance:",colnames(file_case))], by = "Accession" ,all.x = TRUE)
         colnames(dataspace)[length(colnames(dataspace))] <- file_names[j]
       }
@@ -181,10 +193,15 @@ ProtE_analyse <-function(file = NULL,
       samples_per_group <- numeric(groups_number)
 
       for (i in seq_along(group_paths)) {
-        file_names <- list.files(path = group_paths[[i]], pattern = "^[^~].*\\.xlsx$")
+        file_names <- list.files(path = group_paths[[i]], pattern = "^[^~].*\\.(xlsx|txt)$")
         samples_per_group[i] <- length(file_names)
         for (j in seq_along(file_names)) {
-          file_case <- openxlsx::read.xlsx(file.path(group_paths[[i]], file_names[j]), sheet = 1)
+          filepath <- file.path(group_paths[[i]], file_names[j])
+          if (grepl(".xlsx$", filepath)){
+            file_case <- openxlsx::read.xlsx(filepath, sheet = 1)}
+          else if (grepl(".txt$", filepath)){
+            file_case <- read.delim2(filepath, header = TRUE, sep = "\t")}else {
+              stop("Incorrect format of files is provided")   }
           dataspace <- rbind(dataspace, file_case[,grep("Accession|Description",colnames(file_case))])
         }
       }
@@ -194,9 +211,15 @@ ProtE_analyse <-function(file = NULL,
         droplevels()
 
       for (i in 1:groups_number) {
-        file_names <- list.files(path = group_paths[[i]], pattern = "^[^~].*\\.xlsx$")
+        file_names <- list.files(path = group_paths[[i]], pattern = "^[^~].*\\.(xlsx|txt)$")
+
         for (j in seq_along(file_names)){
-          file_case <- openxlsx::read.xlsx(file.path(group_paths[[i]], file_names[j]), sheet = 1)
+          filepath <- file.path(group_paths[[i]], file_names[j])
+          if (grepl(".xlsx$", filepath)){
+            file_case <- openxlsx::read.xlsx(filepath, sheet = 1)}
+          else if (grepl(".txt$", filepath)){
+            file_case <- read.delim2(filepath, header = TRUE, sep = "\t")}else {
+              stop("Incorrect format of files is provided")   }
           dataspace <- merge(x = dataspace,y = file_case[,grep("Accession|Area|Abundance:",colnames(file_case))], by = "Accession" ,all.x = TRUE)
           colnames(dataspace)[length(colnames(dataspace))] <- file_names[j]
         }
@@ -208,7 +231,7 @@ ProtE_analyse <-function(file = NULL,
       dataspace$Description <- "Not available"
     }
 
-    colnames(dataspace) <- gsub(".xlsx", "", colnames(dataspace))
+    colnames(dataspace) <- gsub(".(xlsx|.txt)$", "", colnames(dataspace))
     path_res <- file.path(path, "ProtE_Analysis")
 
   }else {
@@ -229,7 +252,7 @@ ProtE_analyse <-function(file = NULL,
     } else {stop("Error, the file you provided is not on .txt , .tsv or .xlsx format")}
 
     path <- dirname(file)
-    path_res <- file.path(path , "ProtE_Analysis")
+    path_res <- file.path(path , paste0("ProtE_analysis_", Sys.Date()))
 
   }
 if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE analysis.")
@@ -347,8 +370,15 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   }
 
   print("Removing whichever proteins have only missing values in their abundances.")
+  counter <- 1
 
-  dir.create(path_res, showWarnings = FALSE)
+  while (dir.exists(path_res)) {
+    counter <- counter + 1
+    path_res <- file.path(path, paste0("ProtE_analysis_", Sys.Date(), "_", counter))
+  }
+
+  dir.create(path_res, showWarnings = FALSE, recursive = TRUE)
+
 
   path_restat <- file.path(path_res, "Statistical_Analysis")
   path_resman <- file.path(path_res, "Data_processing")
@@ -471,48 +501,49 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       ifelse(is.na(x), NA, (x / sum_x) * 10^6)
     })
 
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Normalized.xlsx")}
+    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")}
 
   if (normalization == "Quantile"){
     dataspace[, -1:-3]<- log(dataspace[, -1:-3]+1,2)
     dataspace[, -1:-3] <- limma::normalizeQuantiles(dataspace[, -1:-3])
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying Quantile normalization (the data was fristly log2 transformed) saved as Normalized.xlsx") }
+    print("Applying Quantile normalization (the data was fristly log2 transformed) saved as Step1_Normalized_data.xlsx") }
   if (normalization == "log2"){
     dataspace[, -1:-3] <- log(dataspace[, -1:-3]+1,2)
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Normalized.xlsx") }
+    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx") }
   if (normalization == "TIC") {
     dataspace[, -1:-3] <- lapply(dataspace[, -1:-3], function(x) (x / sum(x, na.rm = TRUE)) * mean(colSums(dataspace[, -1:-3], na.rm = TRUE)))
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Normalized.xlsx")}
+    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")}
 
   if (normalization == "Cyclic_Loess"){
     dataspace[, -1:-3] <- log(dataspace[, -1:-3]+1,2)
     dataspace[, -1:-3] <- limma::normalizeCyclicLoess(dataspace[, -1:-3])
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying Cyclic Loess normalization (the data was fristly log2 transformed), saved as Normalized.xlsx") }
+    print("Applying Cyclic Loess normalization (the data was fristly log2 transformed), saved as Step1_Normalized_data.xlsx") }
 
   if ( normalization == "VSN") {
     dataspace[, -1:-3] <- suppressMessages(limma::normalizeVSN(dataspace[, -1:-3]))
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Normalized.xlsx")
+    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")
   }
   if (normalization == "median") {
     sample_medians <- apply(dataspace[, -1:-3], 2, median, na.rm = TRUE)
     dataspace[, -1:-3] <- sweep(dataspace[, -1:-3], 2, sample_medians, FUN = "/")
-    norm_file_path <- file.path(path_resman, "Normalized.xlsx")
+    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
     openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Normalized.xlsx")}
+    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")}
 
   if (normalization %in% c("median","VSN", "TIC","PPM") ){
+    proccount = 1
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
     row_means <- rowMeans(log.dataspace, na.rm = TRUE)
     row_sds <- apply(log.dataspace, 1, sd, na.rm = TRUE)
@@ -523,11 +554,12 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       theme_minimal() +
       labs(title = "Mean-SD Plot on the log2 normalized data", x = "Mean Expression", y = "Standard Deviation")
 
-    suppressMessages(suppressWarnings(ggplot2::ggsave("Processed_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+    suppressMessages(suppressWarnings(ggplot2::ggsave("Normalized_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)))
 
   } else if (normalization %in% c("log2","Quantile", "Cyclic_Loess")) {
+    proccount = 1
     row_means <- rowMeans(dataspace[,-c(1:3)], na.rm = TRUE)
     row_sds <- apply(dataspace[,-c(1:3)], 1, sd, na.rm = TRUE)
     plot_data <- data.frame(Mean = row_means, SD = row_sds)
@@ -537,7 +569,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       theme_minimal() +
       labs(title = "Mean-SD Plot on the normalized data", x = "Mean Expression", y = "Standard Deviation")
 
-    suppressMessages(suppressWarnings(ggplot2::ggsave("Processed_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
+    suppressMessages(suppressWarnings(ggplot2::ggsave("Normalized_data_meanSdPlot.bmp", plot = meansd,  path = path_resplot,
                                                       scale = 1, width = 5, height = 4, units = "in",
                                                       dpi = 300, limitsize = TRUE)))
   }
@@ -545,7 +577,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
 
   if (filtering_value < 0 && filtering_value > 100) {stop("Error: The filtering_value must be a number ranging from 0 to 100")}
-
+  if (filtering_value != 100) {proccount = proccount+1}
   if (global_filtering == TRUE) {
 
     filtering_value <- 100- as.numeric(filtering_value)
@@ -589,8 +621,9 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   if (global_filtering == TRUE) {
     dataspace <- dataspace[dataspace$Number_0_all_groups<threshold,]
-    at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
-    openxlsx::write.xlsx(dataspace, file = at_file_path)
+    if (filtering_value != 0) {
+    at_file_path <- file.path(path_resman, paste0("Step",proccount,"_Data_after_filtering.xlsx"))
+    openxlsx::write.xlsx(dataspace, file = at_file_path)}
   }
 
   if (global_filtering == FALSE) {
@@ -599,10 +632,11 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       keep_rows <- keep_rows | (dataspace[,paste0("Number_0_group", j)] < threshold[j])
     }
     dataspace <- dataspace[keep_rows, ]
-    at_file_path <- file.path(path_resman, "Dataset_after_filtering.xlsx")
-    openxlsx::write.xlsx(dataspace, file = at_file_path)}
-
-  print("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Dataset_after_filtering.xlsx")
+    if (filtering_value != 0) {
+    at_file_path <- file.path(path_resman, paste0("Step",proccount,"_Data_after_filtering.xlsx"))
+    openxlsx::write.xlsx(dataspace, file = at_file_path)}}
+  if (filtering_value != 0) {
+  print(paste0("An excel file with the proteins remaining in the data after filtering for missing values, has been created as Step",proccount,"_Data_after_filtering.xlsx"))}
   dataspace_0s<- dataspace
   dataspace[,paste0("Number_0_group", 1:groups_number)] <- NULL
   dataspace$Number_0_all_groups <- NULL
@@ -617,16 +651,17 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
 
   pre_dataspace <- dataspace
+  if(imputation == FALSE){    dataspace[dataspace==0] <- NA} else {proccount = proccount + 1}
 
   if (imputation == "kNN") {
     print("kNN imputation starts now")
     dataspace[dataspace==0] <- NA
     dataspace[,-1:-3] <- VIM::kNN(dataspace[,-1:-3], imp_var = FALSE, k= 5)
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman, paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
   if (imputation == "zeros"){
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman,paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)    }
   if (imputation == "Gaussian_LOD") {
     dataspace[dataspace==0] <- NA
@@ -635,7 +670,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.1), x)
     }
     dataspace[,-1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian)
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman,paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
   if (imputation == "Gaussian_mean_sd") {
@@ -662,7 +697,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
     dataspace[, 4:ncol(dataspace)] <- data_to_impute
 
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman, paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)
   }
 
@@ -682,27 +717,26 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       }
     }
     dataspace[, 4:ncol(dataspace)] <- data_to_impute
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman, paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path) }
   if (imputation == "LOD"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[,-1:-3]),na.rm = TRUE)
     dataspace[,-1:-3][is.na(dataspace[,-1:-3])]  <- impute_value
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman, paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation == "LOD/2"){
     dataspace[dataspace==0] <- NA
     impute_value <- min(as.matrix(dataspace[,-1:-3]),na.rm = TRUE)/2
     dataspace[,-1:-3][is.na(dataspace[,-1:-3])]  <- impute_value
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman,paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if(imputation == "missRanger"){
     print("missRanger imputation starts now")
     dataspace[dataspace==0] <- NA
     dataspace[,-1:-3] <- missRanger::missRanger(dataspace[,-1:-3])
-    imp_file_path <- file.path(path_resman, "Dataset_Imputed.xlsx")
+    imp_file_path <- file.path(path_resman, paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
-  if(imputation == FALSE){    dataspace[dataspace==0] <- NA}
 
 
   if (imputation %in% c("kNN","missRanger","mean","Gaussian_mean_sd", "Gaussian_LOD"))    {
@@ -740,7 +774,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   }
   if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
-    print("An excel with the imputed missing values has been created as Dataset_Imputed.xlsx")
+    print(paste0("An excel with the imputed missing values has been created as Step", proccount,"_Dataset_Imputed.xlsx"))
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
@@ -1187,7 +1221,53 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       Accession, Description, Gene.Symbol,
       everything()
     )
+  cov_data <- data.frame(
+    Accession = Fdataspace$Accession,
+    row.names = NULL
+  )
 
+  for (j in 1:groups_number) {
+    mean_col <- paste0("Average_G", j)
+    sd_col <- paste0("St_Dv_G", j)
+    group_name <- get(paste0("g", j, ".name"))
+
+    cov_data[[paste0("CoV_", group_name)]] <- ifelse(
+      data2[[mean_col]] == 0 | is.na(data2[[mean_col]]),
+      NA,
+      (data2[[sd_col]] / data2[[mean_col]]) * 100
+    )
+  }
+
+  cov_long <- cov_data %>%
+    tidyr::pivot_longer(
+      cols = -Accession,
+      names_to = "Group",
+      values_to = "CoV",
+      names_prefix = "CoV_"
+    ) %>% filter(!is.na(CoV))
+
+  cov_long_filtered <- cov_long %>%
+    group_by(Group) %>%
+    filter(CoV <= quantile(CoV, 0.99, na.rm = TRUE))
+
+  p_cov <- ggplot2::ggplot(cov_long_filtered, ggplot2::aes(x = Group, y = CoV, color = Group)) +
+    ggplot2::geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+    ggplot2::geom_jitter(alpha = 0.1, width = 0.2, size = 0.5) +
+    ggplot2::labs(
+      title = "                 Coefficient of Variation (CoV %) per Protein by Group",
+      x = "",
+      y = "CoV (%)"
+    ) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+  ggplot2::ggsave(
+    filename = file.path(path_resplot, "CoV_boxplot_per_group.bmp"),
+    plot = p_cov,
+    width = 8,
+    height = 6,
+    dpi = 300
+  )
   for (i in 1:groups_number){
     namesc<- colnames(Fdataspace)
     namesc<- gsub(paste0("G",i), get(paste0("g",i,".name")),namesc)
@@ -1196,6 +1276,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   start_col <- 3 + as.numeric(sum(samples_per_group))
   Fdataspace <- Fdataspace[,-c(4:start_col)]
+
+
 
   stats_file_path <- file.path(path_restat, "traditional_statistics.xlsx")
   openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
@@ -1253,7 +1335,7 @@ pca.log.dataspace <- log.dataspace
   qc_file_path <- file.path(path_restat, "Sample_QC.xlsx")
   openxlsx::write.xlsx(qc, file = qc_file_path)
   print("Sample quality metrics and association scores to the first two Principal Components have been saved as Sample_QC.xlsx")
-
+  print("Coefficient of Variation per Group plot saved as CoV_boxplot_per_group.bmp ")
   which.sig<-vector()
   groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
@@ -1513,7 +1595,7 @@ pca.log.dataspace <- log.dataspace
     gene_sets <- msigdbr::msigdbr(species = species, db_species = dbgsea, subcollection = subcollection)}
   gsea <- list()
   pathways <- split(gene_sets$gene_symbol, gene_sets$gs_name)
-
+print("Enrichment analysis begins, it might take some time")
   for (j in 2:groups_number) {
     for (k in 1:(j-1)) {
       comparison <- paste0("G", j, "vsG", k)
@@ -1527,22 +1609,20 @@ pca.log.dataspace <- log.dataspace
 
       lfc_list[[comparison]] <- lfc_list[[comparison]][!duplicated(names(lfc_list[[comparison]]))]
       lfc_list[[comparison]] <- sort( lfc_list[[comparison]], decreasing = TRUE)
-      gsea[[comparison]] <- suppressWarnings(fgsea(pathways = pathways, stats = lfc_list[[comparison]],
-                                  eps = 0.0, minSize = 10))
+      gsea[[comparison]] <- suppressWarnings(fgsea::fgsea(pathways = pathways, stats = lfc_list[[comparison]],
+                                  eps = 0.0, minSize = 10, nproc = 2))
     }}
-  if ( nrow(gsea[[comparison]]) == 0 ) {
-    warning("No pathways were found to be related with the features inserted. No GSEA will be conducted.")
-  } else {
+
 
   for (i in 1:groups_number){
     names(gsea)<- gsub(paste0("G",i), get(paste0("g",i,".name")),names(gsea))
   }
 
-  wb <- createWorkbook()
+  wb <- openxlsx::createWorkbook()
 
   for (name in names(gsea)) {
-    addWorksheet(wb, name)
-    writeData(wb, name, gsea[[name]])  # Write data to the sheet
+    openxlsx::addWorksheet(wb, name)
+    openxlsx::writeData(wb, name, gsea[[name]])  # Write data to the sheet
   }
   gsea_file_path <- file.path(path_restat, "GSEA_results.xlsx")
   openxlsx::saveWorkbook(wb, file = gsea_file_path, overwrite =  TRUE)
@@ -1639,6 +1719,6 @@ print(paste0("User input parameters saved to: ", log_file))
 
 
 
-}
+
 }
 

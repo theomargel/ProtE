@@ -1,6 +1,6 @@
 Package: ProtE
 Type: Package
-Title:Processing Proteomics Data, Statistical Analysis and Visualization
+Title: Processing Proteomics Data, Statistical Analysis and Visualization
 Version: 0.1.0
 Authors@R: 
     c(person("Theodoros", "Margelos", email = "ted.margelos02@gmail.com",role = c("aut","cre","cph")),
@@ -13,7 +13,7 @@ LazyData: true
 Imports:
     dplyr,
     vegan,
-    UniProt.ws,
+    queryup,
     stringr,
     missRanger,
     vsn,
@@ -22,6 +22,8 @@ Imports:
     tidyr,
     broom,
     reshape2,
+    circlize,
+    fgsea,
     ggpubr,
     ggplot2, 
     VIM, 
@@ -36,7 +38,7 @@ Suggests:
     knitr
 URL: https://github.com/theomargel/ProtE
 BugReports: https://github.com/theomargel/ProtE/issues
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
