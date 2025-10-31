@@ -192,7 +192,7 @@ this case, the user should also fill the parameters
 
 <img src="man/figures/image7.jpeg" width="60%" />
 
-**Figure 2.**. The order of the samples in the input tables should be
+**Figure 2.** The order of the samples in the input tables should be
 aligned with the group variables. Here we see 5 Control, then 5
 Treatment, and 5 Compound samples.
 
@@ -236,7 +236,7 @@ The Figure 3 below shows the structure of the directories/folders:
 
 <img src="man/figures/image9.png" width="60%" />
 
-**Figure 3.**. The structure of folders, directories, and Excel files
+**Figure 3.** The structure of folders, directories, and Excel files
 that can be input with *pd_multi*.
 
 The input required in this case includes the file paths of the folders.
@@ -260,7 +260,7 @@ subfolders Data_processing, Statistical_analysis, and Plots (**Figure**
 
 <img src="man/figures/image11.png" width="60%" />
 
-**Figure 4.**. The output directories of ProtE analysis folder.
+**Figure 4.** The output directories of ProtE analysis folder.
 
 # **<u>ProtE pipeline</u>**
 
@@ -497,13 +497,13 @@ imputation.
 
 <img src="man/figures/image13.png" width="60%" />
 
-**Figure 5.**. The boxplot of the data before (up) and after (down)
+**Figure 5.** The boxplot of the data before (up) and after (down)
 processing.
 
 <img src="man/figures/image14.jpeg" width="60%" />
 <img src="man/figures/image15.jpeg" width="60%" />
 
-**Figure 6.**. The mean sd plots before (up) and after (down) the
+**Figure 6.** The mean sd plots before (up) and after (down) the
 processing of proteomics data with *vsn* normalization and *missRanger*
 imputation.
 
@@ -523,8 +523,8 @@ inform the user about the imputation quality.
 
 <img src="man/figures/image17.png" width="60%" />
 
-**Figure 8.**. Histogram of the distribution of imputed values,
-available for multiple values replacement options.
+**Figure 8.** Histogram of the distribution of imputed values, available
+for multiple values replacement options.
 
 Users can select the statistical method for determining significance by
 the logical setting `parametric` parameter. Setting `parametric = TRUE`
@@ -542,7 +542,7 @@ CoV and interquartile range to assess reproducibility.
 
 <img src="man/figures/covplot.jpeg" width="60%" />
 
-**Figure 9.**. Coefficient of Variation plot across experimental groups
+**Figure 9.** Coefficient of Variation plot across experimental groups
 
 Principal Component Analysis (PCA) is also performed on the
 log2-transformed protein abundance data for each sample. The data are
@@ -553,7 +553,7 @@ represent the first and the second principal components is created.
 <img src="man/figures/image18.jpeg" width="60%" />
 <img src="man/figures/image19.jpeg" width="60%" />
 
-**Figure 10.**. PCA plot derived from all the proteins (up) and the
+**Figure 10.** PCA plot derived from all the proteins (up) and the
 significant ones (down)
 
 For experiments with just 2 groups a heatmap is produced showing the
@@ -567,7 +567,7 @@ alongside a heatmap for each pairwise comparison.
 
 <img src="man/figures/image20.jpeg" width="60%" />
 
-**Figure 11.**. A heatmap for each pairwise comparison is created, while
+**Figure 11.** A heatmap for each pairwise comparison is created, while
 clustering of the proteins in rows takes place.
 
 Additionally, Volcano plots are also being created for every pairwise

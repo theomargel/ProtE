@@ -235,7 +235,7 @@ if (file.exists("man/figures/image7.jpeg")) {
 } 
 ```
 
-**Figure 2.**. The order of the samples in the input tables should be
+**Figure 2.** The order of the samples in the input tables should be
 aligned with the group variables. Here we see 5 Control, then 5
 Treatment, and 5 Compound samples.
 
@@ -286,7 +286,7 @@ if (file.exists("man/figures/image9.png")) {
 } 
 ```
 
-**Figure 3.**. The structure of folders, directories, and Excel files
+**Figure 3.** The structure of folders, directories, and Excel files
 that can be input with *pd_multi*.
 
 The input required in this case includes the file paths of the folders.
@@ -316,7 +316,7 @@ if (file.exists("man/figures/image11.png")) {
 } 
 ```
 
-**Figure 4.**. The output directories of ProtE analysis folder.
+**Figure 4.** The output directories of ProtE analysis folder.
 
 # **[ProtE pipeline]{.underline}**
 
@@ -552,7 +552,7 @@ if (file.exists("man/figures/image13.png")) {
 } 
 ```
 
-**Figure 5.**. The boxplot of the data
+**Figure 5.** The boxplot of the data
 before (up) and after (down) processing.
 
 ```{r, echo=FALSE }
@@ -566,7 +566,7 @@ if (file.exists("man/figures/image15.jpeg")) {
 } 
 ```
 
-**Figure 6.**. The mean sd plots before (up) and after (down) the
+**Figure 6.** The mean sd plots before (up) and after (down) the
 processing of proteomics data with *vsn* normalization and *missRanger*
 imputation.
 
@@ -594,7 +594,7 @@ if (file.exists("man/figures/image17.png")) {
 } 
 ```
 
-**Figure 8.**. Histogram of the distribution of imputed values, available for multiple values
+**Figure 8.** Histogram of the distribution of imputed values, available for multiple values
 replacement options.
 
 Users can select the statistical method for determining significance by
@@ -615,7 +615,7 @@ if (file.exists("man/figures/covplot.jpeg")) {
 } 
 ```
 
-**Figure 9.**. Coefficient of Variation plot across experimental groups
+**Figure 9.** Coefficient of Variation plot across experimental groups
 
 
 Principal Component Analysis (PCA) is also
@@ -637,7 +637,7 @@ if (file.exists("man/figures/image19.jpeg")) {
 } 
 ```
 
-**Figure 10.**. PCA plot derived from all the proteins (up) and the
+**Figure 10.** PCA plot derived from all the proteins (up) and the
 significant ones (down)
 
 For experiments with just 2 groups a
@@ -656,7 +656,7 @@ if (file.exists("man/figures/image20.jpeg")) {
 } 
 ```
 
-**Figure 11.**. A heatmap for each pairwise comparison is created, while
+**Figure 11.** A heatmap for each pairwise comparison is created, while
 clustering of the proteins in rows takes place.
 
 Additionally, Volcano plots are also being
