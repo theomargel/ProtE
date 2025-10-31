@@ -421,9 +421,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
 
 
-
+  dataspace[, 4:ncol(dataspace)] <- lapply(dataspace[, 4:ncol(dataspace)], as.numeric)
 
   log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
+  
   melt.log.dataspace <- reshape2::melt(log.dataspace, id.vars = NULL)
 
   repvec <- as.data.frame(table(Group))$Freq * nrow(log.dataspace)
