@@ -371,7 +371,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   print("Removing whichever proteins have only missing values in their abundances.")
   counter <- 1
-
+  path_res <- file.path(path, paste0("ProtE_analysis_", Sys.Date(), "_", counter))
+  
   while (dir.exists(path_res)) {
     counter <- counter + 1
     path_res <- file.path(path, paste0("ProtE_analysis_", Sys.Date(), "_", counter))
