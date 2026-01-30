@@ -119,7 +119,8 @@ ProtE_analyse <-function(file = NULL,
 
   if (!imputation %in% c("kNN","missRanger","mean","zeros","LOD","LOD/2","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
     stop("incompatible imputation method was selected, please check the availables and run again.")}
-
+  if (filtering_value < 0 || filtering_value > 100) {
+  stop("Error: The filtering_value must be a number ranging from 0 to 100")}
 
 
 
@@ -614,7 +615,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
 
 
-  if (filtering_value < 0 && filtering_value > 100) {stop("Error: The filtering_value must be a number ranging from 0 to 100")}
+  
   if (filtering_value != 100) {proccount = proccount+1}
   if (global_filtering == TRUE) {
 
