@@ -72,13 +72,9 @@ system path during installation (i.e., save the program to ProgramFiles)
 
 Install the development version of ProtE from GitHub:
 
-    if (!require("pak", quietly = TRUE)) {
-         install.packages("pak",binary = TRUE)}
+    if (!require("devtools", quietly = TRUE)) {
+         install.packages("devtools",binary = TRUE)}
          
-       pak::pak("theomargel/ProtE", dependencies = TRUE)
-       
-       OR
-       
        devtools::install_github("theomargel/ProtE")
 
 Then load its library with: `library(ProtE)`

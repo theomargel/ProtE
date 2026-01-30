@@ -117,7 +117,7 @@ ProtE_analyse <-function(file = NULL,
   if (!normalization %in% c(FALSE,"median","Quantile","log2","VSN", "TIC","Cyclic_Loess", "PPM") ){
     stop("An incompatible normalization method was provided, please check the available and run the function again.") }
 
-  if (!imputation %in% c("kNN","missRanger","mean","zeros","LOD","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
+  if (!imputation %in% c("kNN","missRanger","mean","zeros","LOD","LOD/2","Gaussian_LOD","Gaussian_mean_sd", FALSE))  {
     stop("incompatible imputation method was selected, please check the availables and run again.")}
 
 
@@ -341,11 +341,47 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       id_numbers <-   dataspace$First_Accession
 
       query <- list("accession_id" = id_numbers)
-      conv_ID <- queryup::query_uniprot(query, columns = c("accession","id","gene_names","organism_name","organism_id","protein_name","protein_existence","sequence_version"), max_keys = 200, show_progress = TRUE )
+      acc_chunks <- split(
+        query$accession_id,
+        ceiling(seq_along(query$accession_id) / 100)
+      )
+      query_list <- lapply(acc_chunks, function(x) {
+        list(accession_id = x)
+      })
+      
+      res <- lapply(seq_along(query_list), function(i) {
+        
+        message(sprintf("UniProt query %d / %d", i, length(query_list)))
+        
+        tryCatch(
+          queryup::query_uniprot(
+            query = query_list[[i]],
+            columns = c(
+              "accession",
+              "id",
+              "gene_names",
+              "organism_name",
+              "organism_id",
+              "protein_name",
+              "protein_existence",
+              "sequence_version"
+            ),
+            max_keys = 100,
+            show_progress = FALSE
+          ),
+          error = function(e) NULL
+        )
+      })
+      
+      conv_ID <- do.call(rbind, res)
+      
+      
       First_Accession <- conv_ID$Entry
+      
       details<-paste0(conv_ID$`Protein names`," OS=",conv_ID$Organism, " OX=", conv_ID$`Organism (ID)`, " GN=",conv_ID$`Gene Names`, " PE=", conv_ID$`Protein existence`, " SV=", conv_ID$`Sequence version`)
+      
       dfup <- cbind(First_Accession, details)
-      dataspace <- merge(dataspace, dfup,
+      dataspace  <- merge(dataspace, dfup,
                          by = "First_Accession",
                          all.x = TRUE, sort = FALSE)
       dataspace$Description <- ifelse(is.na(dataspace$details),
