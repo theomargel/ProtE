@@ -452,14 +452,12 @@ effects. When a `metadata_file` with covariates is provided, the
 covariate coefficients are included in the output, and these covariates
 are accounted for in the differential expression analysis. Additionally,
 if the `independent` parameter is set to FALSE, subjects with repeated
-measurements are treated as a random effect. An ANOVA-like F-test is
-performed testing just the experimental groups of comparison, when they
-are more than 2, while for every pairwise comparison a moderated t-test
-is computed. The output includes p-values, adjusted p-values, t-scores,
-and F-statistics from the Empirical Bayes moderated t-test and
-ANOVA-like test, alongside the averages, and log<sub>2</sub> fold
-changes for each gene across groups (based on the limma-processed data)
-and are presented in the Excel file.
+measurements are treated as a random effect. For every pairwise
+comparison a limma moderated t-test is computed. The output includes
+p-values, adjusted p-values, t-scores from the Empirical Bayes moderated
+t-test, alongside the averages, and log<sub>2</sub> fold changes for
+each gene across groups (based on the limma-processed data) and are
+presented in the Excel file.
 
 The Excel file *Sample_QC.xlsx* contains information about the proteins
 present in each sample and the missing values before and after
@@ -528,12 +526,12 @@ for multiple values replacement options.
 
 Users can select the statistical method for determining significance by
 the logical setting `parametric` parameter. Setting `parametric = TRUE`
-uses results from the limma t-test or ANOVA-like F-test , while
-`parametric = FALSE` uses results from the Wilcoxon test or
-Kruskal-Walli’s test. The user can further specify the significance
-threshold with the `significance` argument: setting `significance = "p"`
-uses a raw p-value threshold of 0.05, and `significance = "p.adj"` uses
-the selector’s adjusted p-value threshold of 0.05.
+uses results from the limma t-test , while `parametric = FALSE` uses
+results from the Wilcoxon test. The user can further specify the
+significance threshold with the `significance` argument: setting
+`significance = "p"` uses a raw p-value threshold of 0.05, and
+`significance = "p.adj"` uses the selector’s adjusted p-value threshold
+of 0.05.
 
 A Coefficient of Variation (CoV) boxplot is also created, which
 visualizes the distribution of per-protein variability (SD/mean × 100%)
@@ -562,8 +560,8 @@ argument).It is split into the selected groups and created with the
 z-scale normalized abundances of each sample. In the heatmap clustering
 of the proteins in rows takes place. When there are more than 2 groups,
 one heatmap for the groups altogether is created by using the
-significant proteins of the F-test or Kruskal-Walli’s/Friedman tests,
-alongside a heatmap for each pairwise comparison.
+significant proteins of Kruskal-Walli’s/Friedman tests, alongside a
+heatmap for each pairwise comparison.
 
 <img src="man/figures/image20.jpeg" width="60%" />
 

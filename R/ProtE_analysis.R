@@ -933,145 +933,177 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                    dpi = 300, limitsize = TRUE, bg = "white"))
   print("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as After_Processing_violin_plot.bmp" )
 
+  
   if(!is.null(metadata_file)){
+    
     metadata_df <- metadata_df[, sapply(metadata_df, function(x) length(unique(x)) >= 2)]
-
-     if (ncol(metadata_df) > 2){
+    
+    if (ncol(metadata_df) > 2){
+      
       max_cols_to_process <- min(5, ncol(metadata_df) - 2)
       cov <- list()
+      
       for (i in 1:max_cols_to_process) {
-        if ( is.numeric(metadata_df[, i + 2]) == TRUE){
+        if (is.numeric(metadata_df[, i + 2])) {
           cov[[i]] <- as.numeric(metadata_df[, i + 2])
         } else {
           cov[[i]] <- as.factor(metadata_df[, i + 2])
-        }}
+        }
+      }
+      
       cov_terms <- paste0("cov[[", 1:max_cols_to_process, "]]", collapse = " + ")
       formula <- as.formula(paste("~ 0 + groups_list_f +", cov_terms))
       mm <- model.matrix(formula)
-
+      
       rank_mm <- qr(mm)$rank
       ncol_mm <- ncol(mm)
+      
       if (rank_mm < ncol_mm) {
+        
         qr_obj <- qr(mm)
         non_estimable <- colnames(mm)[-qr_obj$pivot[1:rank_mm]]
-        non_estimable_short <- sub(".*\\]\\]", "", non_estimable)
+        
         cov_remove <- unique(as.integer(sub("cov\\[\\[(\\d+)\\]\\].*", "\\1",
                                             non_estimable[grepl("cov\\[\\[", non_estimable)])))
+        
         if (length(cov_remove) > 0) {
+          
           cov_columns_to_remove <- unlist(lapply(cov_remove, function(i) {
             grep(paste0("cov\\[\\[", i, "\\]\\]"), colnames(mm), value = TRUE)
           }))
+          
           mm <- mm[, !colnames(mm) %in% cov_columns_to_remove]
+          
           excluded_metadata_cols <- colnames(metadata_df)[cov_remove + 2]
-          warning("Non-estimable coefficients:", paste(non_estimable_short, collapse = ", "), "\n",
-                  "Excluded entire covariates from the linear model based on:",
-                  paste(excluded_metadata_cols, collapse = ", "), "\n")
+          
+          warning("Non-estimable coefficients:",
+                  paste(non_estimable, collapse = ", "), "\n",
+                  "Excluded covariates:",
+                  paste(excluded_metadata_cols, collapse = ", "))
         }
       }
-      for (i in 1:max_cols_to_process) {
-        names(cov)[[i]] <- colnames(metadata_df)[ i + 2]
-        colnames(mm) <- gsub(paste0("cov\\[\\[", i, "\\]\\]") , names(cov)[[i]] , colnames(mm))
+      
+
+        for (i in 1:max_cols_to_process) {
+        names(cov)[[i]] <- colnames(metadata_df)[i + 2]
+        colnames(mm) <- gsub(paste0("cov\\[\\[", i, "\\]\\]"),
+                             names(cov)[[i]],
+                             colnames(mm))
       }
-      colnames(mm) <- gsub(paste0("cov\\[\\[", i, "\\]\\]") , paste0(names(cov)[[i]], "_") , colnames(mm))
-     groups_coef <- grep("^groups_list_f", colnames(mm), value = TRUE)
-     }else {
-       mm <- model.matrix(~groups_list_f + 0)
-       colnames(mm)<- group_names
-     }
+      
+      groups_coef <- grep("^groups_list_f", colnames(mm), value = TRUE)
+      
     } else {
       mm <- model.matrix(~groups_list_f + 0)
-      colnames(mm)<- group_names
+      colnames(mm) <- group_names
+      groups_coef <- colnames(mm)
     }
+    
+  } else {
+    mm <- model.matrix(~groups_list_f + 0)
+    colnames(mm) <- group_names
+    groups_coef <- colnames(mm)
+  }
+  
   colnames(mm) <- make.names(colnames(mm))
-
-
-
-  if (independent != FALSE && independent != TRUE){stop("Error: Sample relationship between groups should be defined in the parameter 'independent' either as TRUE or FALSE")}
-
-  nndataspace<- dataspace[,-1:-3]
-  if (imputation == FALSE ) {
-    warning("To perform limma statistical analysis, without imputation NA coefficients are expected for certain proteins.")
+  
+ 
+  
+  nndataspace <- dataspace[, -c(1:3)]
+  
+  if (imputation == FALSE) {
+    warning("Without imputation NA coefficients may occur.")
   }
+  
   nndataspace[nndataspace < 0] <- 0
-  if (normalization %in% c(FALSE,"median", "VSN","TIC", "PPM") ){
-    nndataspace <- log2(nndataspace+1)}
+  
+  if (normalization %in% c(FALSE, "median", "VSN", "TIC", "PPM")) {
+    nndataspace <- log2(nndataspace + 1)
+  }
+  
+
+  
+  if (independent != FALSE && independent != TRUE){
+    stop("Parameter 'independent' must be TRUE or FALSE")
+  }
+  
   if (independent == FALSE){
+    
     if (length(unique(samples_per_group)) != 1){
-      stop("Error: The paired group analysis requires an equal number of samples in each group. Please consider removing any samples that lack a corresponding matched pair.")
+      stop("Paired analysis requires equal samples per group.")
     }
-    n = sum(samples_per_group)/groups_number
-    pairing <- rep(1:n, each = groups_number)
-
+    
+    n <- sum(samples_per_group) / groups_number
+    pairing <- factor(rep(1:n, each = groups_number))
+    
     corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
-    fit <- limma::lmFit(nndataspace, mm, block = pairing, correlation = corfit$consensus.correlation)
+    
+    fit <- limma::lmFit(nndataspace, mm,
+                        block = pairing,
+                        correlation = corfit$consensus.correlation)
+    
+  } else {
+    fit <- limma::lmFit(nndataspace, mm)
   }
-  if (independent == TRUE){
-    fit <- limma::lmFit(nndataspace, mm)}
-  fit<- limma::eBayes(fit)
+  
+  fit <- limma::eBayes(fit)
+  
 
+  
+  coef_res <- as.data.frame(fit$coefficients)
+  
+
+    colnames(coef_res) <- gsub("groups_list_f", "", colnames(coef_res))
+  colnames(coef_res) <- paste("coef", colnames(coef_res), sep = "_")
+
+  
   lima.res <- data.frame()
-
-  if (!is.null(metadata_file)){
-    if (ncol(metadata_df) > 2){
-      if (groups_number == 2){
-        coef_res <- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
-        colnames(coef_res)<-gsub("groups_list_f","",colnames(coef_res))
-        colnames(coef_res)<- paste("coef",colnames(coef_res), sep = "_")
-        coef_res <- coef_res[,1:ncol(mm)]
-        lima.res <- coef_res
-      }}}
-  if (groups_number>2){
-    anova_res <- data.frame()
-    if (!is.null(metadata_file)){
-      if (ncol(metadata_df) > 2){
-        if (ncol(mm) > length(groups_coef)){
-          coef_res <- data.frame()
-          group_coef_indices <- match(grep("^groups_list_f", colnames(mm), value = TRUE), colnames(fit$coefficients))
-          coef_res <- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
-          anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, coef = group_coef_indices, sort.by = "none")
-          colnames(coef_res)<-gsub("groups_list_f","",colnames(coef_res))
-          colnames(coef_res)<- paste("coef",colnames(coef_res), sep = "_")
-          coef_res <- coef_res[,1:ncol(mm)]
-          anova_res <- anova_res[,-c(1:groups_number)]
-          colnames(anova_res)<-paste("F-test",colnames(anova_res), sep = "_")
-          anova_res <- cbind(coef_res,anova_res)
-        } else {    anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
-        colnames(anova_res)[-c(1:groups_number)]<-paste("F-test",colnames(anova_res)[-c(1:groups_number)], sep = "_")
-        colnames(anova_res)[c(1:groups_number)]<- paste("coef",colnames(anova_res)[c(1:groups_number)], sep = "_")
-
-        }
-        }} else {    anova_res<- limma::topTable(fit, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
-        colnames(anova_res)[-c(1:groups_number)]<-paste("F-test",colnames(anova_res)[-c(1:groups_number)], sep = "_")
-        colnames(anova_res)[c(1:groups_number)]<- paste("coef",colnames(anova_res)[c(1:groups_number)], sep = "_")
-
-        }
-  }
-
-  for (i in 1:(groups_number-1)) {
-    for (j in (i+1):groups_number) {
-      comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
-      comparison <- gsub("groups_list_f","",comparison)
-      contrast_fref <- limma::makeContrasts(contrasts = paste0(colnames(mm)[i],"-",colnames(mm)[j]), levels = mm)
+  
+  for (i in 1:(groups_number - 1)) {
+    for (j in (i + 1):groups_number) {
+      
+      comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j])
+      comparison <- gsub("groups_list_f", "", comparison)
+      
+      contrast_fref <- limma::makeContrasts(
+        contrasts = paste0(colnames(mm)[i], "-", colnames(mm)[j]),
+        levels = mm
+      )
+      
       fit2 <- limma::contrasts.fit(fit, contrast_fref)
       fit2 <- limma::eBayes(fit2)
-      top_table<- limma::topTable(fit2, adjust.method = p.adjust.method, number = Inf, sort.by = "none")
-      column_groups<- top_table[,c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
-      colnames(column_groups)<-paste(colnames(column_groups), comparison, sep = "_")
-
+      
+      top_table <- limma::topTable(fit2,
+                                   adjust.method = p.adjust.method,
+                                   number = Inf,
+                                   sort.by = "none")
+      
+      column_groups <- top_table[, c("logFC","AveExpr","t","P.Value","adj.P.Val","B")]
+      
+      colnames(column_groups) <- paste(colnames(column_groups), comparison, sep = "_")
+      
       if (nrow(lima.res) == 0){
         lima.res <- column_groups
-      } else {lima.res<- cbind(lima.res, column_groups)}
-    }}
+      } else {
+        lima.res <- cbind(lima.res, column_groups)
+      }
+    }
+  }
 
-  if (groups_number>2){
-    limma_dataspace <- cbind(anova_res,lima.res,dataspace)} else {limma_dataspace <- cbind(lima.res,dataspace)}
+  
+  limma_dataspace <- cbind(coef_res, lima.res, dataspace)
+  
   ncollimma <- ncol(limma_dataspace) - ncol(dataspace) + 3
-  limma_dataspace<-limma_dataspace %>%
-    dplyr::select(Accession ,Description ,Gene.Symbol, everything())
-  limma_dataspace <- limma_dataspace[,1:ncollimma]
+  
+  limma_dataspace <- limma_dataspace %>%
+    dplyr::select(Accession, Description, Gene.Symbol, everything())
+  
+  limma_dataspace <- limma_dataspace[, 1:ncollimma]
+  
   limma_file_path <- file.path(path_restat, "limma_statistics.xlsx")
+  
   openxlsx::write.xlsx(limma_dataspace, file = limma_file_path)
-  print("The limma output has been saved as limma_statistics.xlsx")
+  print("limma output has been saved as limma_statistics.xlsx")
 
   data2 <- dataspace
 
@@ -1192,7 +1224,11 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   transposed_data<-data.frame(transposed_data)
   dataspace<-data.frame(dataspace)
-  colnames(transposed_data)<-dataspace[,1]
+  if (uqg == TRUE) {
+    colnames(transposed_data)<-dataspace[,3]
+    
+  } else {
+  colnames(transposed_data)<-dataspace[,1]}
   colnames(transposed_data) <- make.names(colnames(transposed_data), unique = TRUE)
   dataspace4<-cbind(Group,transposed_data)
   dataspace4$Group<-as.factor(dataspace4$Group)
@@ -1223,7 +1259,11 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         }, .keep = TRUE) %>%
         dplyr::select(key, p.value)
       data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
-      data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]
+    if (uqg == TRUE) {
+      data3 <- data3[match(Ddataspace[, 3], data3[, 3]), ]
+      
+    } else {
+      data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]}
       test_type <- "Kruskal_Wallis"
 
 
@@ -1333,8 +1373,8 @@ pca.log.dataspace <- log.dataspace
     warning("To perform principal component analysis, without imputation any missing values will be treated as 0s.")
   } else { hcluster <- TRUE }
 
-
   pca<-prcomp(t(pca.log.dataspace), scale=TRUE, center=TRUE)
+
   pca.data <- data.frame(Sample=rownames(pca$x),
                          X=pca$x[,1],
                          Y=pca$x[,2],
@@ -1378,33 +1418,24 @@ pca.log.dataspace <- log.dataspace
   which.sig<-vector()
   groups_list_f <- factor(groups_list_f, levels=c(unique(groups_list_f)))
 
-  if (parametric == TRUE) {
-    tn <- "F-test_limma"
-    if (significance == "p"){
-      if (groups_number != 2){
-        which.sig <- which(limma_dataspace$ANOVA_P.Value < 0.05)
-      } else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))}
-    }
-    if (significance == "p.adj"){
-      if (groups_number != 2){
-        which.sig <- which(limma_dataspace$ANOVA_adj.P.Val < 0.05)
-      } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))}
-    }
-  }
 
-  if (parametric == FALSE) {
+  
+
+
     if (independent == TRUE){
       tn <- "Kruskal"} else {tn <- "Friedman"}
     if (significance == "p"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
-      }
+      }else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))
+    }
     }
     if (significance == "p.adj"){
       if (groups_number != 2){
         which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_adjusted < 0.05)
-      }
-    }}
+      } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))
+    }
+    }
   group_colors <- hcl.colors(groups_number, palette = "Dark 3")
   names(group_colors) <- group_names
   if (length(which.sig) < 2){
@@ -1747,7 +1778,7 @@ writeLines(c("ProtE Parameter Report",
              paste("p.adjust.method    =", p.adjust.method),
 ifelse(independent == TRUE, paste("Different experimental groups come from different populations"), paste("Paired setting. Different experimental groups come from the same populations")),
              paste("parametric         =", parametric),
-             ifelse(parametric == TRUE, paste("Volcano and Heatmaps generated from the limma DE analysis"), paste("Volcano and Heatmaps generated from the nonparametric DE analysis (traditional_statistics.xlsx)")),
+             ifelse(parametric == TRUE, paste("Volcano and Heatmaps generated from the limma DE analysis"), paste("Volcano and Heatmaps generated from the nonparametric DE (Wilcoxon) analysis (traditional_statistics.xlsx)")),
              ifelse(significance == "p", paste("Significant proteins for Volcano, Heatmaps generated from p<0.05 proteins."), paste("Significant proteins for Volcano, Heatmaps generated from p adjusted <0.05 proteins")),
              paste("species            =", species),
              paste("msigdb subcollection for GSEA =", subcollection),
