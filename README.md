@@ -668,7 +668,4 @@ request feedback from the users via contacting:
 
 In order to cite ProtE the following reference can be used:
 
-Theodoros Margelos, Manousos Makridakis, Charis Gonidaki, et al. Simple,
-fast, and reliable analysis of label-free proteomics data with the
-Proteomics Eye (ProtE). Authorea. July 11, 2025.
-[DOI](10.22541/au.175225896.65259586/v1)
+Margelos T, Makridakis M, Gonidaki C, et al. Simple, Fast, and Reliable Analysis of Label-Free Proteomics Data With the Proteomics Eye (ProtE). Proteomics Clin Appl. 2026;20(1):e70037. [DOI](doi:10.1002/prca.70037)
