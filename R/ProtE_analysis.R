@@ -4,14 +4,14 @@
 #'
 #' @param pd_single_dir For Proteome Discoverer (PD) multiple-files' (format of a single file per sample) proteomic analysis. The specific path to the folder(s) where the Proteome Discoverer's samples from each group are located.  Attention: Ensure paths use '/' or '\\' as a directory separator.
 #' @param file The whole path to the proteomics quantification data i.e. for software MaxQuant the ProteinGroups .txt or .xlsx file, for ProteomeDiscoverer the .pdResult derived .xlsx file and for DIA-NN the pg_matrix or the unique_genes_matrix .tsv or .xlsx files.  Attention: Ensure paths use '/' or '\\' as a directory separator.
-#' @param metadata_file Not requisite if samples_per_group and group_names are defined. An excel or txt table that includes in column 1 the Samples' names in column 2 the experimental group of comparison and in the rest columns, covariates (e.g. age, sex, batch) that affect the limma statistical procedures.
+#' @param metadata_file Not requisite if samples_per_group and group_names are defined. An excel or txt table that includes in column 1 the Samples' names, in column 2 the experimental group of comparison and in the rest columns covariates (e.g. age, sex, batch) that are included in the limma model. For paired designs (independent = FALSE), an optional column named "Subject" can identify which samples come from the same individual; it is used for pairing and is not treated as a covariate.
 #' @param group_names Not requisite if metadata_file is inserted. A character vector specifying group names. The order of the names should align with the order of the sample groups in the input tsv file.
 #' @param samples_per_group Not requisite if metadata_file is inserted. A numerical vector giving the number of samples in each group. The order of the numbers should align with the order of the names in group_names.
-#' @param normalization The specific method for normalizing the data.By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for a quantiles based normalization  and "Cyclic_Loess" for a Cyclic Loess normalization of the log2 data, "median" for a median one, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization and "PPM" for Parts per Million transformation of the data.
+#' @param normalization The specific method for normalizing the data. By default it is set to FALSE. Options are FALSE for no normalization of the data, "log2" for a simple log2 transformation, "Quantile" for quantile normalization of the log2 data, "Cyclic_Loess" for Cyclic Loess normalization of the log2 data, "median" for median centering of the log2 data, "TIC" for Total Ion Current normalization, "VSN" for Variance Stabilizing Normalization (requires the 'vsn' package) and "PPM" for Parts per Million transformation of the data.
 #' @param filtering_value The maximum allowable percentage of missing values for a protein. Proteins with missing values exceeding this percentage will be excluded from the analysis. By default it is set to 50.
 #' @param global_filtering TRUE/FALSE. If TRUE, the per-protein percentage of missing values will be calculated across the entire dataset. If FALSE, it will be calculated separately for each group, allowing proteins to remain in the analysis if they meet the criteria within any group. By default it is set to TRUE.
-#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2", "Gaussian_LOD" for selecting random values from the normal distribution around LOD with sd= 0.2*LOD,  "Gaussian_mean_sd" for sampling values from the normal distribution of the mean value of each sample with its standard deviation, "zeros" for simply assigning 0 to MVs, mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for a k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for a random forest based imputation using predictive mean matching (from the package missRanger). By default it is set to FALSE (skips imputation).
-#' @param independent TRUE/FALSE If TRUE, the samples come from different populations, if FALSE they come from the same population (Dependent samples). By default, it is set to TRUE. If set to FALSE, the numbers given in the samples_per_group param must be equal to each other.
+#' @param imputation Imputes all remaining missing values. Available methods: "LOD" for assigning the dataset's Limit Of Detection (lowest protein intensity identified), "LOD/2" for half of the LOD (LOD - 1 on log2-scale data), "Gaussian_LOD" for sampling random values from a normal distribution around the LOD with sd = 0.1*|LOD|, "Gaussian_mean_sd" for sampling values from a normal distribution with each protein's mean and 0.3 times its standard deviation, "zeros" for simply assigning 0 to MVs, "mean" for replacing missing values with the mean of each protein across the entire dataset, "kNN" for k-nearest neighbors imputation using 5 neighbors (from the package VIM) and "missRanger" for random forest based imputation using predictive mean matching (from the package missRanger). Gaussian and missRanger imputations are random, so results may vary slightly between runs. By default it is set to FALSE (skips imputation).
+#' @param independent TRUE/FALSE. If TRUE, the samples come from different populations; if FALSE they come from the same population (dependent/paired samples). By default it is set to TRUE. If FALSE, pairing is taken from the "Subject" column of the metadata file when present; otherwise samples are paired by their position within each group, so the numbers in samples_per_group must be equal and subjects must appear in the same order in every group.
 #' @param parametric TRUE/FALSE. Specifies the statistical tests that will be taken into account for creating the PCA plots and heatmap. By default it is set to FALSE (non-parametric).
 #' @param significance "p" or "p.adj" Specifies which of the p-values (nominal vs p.adjusted for multiple hypothesis) will be taken into account for creating the PCA plots, the heatmap and the Volcano plots. By default it is set to "p" (nominal p-value).
 #' @param species Species name, such as "Homo sapiens" or "Mus musculus", for the genes symbols output of the msigdbr package that will be used for the GSEA. Use msigdbr_species() for available options.
@@ -19,7 +19,7 @@
 #' @param LFC The LogFC threshold (absolute value) that you want to be the cutoff for the significant up or downregulation of the volcano plots
 #' @param p.adjust.method The method used to adjust the p-values for multiple testing. Options are "holm","hochberg","hommel","bonferroni","BH","BY","fdr". Default is "BH".
 #'
-#' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma+ANOVA) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
+#' @return Returns the complete output of the exploratory analysis: i) The processed, or filtered/normalized data ii) Statistical output containing results for the parametric (limma) and non-parametric tests (Wilcoxon+Kruskal-Wallis+PERMANOVA), along with statistical tests for heteroscedasticity, iii) Quality metrics for the input samples iv) QC plots and exploratory visualizations.
 #' @importFrom openxlsx write.xlsx  read.xlsx createWorkbook addWorksheet writeData
 #' @importFrom grDevices  dev.off bmp colorRampPalette hcl.colors
 #' @importFrom dplyr select  group_by  group_modify everything  %>% arrange filter slice mutate
@@ -118,7 +118,8 @@ ProtE_analyse <-function(file = NULL,
     stop("incompatible imputation method was selected, please check the availables and run again.")}
   if (filtering_value < 0 || filtering_value > 100) {
   stop("Error: The filtering_value must be a number ranging from 0 to 100")}
-
+if (normalization == "VSN" && !requireNamespace("vsn", quietly = TRUE))
+  stop("VSN normalization requires the 'vsn' package: BiocManager::install('vsn')")
 
 
   group_paths <- as.list(pd_single_dir)
@@ -391,8 +392,9 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     }
   }else { print("Description fetching is not available for DIA-NN unique_genes matrices")}
   if (uqg == FALSE){
-  dataspace$Gene.Symbol = sub(".*GN=(.*?) .*","\\1",dataspace$Description)}
-  dataspace<-dataspace %>%  dplyr::select(Accession, Description,Gene.Symbol , everything())
+    dataspace$Gene.Symbol <- ifelse(grepl("GN=", dataspace$Description),
+                                sub(".*GN=([^ ]+).*", "\\1", dataspace$Description), NA)}
+    dataspace<-dataspace %>%  dplyr::select(Accession, Description,Gene.Symbol , everything())
 
 
 
@@ -572,13 +574,16 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")
   }
   if (normalization == "median") {
-    sample_medians <- apply(dataspace[, -1:-3], 2, median, na.rm = TRUE)
-    dataspace[, -1:-3] <- sweep(dataspace[, -1:-3], 2, sample_medians, FUN = "/")
-    norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
-    openxlsx::write.xlsx(dataspace, file = norm_file_path)
-    print("Applying the selected normalization, saved as Step1_Normalized_data.xlsx")}
-
-  if (normalization %in% c("median","VSN", "TIC","PPM") ){
+  logmat <- log2(as.matrix(dataspace[, -1:-3]) + 1)
+  med <- apply(logmat, 2, median, na.rm = TRUE)
+  logmat <- sweep(logmat, 2, med, FUN = "-") + mean(med)
+  dataspace[, -1:-3] <- as.data.frame(logmat)
+  norm_file_path <- file.path(path_resman, "Step1_Normalized_data.xlsx")
+  openxlsx::write.xlsx(dataspace, file = norm_file_path)
+  print("Applying median normalization on log2 data (the data was firstly log2 transformed), saved as Step1_Normalized_data.xlsx")
+  }
+log_scale_input <- normalization %in% c("log2", "Quantile", "Cyclic_Loess", "VSN", "median")
+  if (normalization %in% c( "TIC","PPM") ){
     proccount = 1
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
     row_means <- rowMeans(log.dataspace, na.rm = TRUE)
@@ -594,7 +599,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                     scale = 1, width = 5, height = 4, units = "in",
                     dpi = 300, limitsize = TRUE)))
 
-  } else if (normalization %in% c("log2","Quantile", "Cyclic_Loess")) {
+  } else if (normalization %in% c("log2","Quantile", "Cyclic_Loess" ,"VSN", "median")) {
     proccount = 1
     row_means <- rowMeans(dataspace[,-c(1:3)], na.rm = TRUE)
     row_sds <- apply(dataspace[,-c(1:3)], 1, sd, na.rm = TRUE)
@@ -703,7 +708,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace[dataspace==0] <- NA
     LOD <- min(as.matrix(dataspace[,-1:-3]),na.rm = TRUE)
     replace_gaussian <- function(x) {
-      ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = LOD*0.1), x)
+      ifelse(is.na(x), rnorm(length(x), mean = LOD, sd = abs(LOD)*0.1), x)
     }
     dataspace[,-1:-3] <- apply(dataspace[,-1:-3], 2, replace_gaussian)
     imp_file_path <- file.path(path_resman,paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
@@ -723,7 +728,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         sd_row <- sd(row_data, na.rm = TRUE)
 
         num_na <- sum(is.na(row_data))
-        imputed_values <- rnorm(num_na, mean = row_mean, sd = sd_row * 0.3)
+        if (is.na(sd_row)) { sd_row <- 0 }
+        imputed_values <- rnorm(num_na, mean = row_mean, sd = abs(sd_row) * 0.3)
         imputed_values[imputed_values < 0] <- 0
 
         row_data[is.na(row_data)] <- imputed_values
@@ -763,7 +769,8 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
   if (imputation == "LOD/2"){
     dataspace[dataspace==0] <- NA
-    impute_value <- min(as.matrix(dataspace[,-1:-3]),na.rm = TRUE)/2
+    impute_value <- min(as.matrix(dataspace[,-1:-3]), na.rm = TRUE)
+    impute_value <- if (log_scale_input) impute_value - 1 else impute_value / 2
     dataspace[,-1:-3][is.na(dataspace[,-1:-3])]  <- impute_value
     imp_file_path <- file.path(path_resman,paste0("Step", proccount,"_Dataset_Imputed.xlsx"))
     openxlsx::write.xlsx(dataspace, file = imp_file_path)  }
@@ -782,7 +789,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
     his_dataspace<-rbind(dataspace1,pre_dataspace1,imp.values)
     x = "Protein Abundance"
-    if (normalization %in% c(FALSE,"median", "TIC", "PPM") ){
+    if (normalization %in% c(FALSE, "TIC", "PPM") ){
       his_dataspace<-log2(his_dataspace+1)
       x= expression(Log[2]~"Protein Abundance")}
 
@@ -809,13 +816,13 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     print("A frequency histogram of real and imputed values has been created as Imputed_values_histogram.bmp")
 
   }
-  if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD")){
+  if (imputation %in% c("LOD/2","LOD","kNN","missRanger","mean","zeros","Gaussian_LOD","Gaussian_mean_sd")){
     print(paste0("An excel with the imputed missing values has been created as Step", proccount,"_Dataset_Imputed.xlsx"))
 
     dataspace_0s$percentage <- dataspace_0s$Number_0_all_groups*100/sum(samples_per_group)
     dataspace$percentage <- dataspace_0s$percentage
     dataspace$mean <- rowMeans(dataspace[,4:(3+sum(samples_per_group))])
-    dataspace$log<-log2(dataspace$mean)
+    dataspace$log <- if (log_scale_input) {dataspace$mean} else {log2(dataspace$mean)}
     dataspace$rank <- rank(-dataspace$mean)
 
     abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
@@ -840,7 +847,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dataspace$percentage <- dataspace_0s$percentage
     dataspace[,4:(3+sum(samples_per_group))] <- lapply(dataspace[,4:(3+sum(samples_per_group))], as.numeric)
     dataspace$mean <- apply(dataspace[,4:(3+sum(samples_per_group))], 1, function(x) mean(x[!is.na(x)]))
-    dataspace$log<-log2(dataspace$mean)
+    dataspace$log <- if (log_scale_input) {dataspace$mean} else {log2(dataspace$mean)}
     dataspace$rank <- rank(-dataspace$mean)
 
     abund.plot <- ggplot(dataspace, aes(x = rank, y = log, colour = percentage)) +
@@ -870,7 +877,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   dataspace$log<- NULL
   dataspace$rank <- NULL
 
-  if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
+  if (normalization %in% c(FALSE, "TIC","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)
   } else {
     log.dataspace <- dataspace[,-c(1:3)]
@@ -930,7 +937,14 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
                                    dpi = 300, limitsize = TRUE, bg = "white"))
   print("A Violin Plot showing the log2 Protein Abundance of each protein, across the samples was created as After_Processing_violin_plot.bmp" )
 
-  
+  subject_vector <- NULL
+  if (!is.null(metadata_file)) {
+    subj_col <- grep("^subject$", colnames(metadata_df), ignore.case = TRUE)
+    if (length(subj_col) > 0) {
+      subject_vector <- factor(metadata_df[[subj_col[1]]][match(colnames(dataspace)[-c(1:3)], metadata_df$Samples)])
+      metadata_df <- metadata_df[, -subj_col[1], drop = FALSE]
+    }
+  }
   if(!is.null(metadata_file)){
     
     metadata_df <- metadata_df[, sapply(metadata_df, function(x) length(unique(x)) >= 2)]
@@ -1011,10 +1025,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   if (imputation == FALSE) {
     warning("Without imputation NA coefficients may occur.")
   }
-  
-  nndataspace[nndataspace < 0] <- 0
-  
-  if (normalization %in% c(FALSE, "median", "VSN", "TIC", "PPM")) {
+  if (!log_scale_input) {
+    nndataspace[!is.na(nndataspace) & nndataspace < 0] <- 0
+  }
+  if (normalization %in% c(FALSE,  "TIC", "PPM")) {
     nndataspace <- log2(nndataspace + 1)
   }
   
@@ -1024,14 +1038,17 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     stop("Parameter 'independent' must be TRUE or FALSE")
   }
   
-  if (independent == FALSE){
+if (independent == FALSE){
     
-    if (length(unique(samples_per_group)) != 1){
-      stop("Paired analysis requires equal samples per group.")
+    if (!is.null(subject_vector)) {
+      pairing <- subject_vector
+    } else {
+      if (length(unique(samples_per_group)) != 1){
+        stop("Paired analysis requires equal samples per group.")
+      }
+      n <- sum(samples_per_group) / groups_number
+      pairing <- factor(rep(1:n, times = groups_number))
     }
-    
-    n <- sum(samples_per_group) / groups_number
-    pairing <- factor(rep(1:n, each = groups_number))
     
     corfit <- limma::duplicateCorrelation(nndataspace, design = mm, block = pairing)
     
@@ -1131,14 +1148,24 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
             if (sum(!is.na(values_k)) > 0 & sum(!is.na(values_j)) > 0) {
               test_list <- stats::wilcox.test(
                 values_k, values_j,
-                exact = FALSE, paired = FALSE, na.rm = TRUE
+                exact = FALSE, paired = FALSE
               )
               data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- test_list$p.value
             } else {
               data2[i, paste0("Wilcoxon_p_G", j, "vsG", k)] <- NA
             }
           } else if (independent == FALSE) {
-            paired_values <- na.omit(cbind(values_k, values_j))
+              if (!is.null(subject_vector)) {
+              subj_k <- subject_vector[coln[[k]] - 3]
+              subj_j <- subject_vector[coln[[j]] - 3]
+              common_subjs <- intersect(subj_k, subj_j)
+              
+              val_k_matched <- values_k[match(common_subjs, subj_k)]
+              val_j_matched <- values_j[match(common_subjs, subj_j)]
+              paired_values <- na.omit(data.frame(x = val_k_matched, y = val_j_matched))
+            } else {
+              paired_values <- na.omit(cbind(values_k, values_j))
+            }
             if (nrow(paired_values) > 0) {
               test_list <- stats::wilcox.test(
                 paired_values[, 1], paired_values[, 2],
@@ -1155,7 +1182,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
           data2[[paste0("Wilcoxon_p_G", j, "vsG", k)]],
           method = p.adjust.method
         )
-
+if (independent == TRUE) {
         avg_j <- data2[[paste0("Average_G", j)]]
         avg_k <- data2[[paste0("Average_G", k)]]
         data2[[paste0("Ratio_G", j, "vsG", k)]] <- ifelse(
@@ -1164,7 +1191,7 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         data2[[paste0("Ratio_G", k, "vsG", j)]] <- ifelse(
           avg_j == 0, NA, avg_k / avg_j
         )
-        if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
+        if (normalization %in% c(FALSE, "TIC","PPM") ){
           data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- log2(
             data2[[paste0("Ratio_G", j, "vsG", k)]])
           data2[[paste0("Log2_Ratio_G", k, "vsG", j)]] <- log2(
@@ -1172,6 +1199,36 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
         } else {
           data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- avg_j - avg_k
           data2[[paste0("Log2_Ratio_G", k, "vsG", j)]] <- avg_k - avg_j
+        }
+  } else {
+          
+          if (!is.null(subject_vector)) {
+            subj_k <- subject_vector[coln[[k]] - 3]
+            subj_j <- subject_vector[coln[[j]] - 3]
+            common_subjs <- intersect(subj_k, subj_j)
+            cols_k <- coln[[k]][match(common_subjs, subj_k)]
+            cols_j <- coln[[j]][match(common_subjs, subj_j)]
+          } else {
+            cols_k <- coln[[k]]
+            cols_j <- coln[[j]]
+          }
+          
+          mat_k <- as.matrix(data2[, cols_k, drop = FALSE])
+          mat_j <- as.matrix(data2[, cols_j, drop = FALSE])
+          
+          if (normalization %in% c(FALSE, "TIC", "PPM")) {
+            diff_mat <- log2(mat_j + 1) - log2(mat_k + 1)
+          } else {
+            diff_mat <- mat_j - mat_k
+          }
+          
+          mean_diff <- rowMeans(diff_mat, na.rm = TRUE)
+          mean_diff[rowSums(!is.na(diff_mat)) == 0] <- NA
+          
+          data2[[paste0("Log2_Ratio_G", j, "vsG", k)]] <- mean_diff
+          data2[[paste0("Log2_Ratio_G", k, "vsG", j)]] <- -mean_diff
+          data2[[paste0("Ratio_G", j, "vsG", k)]] <- 2^(mean_diff)
+          data2[[paste0("Ratio_G", k, "vsG", j)]] <- 2^(-mean_diff)
         }
       }
     }
@@ -1219,72 +1276,35 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
 
 
-  transposed_data<-data.frame(transposed_data)
-  dataspace<-data.frame(dataspace)
-  if (uqg == TRUE) {
-    colnames(transposed_data)<-dataspace[,3]
-    
-  } else {
-  colnames(transposed_data)<-dataspace[,1]}
-  colnames(transposed_data) <- make.names(colnames(transposed_data), unique = TRUE)
-  dataspace4<-cbind(Group,transposed_data)
-  dataspace4$Group<-as.factor(dataspace4$Group)
-
-
-
+  dataspace <- data.frame(dataspace)
 
   if (groups_number > 2) {
+    mat <- as.matrix(Ddataspace[, 4:(3 + sum(samples_per_group))])
+
     if (independent == TRUE) {
       print("Mann-Whitney, Levene's and Bartlett's tests have been completed, calculating the Kruskal-Wallis p-values:")
-      df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
-      df4 <- df3 %>% dplyr::group_by(key)
-      df4$value <- as.numeric(df4$value)
-      df5 <- df4 %>%
-        dplyr::group_by(key) %>%
-        dplyr::group_modify(~ {
-          valid_data <- .x[!is.na(.x$value), ]
-          if (length(unique(valid_data$Group)) >= 2) {
-            broom::tidy(kruskal.test(value ~ Group, data = valid_data))
-          } else {
-            data.frame(
-              statistic = NA,
-              p.value = NA,
-              parameter = NA,
-              method = "Kruskal-Wallis rank sum test"
-            )
-          }
-        }, .keep = TRUE) %>%
-        dplyr::select(key, p.value)
-      data3 <- merge(Ddataspace, df5, by.x = colnames(Ddataspace)[1], by.y = "key", all.x = TRUE)
-    if (uqg == TRUE) {
-      data3 <- data3[match(Ddataspace[, 3], data3[, 3]), ]
-      
-    } else {
-      data3 <- data3[match(Ddataspace[, 1], data3[, 1]), ]}
+      Test.pvalue <- apply(mat, 1, function(x) {
+        ok <- !is.na(x)
+        if (length(unique(Group[ok])) < 2) return(NA)
+        tryCatch(kruskal.test(x[ok], Group[ok])$p.value, error = function(e) NA)
+      })
       test_type <- "Kruskal_Wallis"
 
-
-    }  else if (independent == FALSE) {
+    } else {
       print("Wilcoxon, Levene's and Bartlett's tests have been completed, performing Friedman test for paired samples:")
-      df3 <- dataspace4 %>% tidyr::gather(key, value, -Group)
-      df4 <- df3 %>% dplyr::group_by(key)
-      df4$value <- as.numeric(df4$value)
-      samples_fried <- rep(1:samples_per_group[1],nrow(dataspace)*groups_number)
-      df4<- suppressMessages(cbind(df4, samples_fried ))
-      colnames(df4)[ncol(df4)] <- "sample"
-      keys <- unique(df4$key)
-      p_values <- numeric(length(keys))
-      for (i in seq_along(keys)) {
-        gene_data <- df4[df4$key == keys[i], ]
-        p_values[i] <- tryCatch({
-          friedman.test(value ~ Group | sample, data = gene_data)$p.value
-        }, error = function(e) NA)
+      if (!is.null(subject_vector)) {
+        blocks <- subject_vector
+      } else {
+        blocks <- factor(rep(seq_len(samples_per_group[1]), times = groups_number))
       }
-      Test.pvalue <- p_values
+      Test.pvalue <- apply(mat, 1, function(x) {
+        tryCatch(friedman.test(x, Group, blocks)$p.value, error = function(e) NA)
+      })
       test_type <- "Friedman"
-      data3 <- cbind(Ddataspace, Test.pvalue)
     }
 
+    data3 <- cbind(Ddataspace, Test.pvalue)
+                           
     colnames(data3)[ncol(data3)] <- paste0(test_type, ".pvalue")
     data3[[paste0(test_type, ".pvalue_adjusted")]] <- p.adjust(data3[[paste0(test_type, ".pvalue")]], method = p.adjust.method)
     Fdataspace <- data3
@@ -1303,17 +1323,14 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
   )
 
   for (j in 1:groups_number) {
-    mean_col <- paste0("Average_G", j)
-    sd_col <- paste0("St_Dv_G", j)
     group_name <- get(paste0("g", j, ".name"))
-
-    cov_data[[paste0("CoV_", group_name)]] <- ifelse(
-      data2[[mean_col]] == 0 | is.na(data2[[mean_col]]),
-      NA,
-      (data2[[sd_col]] / data2[[mean_col]]) * 100
-    )
+    vals <- as.matrix(data2[, coln[[j]]])
+    if (log_scale_input) {vals <- 2^vals}
+    m <- rowMeans(vals, na.rm = TRUE)
+    s <- apply(vals, 1, sd, na.rm = TRUE)
+    cov_data[[paste0("CoV_", group_name)]] <- ifelse(is.na(m) | m == 0, NA, s / m * 100)
   }
-
+                           
   cov_long <- cov_data %>%
     tidyr::pivot_longer(
       cols = -Accession,
@@ -1345,11 +1362,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
     dpi = 300
   )
   for (i in 1:groups_number){
-    namesc<- colnames(Fdataspace)
-    namesc<- gsub(paste0("G",i), get(paste0("g",i,".name")),namesc)
-    colnames(Fdataspace)<-namesc
+    colnames(Fdataspace) <- gsub(paste0("G", i, "(?![0-9])"), get(paste0("g", i, ".name")),
+                                 colnames(Fdataspace), perl = TRUE)
   }
-
+                           
   start_col <- 3 + as.numeric(sum(samples_per_group))
   Fdataspace <- Fdataspace[,-c(4:start_col)]
 
@@ -1357,10 +1373,10 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
 
   stats_file_path <- file.path(path_restat, "traditional_statistics.xlsx")
   openxlsx::write.xlsx(Fdataspace, file = stats_file_path)
-  print("The non-parametric statistical output along with tests for homoscedasticity have been saved as Statistical_analysis.xlsx")
+  print("The non-parametric statistical output along with tests for homoscedasticity have been saved as traditional_statistics.xlsx")
 
 
-  if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM") ){
+  if (normalization %in% c(FALSE, "TIC","PPM") ){
     log.dataspace <- log(dataspace[,-c(1:3)]+1,2)}
 pca.log.dataspace <- log.dataspace
 
@@ -1419,20 +1435,34 @@ pca.log.dataspace <- log.dataspace
   
 
 
-    if (independent == TRUE){
-      tn <- "Kruskal"} else {tn <- "Friedman"}
-    if (significance == "p"){
-      if (groups_number != 2){
-        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue < 0.05)
-      }else {(which.sig <- which(limma_dataspace[,grep("P.Value",colnames(limma_dataspace))] < 0.05))
+  pfx_limma <- ifelse(significance == "p", "^P.Value_", "^adj.P.Val_")
+
+  if (parametric == TRUE) {
+    pmat <- as.matrix(limma_dataspace[, grep(pfx_limma, colnames(limma_dataspace)), drop = FALSE])
+    if (groups_number == 2) {
+      tn <- "limma"
+    } else {
+      tn <- "limma_any_pairwise"
     }
+  } else if (groups_number == 2) {
+    if (significance == "p") {
+      pcol <- "Wilcoxon_p_G2vsG1"
+    } else {
+      pcol <- "p.adj_p_G2vsG1"
     }
-    if (significance == "p.adj"){
-      if (groups_number != 2){
-        which.sig <- which(Fdataspace$Kruskal_Wallis.pvalue_adjusted < 0.05)
-      } else {(which.sig <- which(limma_dataspace[,grep("adj.P.Val",colnames(limma_dataspace))] < 0.05))
+    pmat <- as.matrix(Ddataspace[, pcol, drop = FALSE])
+    tn <- "Wilcoxon"
+  } else {
+    if (independent == TRUE) {
+      tn <- "Kruskal_Wallis"
+    } else {
+      tn <- "Friedman"
     }
-    }
+    pcol <- paste0(tn, ".pvalue", ifelse(significance == "p.adj", "_adjusted", ""))
+    pmat <- as.matrix(Fdataspace[, pcol, drop = FALSE])
+  }
+
+  which.sig <- which(apply(pmat, 1, function(x) any(x < 0.05, na.rm = TRUE)))
   group_colors <- hcl.colors(groups_number, palette = "Dark 3")
   names(group_colors) <- group_names
   if (length(which.sig) < 2){
@@ -1504,33 +1534,21 @@ pca.log.dataspace <- log.dataspace
   which_sig <- list()
   volcano_list <- list()
   heatmap_cols <- list()
-  if (parametric == TRUE) {
-    if (significance  == "p"){
-      significance_m = significance
-      for (i in 1:(ncol(mm)-1)) {
-        for (j in (i+1):ncol(mm)) {
-          comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
-          which_sig[[comparison]] <- which(limma_dataspace[,grep(paste("P.Value", comparison, sep = "_"),colnames(limma_dataspace))] < 0.05)
-          heatmap_cols[[comparison]] <- c(coln[[i]],coln[[j]])-3
-          volcano.select <- c("Accession",paste0("logFC_", comparison) ,
-                              paste0("P.Value_", comparison))
-          volcano_list[[comparison]]<- limma_dataspace[,volcano.select ]
-        }}
-    }
-    if (significance  == "p.adj"){
-      significance_m = paste0(p.adjust.method," P")
 
-      for (i in 1:(ncol(mm)-1)) {
-        for (j in (i+1):ncol(mm)) {
-          comparison <- paste(colnames(mm)[i], "vs", colnames(mm)[j], sep = " ")
-          which_sig[[comparison]] <- which(limma_dataspace[,grep(paste("adj.P.Val", comparison, sep = "_"),colnames(limma_dataspace))] < 0.05)
-          heatmap_cols[[comparison]] <- c(coln[[i]],coln[[j]])-3
 
-          volcano.select <- c("Accession",paste0("logFC_", comparison) ,
-                              paste0("adj.P.Val_", comparison))
-          volcano_list[[comparison]]<- limma_dataspace[,volcano.select ]
+    if (parametric == TRUE) {
+    significance_m <- if (significance == "p") "p" else paste0(p.adjust.method, " P")
+    pprefix <- if (significance == "p") "P.Value_" else "adj.P.Val_"
+    grp_cols <- colnames(mm)[1:groups_number]
 
-        }}
+    for (i in 1:(groups_number - 1)) {
+      for (j in (i + 1):groups_number) {
+        comparison <- gsub("groups_list_f", "", paste(grp_cols[i], "vs", grp_cols[j]))
+        pcol <- paste0(pprefix, comparison)
+        which_sig[[comparison]]    <- which(limma_dataspace[[pcol]] < 0.05)
+        heatmap_cols[[comparison]] <- c(coln[[i]], coln[[j]]) - 3
+        volcano_list[[comparison]] <- limma_dataspace[, c("Accession", paste0("logFC_", comparison), pcol)]
+      }
     }
   }
 
@@ -1540,7 +1558,7 @@ pca.log.dataspace <- log.dataspace
       for (j in 2:groups_number) {
         for (k in 1:(j-1)) {
           comparison <- paste0("G", j, "vsG", k)
-          which_sig[[comparison]] <- which(Ddataspace[,grep(paste0("Wilcoxon_p_", comparison),colnames(Ddataspace))] < 0.05)
+          which_sig[[comparison]] <- which(Ddataspace[[paste0("Wilcoxon_p_", comparison)]] < 0.05)
           heatmap_cols[[comparison]] <- c(coln[[k]],coln[[j]])-3
           volcano.select <- c("Accession",paste0("Log2_Ratio_", comparison) ,
                               paste0("Wilcoxon_p_", comparison))
@@ -1554,7 +1572,8 @@ pca.log.dataspace <- log.dataspace
       for (j in 2:groups_number) {
         for (k in 1:(j-1)) {
           comparison <- paste0("G", j, "vsG", k)
-          which_sig[[comparison]] <- which(Ddataspace[,grep(paste0("p.adj_p_", comparison),colnames(Ddataspace))] < 0.05)
+          pcol <- paste0("p.adj_p_", comparison)
+          which_sig[[comparison]] <- which(Ddataspace[[pcol]] < 0.05)
           heatmap_cols[[comparison]] <- c(coln[[k]],coln[[j]])-3
 
           volcano.select <- c("Accession",paste0("Log2_Ratio_", comparison) ,
@@ -1564,7 +1583,8 @@ pca.log.dataspace <- log.dataspace
         }
       }}
     for (i in 1:groups_number){
-      names(which_sig)<- gsub(paste0("G",i), get(paste0("g",i,".name")),names(which_sig))
+      names(which_sig) <- gsub(paste0("G", i, "(?![0-9])"), get(paste0("g", i, ".name")),
+                               names(which_sig), perl = TRUE)
     }
   }
 
@@ -1572,7 +1592,7 @@ pca.log.dataspace <- log.dataspace
     if (length(which_sig[[i]]) <3 ){
       print(paste("No plots for the comparison ",names(which_sig[i]), ", will be created as there are not enough significant proteins"))
     } else {
-      if (normalization %in% c(FALSE,"median","VSN", "TIC","PPM")){
+      if (normalization %in% c(FALSE, "TIC","PPM")){
         log.dataspace.sig <- log.dataspace[which_sig[[i]],]} else {
           log.dataspace.sig <-  dataspace[which_sig[[i]],-c(1:3)]
         }
@@ -1682,14 +1702,17 @@ print("Enrichment analysis begins, it might take some time")
 
 
   for (i in 1:groups_number){
-    names(gsea)<- gsub(paste0("G",i), get(paste0("g",i,".name")),names(gsea))
+    names(gsea) <- gsub(paste0("G", i, "(?![0-9])"), get(paste0("g", i, ".name")),
+                        names(gsea), perl = TRUE)
   }
 
   wb <- openxlsx::createWorkbook()
+  sheet_names <- substr(gsub("[\\[\\]\\*\\?/\\\\:]", "_", names(gsea), perl = TRUE), 1, 28)
+  sheet_names <- make.unique(sheet_names, sep = "_")
 
-  for (name in names(gsea)) {
-    openxlsx::addWorksheet(wb, name)
-    openxlsx::writeData(wb, name, gsea[[name]])  # Write data to the sheet
+  for (s in seq_along(gsea)) {
+    openxlsx::addWorksheet(wb, sheet_names[s])
+    openxlsx::writeData(wb, sheet_names[s], gsea[[s]])
   }
   gsea_file_path <- file.path(path_restat, "GSEA_results.xlsx")
   openxlsx::saveWorkbook(wb, file = gsea_file_path, overwrite =  TRUE)
