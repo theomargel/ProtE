@@ -38,7 +38,7 @@
 #' @importFrom grid gpar
 #' @importFrom car leveneTest
 #' @importFrom missRanger missRanger
-#' @importFrom utils read.delim install.packages update.packages
+#' @importFrom utils read.delim install.packages update.packages read.delim2
 #' @importFrom vegan adonis2
 #' @importFrom msigdbr msigdbr
 #' @importFrom fgsea fgsea
@@ -325,8 +325,25 @@ if (groups_number  == 1) stop("multiple groups should be inserted for the ProtE 
       dataspace$Description <- rep("Unavailable for Genes matrices", nrow(dataspace))
       dataspace$Accession <- rep("Unavailable for Genes matrices", nrow(dataspace))
       uqg <- TRUE
-    } else stop("Incompatible input file was inserted.")
-  }
+    } else if (ncol(dataspace) >= 3 &&
+               !is.numeric(dataspace[[1]]) &&
+               all(sapply(dataspace[, -1, drop = FALSE], function(x) {
+                 x <- x[!is.na(x) & x != ""]
+                 is.numeric(x) || !anyNA(suppressWarnings(as.numeric(x)))
+               }))) {
+      print("Generic matrix mode: first column = gene symbols, all other columns = sample values.")
+      colnames(dataspace)[1] <- "Gene.Symbol"
+      dataspace[, -1] <- lapply(dataspace[, -1, drop = FALSE], function(x) {
+        x <- suppressWarnings(as.numeric(x))
+        x[x %in% 0] <- NA
+        x
+      })
+      dataspace <- dataspace[!is.na(dataspace$Gene.Symbol) & dataspace$Gene.Symbol != "", ]
+      dataspace <- dataspace[rowSums(!is.na(dataspace[, -1, drop = FALSE])) > 0, ]
+      dataspace$Accession <- dataspace$Gene.Symbol
+      dataspace$Description <- "Unavailable for generic matrices"
+      uqg <- TRUE
+    } else stop("Incompatible input file was inserted. Supported: MaxQuant, Proteome Discoverer, DIA-NN, or a matrix with a gene column followed by numeric sample columns.")  }
 
   colnames(dataspace) <- make.names(colnames(dataspace), unique = TRUE)
   rownames(dataspace) <- make.names(rownames(dataspace), unique = TRUE)
